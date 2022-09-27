@@ -28,7 +28,7 @@ install-infra:
 	cp -r template-infra/infra/ infra/
 
 	# copy github actions
-	cp -r template-infra/.github/workflows/ .github/workflows
+	cp -r template-infra/.github/ .github/
 
 	# clean up template-infra folder
 	rm -fr template-infra
@@ -67,5 +67,5 @@ clean-app:
 clean-infra:
 	rm -f docker-compose.yml
 	rm -fr infra/
-	rm -fr .github/workflows
+	rm -fr .github/
 	rm -fr docs/

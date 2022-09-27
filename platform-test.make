@@ -28,7 +28,7 @@ install-infra:
 	cp -r template-infra/infra/ infra/
 
 	# copy github actions
-	cp -r template-infra/.git/workflows/ .git/workflows
+	cp -r template-infra/.github/workflows/ .github/workflows
 
 	# clean up template-infra folder
 	rm -fr template-infra
@@ -47,11 +47,25 @@ install-application-nextjs:
 	# clean up template-application-nextjs folder
 	rm -fr template-application-nextjs
 
+install-application-flask:
+	# fetch latest version of template-application-flask
+	git clone --single-branch --branch main --depth 1 git@github.com:navapbc/template-application-flask.git
+
+	# copy app decision records
+	mkdir -p docs/
+	cp -r template-application-flask/docs/decisions/ docs/decisions/
+
+	# copy app code
+	cp -r template-application-flask/app/ app/
+
+	# clean up template-application-flask folder
+	rm -fr template-application-flask
+
 clean-app:
 	rm -fr app/
 
 clean-infra:
 	rm -f docker-compose.yml
 	rm -fr infra/
-	rm -fr .git/workflows
+	rm -fr .github/workflows
 	rm -fr docs/

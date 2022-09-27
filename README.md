@@ -20,6 +20,12 @@ Test installing NextJS application template
 make -f platform-test.make install-application-nextjs
 ```
 
+Test installing Flask application template
+
+```bash
+make -f platform-test.make install-application-flask
+```
+
 Cleanup after testing
 
 ```bash

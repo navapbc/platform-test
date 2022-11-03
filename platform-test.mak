@@ -64,7 +64,7 @@ clean-app:
 	rm -fr app/
 
 clean-infra:
-	rm -f docker-compose.yml
 	rm -fr infra/
-	rm -fr .github/
+	rm -fr bin/
 	rm -fr docs/
+	rm -fr .github/

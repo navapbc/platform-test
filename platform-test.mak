@@ -23,7 +23,6 @@ install-infra:
 		template-infra/bin \
 		template-infra/docs \
 		template-infra/infra \
-		template-infra/docker-compose.yml \
 		Makefile \
 		.
 

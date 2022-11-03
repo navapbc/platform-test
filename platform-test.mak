@@ -67,3 +67,4 @@ clean-infra:
 	rm -fr bin/
 	rm -fr docs/
 	rm -fr .github/
+	rm Makefile

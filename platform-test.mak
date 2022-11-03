@@ -12,7 +12,7 @@
 	install-nextjs
 
 # The git ref to use to upgrade from
-UPGRADE_REF := $(git rev-parse --abbrev-ref HEAD)
+UPGRADE_REF ?= $(shell git rev-parse --abbrev-ref HEAD)
 
 clean: clean-app clean-infra
 

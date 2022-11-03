@@ -11,6 +11,9 @@
 	install-flask \
 	install-nextjs
 
+# The git ref to use to upgrade from
+UPGRADE_REF := $(git rev-parse --abbrev-ref HEAD)
+
 clean: clean-app clean-infra
 
 install-infra:
@@ -58,6 +61,11 @@ install-application-flask:
 
 	# clean up template-application-flask folder
 	rm -fr template-application-flask
+
+upgrade-infra-modules:
+	git clone --single-branch --branch $(UPGRADE_REF) --depth 1 git@github.com:navapbc/template-infra.git
+	cp -r template-infra/infra/modules infra/
+	rm -fr template-infra
 
 clean-app:
 	rm -fr app/

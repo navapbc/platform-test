@@ -23,7 +23,7 @@ install-infra:
 		template-infra/bin \
 		template-infra/docs \
 		template-infra/infra \
-		Makefile \
+		template-infra/Makefile \
 		.
 
 	rm .github/workflows/template-only-*

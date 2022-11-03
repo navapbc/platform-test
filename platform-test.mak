@@ -27,8 +27,10 @@ install-infra:
 		Makefile \
 		.
 
-	# clean up template-infra folder
 	rm .github/workflows/template-only-*
+
+	# clean up template-infra folder
+	rm -fr template-infra
 
 install-application-nextjs:
 	# fetch latest version of template-application-nextjs

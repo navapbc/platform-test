@@ -65,7 +65,7 @@ install-application-flask:
 upgrade-infra-modules:
 	git clone --single-branch --branch $(UPGRADE_REF) --depth 1 git@github.com:navapbc/template-infra.git
 	cp -r template-infra/infra/modules infra/
-	cp -r template-infra/infra/app/env-template infra/app/env-template
+	cp -r template-infra/infra/app/env-template/ infra/app/env-template/
 	rm -fr template-infra
 
 clean-app:

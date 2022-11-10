@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gruntwork-io/terratest/modules/http-helper"
 	"github.com/gruntwork-io/terratest/modules/random"
@@ -28,7 +29,7 @@ func TestDev(t *testing.T) {
 		},
 	})
 
-	defer DestroyDevEnvironmentAndWorkspace(t, terraformOptions, workspaceName)
+	// defer DestroyDevEnvironmentAndWorkspace(t, terraformOptions, workspaceName)
 	CreateDevEnvironmentInWorkspace(t, terraformOptions, workspaceName)
 	WaitForServiceToBeStable(t, workspaceName)
 	RunEndToEndTests(t, terraformOptions)
@@ -66,7 +67,7 @@ func WaitForServiceToBeStable(t *testing.T, workspaceName string) {
 
 func RunEndToEndTests(t *testing.T, terraformOptions *terraform.Options) {
 	serviceEndpoint := terraform.Output(t, terraformOptions, "service_endpoint")
-	http_helper.HttpGetWithRetry(t, serviceEndpoint, nil, 200, "Hello, World!", 3, 1)
+	http_helper.HttpGetWithRetry(t, serviceEndpoint, nil, 200, "Hello, World!", 5, 1*time.Second)
 }
 
 func DestroyDevEnvironmentAndWorkspace(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {

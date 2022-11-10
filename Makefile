@@ -49,6 +49,9 @@ infra-lint:
 infra-format:
 	terraform fmt -recursive infra
 
+infra-test:
+	cd test && go test -v -timeout 30m
+
 ########################
 ## Release Management ##
 ########################

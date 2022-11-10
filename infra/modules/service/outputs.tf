@@ -1,3 +1,3 @@
 output "service_endpoint" {
-  value = aws_lb.alb.dns_name
+  value = "http://${aws_lb.alb.dns_name}"
 }

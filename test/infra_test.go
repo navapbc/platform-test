@@ -9,7 +9,6 @@ import (
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/shell"
 	"github.com/gruntwork-io/terratest/modules/terraform"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestDev(t *testing.T) {
@@ -17,8 +16,16 @@ func TestDev(t *testing.T) {
 
 	uniqueId := strings.ToLower(random.UniqueId())
 	workspaceName := fmt.Sprintf("t-%s", uniqueId)
+	imageTag := shell.RunCommandAndGetOutput(t, shell.Command{
+		Command:    "git",
+		Args:       []string{"rev-parse", "HEAD"},
+		WorkingDir: "./",
+	})
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 		TerraformDir: "../infra/app/envs/dev/",
+		Vars: map[string]interface{}{
+			"image_tag": imageTag,
+		},
 	})
 
 	defer DestroyDevEnvironmentAndWorkspace(t, terraformOptions, workspaceName)
@@ -28,19 +35,17 @@ func TestDev(t *testing.T) {
 }
 
 func BuildAndPublish(t *testing.T) {
-	err := shell.RunCommandE(t, shell.Command{
+	shell.RunCommand(t, shell.Command{
 		Command:    "make",
 		Args:       []string{"release-build"},
 		WorkingDir: "../",
 	})
-	assert.NoError(t, err, "Could not build release")
 
-	err = shell.RunCommandE(t, shell.Command{
+	shell.RunCommand(t, shell.Command{
 		Command:    "make",
 		Args:       []string{"release-publish"},
 		WorkingDir: "../",
 	})
-	assert.NoError(t, err, "Could not publish release")
 }
 
 func CreateDevEnvironmentInWorkspace(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
@@ -52,12 +57,11 @@ func WaitForServiceToBeStable(t *testing.T, workspaceName string) {
 	appName := "app"
 	environmentName := "dev"
 	serviceName := fmt.Sprintf("%s-%s-%s", workspaceName, appName, environmentName)
-	err := shell.RunCommandE(t, shell.Command{
+	shell.RunCommand(t, shell.Command{
 		Command:    "aws",
 		Args:       []string{"ecs", "wait", "services-stable", "--cluster", serviceName, "--services", serviceName},
 		WorkingDir: "../",
 	})
-	assert.NoError(t, err, "Error when waiting for service to be stable")
 }
 
 func RunEndToEndTests(t *testing.T, terraformOptions *terraform.Options) {

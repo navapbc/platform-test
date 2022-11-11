@@ -36,6 +36,10 @@ func TestDev(t *testing.T) {
 }
 
 func BuildAndPublish(t *testing.T) {
+	terraform.Init(t, &terraform.Options{
+		TerraformDir: "../app/build-repository/",
+	})
+
 	shell.RunCommand(t, shell.Command{
 		Command:    "make",
 		Args:       []string{"release-build"},

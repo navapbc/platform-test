@@ -54,8 +54,9 @@ func BuildAndPublish(t *testing.T) {
 }
 
 func CreateDevEnvironmentInWorkspace(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
+	terraform.Init(t, terraformOptions)
 	terraform.WorkspaceSelectOrNew(t, terraformOptions, workspaceName)
-	terraform.InitAndApply(t, terraformOptions)
+	terraform.Apply(t, terraformOptions)
 }
 
 func WaitForServiceToBeStable(t *testing.T, workspaceName string) {

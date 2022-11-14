@@ -140,7 +140,7 @@ resource "aws_ecs_service" "app" {
 
 resource "aws_ecs_task_definition" "app" {
   family             = var.service_name
-  execution_role_arn = aws_iam_service_linked_role.task_executor.arn
+  execution_role_arn = aws_iam_role.task_executor.arn
 
   # when is this needed?
   # task_role_arn      = aws_iam_role.api_service.arn
@@ -200,10 +200,6 @@ resource "aws_iam_role" "task_executor" {
   assume_role_policy = data.aws_iam_policy_document.ecs_assume_task_executor_role.json
 }
 
-resource "aws_iam_service_linked_role" "task_executor" {
-  aws_service_name = "elasticbeanstalk.amazonaws.com"
-}
-
 data "aws_iam_policy_document" "ecs_assume_task_executor_role" {
   statement {
     sid = "ECSTaskExecution"
@@ -250,11 +246,11 @@ data "aws_iam_policy_document" "task_executor" {
 }
 
 # Link access policies to the ECS task execution role.
-# resource "aws_iam_role_policy" "task_executor" {
-#   name   = "${var.service_name}-task-executor-role-policy"
-#   role   = aws_iam_role.task_executor.id
-#   policy = data.aws_iam_policy_document.task_executor.json
-# }
+resource "aws_iam_role_policy" "task_executor" {
+  name   = "${var.service_name}-task-executor-role-policy"
+  role   = aws_iam_role.task_executor.id
+  policy = data.aws_iam_policy_document.task_executor.json
+}
 
 ###########################
 ## Network Configuration ##

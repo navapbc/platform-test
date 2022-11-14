@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-	"time"
 
-	"github.com/gruntwork-io/terratest/modules/http-helper"
+	http_helper "github.com/gruntwork-io/terratest/modules/http-helper"
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/shell"
 	"github.com/gruntwork-io/terratest/modules/terraform"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDev(t *testing.T) {
@@ -72,7 +72,8 @@ func WaitForServiceToBeStable(t *testing.T, workspaceName string) {
 
 func RunEndToEndTests(t *testing.T, terraformOptions *terraform.Options) {
 	serviceEndpoint := terraform.Output(t, terraformOptions, "service_endpoint")
-	http_helper.HttpGetWithRetry(t, serviceEndpoint, nil, 200, "Hello, World!", 5, 1*time.Second)
+	responseStatus, _ := http_helper.HttpGet(t, serviceEndpoint, nil)
+	assert.Equal(t, 200, responseStatus)
 }
 
 func DestroyDevEnvironmentAndWorkspace(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {

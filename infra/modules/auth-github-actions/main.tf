@@ -13,9 +13,11 @@ resource "aws_iam_role" "github_actions" {
 }
 
 # Attach access policies to GitHub Actions role
-resource "aws_iam_role_policy_attachment" "dev_power_user" {
+resource "aws_iam_role_policy_attachment" "custom" {
+  count = length(var.iam_role_policy_arns)
+
   role       = aws_iam_role.github_actions.name
-  policy_arn = "arn:aws:iam::aws:policy/PowerUserAccess"
+  policy_arn = var.iam_role_policy_arns[count.index]
 }
 
 # Get GitHub's OIDC provider's thumbprint

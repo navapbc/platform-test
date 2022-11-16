@@ -15,8 +15,8 @@ locals {
     description = "Application resources created in dev environment"
   })
 
-  tfstate_bucket = "platform-test-430004246987-us-east-1-tf-state"
-  tfstate_key    = "infra/app/environments/dev.tfstate"
+  tfstate_bucket = "<TF_STATE_BUCKET_NAME>"
+  tfstate_key    = "infra/<APP_NAME>/environments/dev.tfstate"
 }
 
 terraform {
@@ -32,10 +32,10 @@ terraform {
   # Terraform does not allow interpolation here, values must be hardcoded.
 
   backend "s3" {
-    bucket         = "platform-test-430004246987-us-east-1-tf-state"
-    key            = "infra/app/environments/dev.tfstate"
-    dynamodb_table = "platform-test-tf-state-locks"
-    region         = "us-east-1"
+    bucket         = "<TF_STATE_BUCKET_NAME>"
+    key            = "infra/<APP_NAME>/environments/dev.tfstate"
+    dynamodb_table = "<TF_LOCKS_TABLE_NAME>"
+    region         = "<REGION>"
     encrypt        = "true"
   }
 }

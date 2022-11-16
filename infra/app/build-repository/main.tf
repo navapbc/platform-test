@@ -4,8 +4,8 @@ data "aws_iam_role" "github_actions" {
 
 locals {
   project_name = module.project_config.project_name
-  app_name     = "app"
-  region       = "us-east-1"
+  app_name     = "<APP_NAME>"
+  region       = "<REGION>"
 
   # Set project tags that will be used to tag all resources.
   tags = merge(module.project_config.default_tags, {
@@ -28,10 +28,10 @@ terraform {
   # Terraform does not allow interpolation here, values must be hardcoded.
 
   backend "s3" {
-    bucket         = "platform-test-430004246987-us-east-1-tf-state"
-    key            = "infra/app/dist.tfstate"
-    dynamodb_table = "platform-test-tf-state-locks"
-    region         = "us-east-1"
+    bucket         = "<TF_STATE_BUCKET_NAME>"
+    key            = "infra/<APP_NAME>/dist.tfstate"
+    dynamodb_table = "<TF_LOCKS_TABLE_NAME>"
+    region         = "<REGION>"
     encrypt        = "true"
   }
 }

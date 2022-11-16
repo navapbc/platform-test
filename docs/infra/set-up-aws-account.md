@@ -7,7 +7,7 @@ The AWS account setup process will:
 
 ## Prerequisites
 
-First, [set up infrastructure tools](../docs/infra/set-up-infrastructure-tools.md), like Terraform, AWS CLI, and AWS authentication.
+First, [set up infrastructure tools](./set-up-infrastructure-tools.md), like Terraform, AWS CLI, and AWS authentication.
 
 ## Overview of Terraform backend management
 
@@ -46,6 +46,7 @@ Now that the S3 bucket for storing Terraform state files and the DynamoDB table 
   backend "s3" {
     bucket         = "<TF_STATE_BUCKET_NAME>"
     dynamodb_table = "<TF_LOCKS_TABLE_NAME>"
+    region         = "<REGION>"
     ...
   }
 ```

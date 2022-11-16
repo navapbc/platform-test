@@ -1,7 +1,6 @@
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
-
 locals {
   # The prefix key/value pair is used for terraform workspaces, which is useful for projects with multiple infrastructure developers. 
   # Leave this as a static string if you are not using workspaces for this environment (recommended). Change it to terraform.workspace 
@@ -29,10 +28,10 @@ terraform {
   # Terraform does not allow interpolation here, values must be hardcoded.
 
   backend "s3" {
-    bucket         = "<TF_STATE_BUCKET_NAME>"
-    key            = "infra/<APP_NAME>/environments/staging.tfstate"
-    dynamodb_table = "<TF_LOCKS_TABLE_NAME>"
-    region         = "<REGION>"
+    bucket         = "platform-test-430004246987-us-east-1-tf-state"
+    key            = "infra/app/environments/staging.tfstate"
+    dynamodb_table = "platform-test-tf-state-locks"
+    region         = "us-east-1"
     encrypt        = "true"
   }
 }

@@ -24,34 +24,12 @@ resource "aws_lb" "alb" {
   internal        = false
   security_groups = [aws_security_group.alb.id]
   subnets         = var.subnet_ids
-
-  # TODO(https://github.com/navapbc/template-infra/issues/163) Implement HTTPS
-  # checkov:skip=CKV2_AWS_20:Redirect HTTP to HTTPS as part of implementing HTTPS support
-
-  # TODO(https://github.com/navapbc/template-infra/issues/161) Prevent deletion protection
-  # checkov:skip=CKV_AWS_150:Allow deletion until we can automate deletion for automated tests
-  # enable_deletion_protection = true
-
-  # TODO(https://github.com/navapbc/template-infra/issues/165) Protect ALB with WAF
-  # checkov:skip=CKV2_AWS_28:Implement WAF in issue #165
-
-  # Drop invalid HTTP headers for improved security
-  # Note that header names cannot contain underscores
-  # https://docs.bridgecrew.io/docs/ensure-that-alb-drops-http-headers
-  drop_invalid_header_fields = true
-
-  # TODO(https://github.com/navapbc/template-infra/issues/162) Add access logs
-  # checkov:skip=CKV_AWS_91:Add access logs in future PR
 }
 
 # NOTE: for the demo we expose private http endpoint
 # due to the complexity of acquiring a valid TLS/SSL cert.
 # In a production system we would provision an https listener
 resource "aws_lb_listener" "alb_listener_http" {
-  # TODO(https://github.com/navapbc/template-infra/issues/163) Use HTTPS protocol
-  # checkov:skip=CKV_AWS_2:Implement HTTPS in issue #163
-  # checkov:skip=CKV_AWS_103:Require TLS 1.2 as part of implementing HTTPS support
-
   load_balancer_arn = aws_lb.alb.arn
   port              = "80"
   protocol          = "HTTP"
@@ -182,13 +160,6 @@ resource "aws_ecs_cluster" "cluster" {
 # Cloudwatch log group to for streaming ECS application logs.
 resource "aws_cloudwatch_log_group" "service_logs" {
   name = local.log_group_name
-
-  # Conservatively retain logs for 5 years.
-  # Looser requirements may allow shorter retention periods
-  retention_in_days = 1827
-
-  # TODO(https://github.com/navapbc/template-infra/issues/164) Encrypt with customer managed KMS key
-  # checkov:skip=CKV_AWS_158:Encrypt service logs with customer key in future work
 }
 
 ####################
@@ -273,10 +244,7 @@ resource "aws_security_group" "alb" {
 
   vpc_id = var.vpc_id
 
-  # TODO(https://github.com/navapbc/template-infra/issues/163) Disallow incoming traffic to port 80
-  # checkov:skip=CKV_AWS_260:Disallow ingress from 0.0.0.0:0 to port 80 when implementing HTTPS support in issue #163
   ingress {
-    description = "Allow HTTP traffic from public internet"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
@@ -284,7 +252,6 @@ resource "aws_security_group" "alb" {
   }
 
   egress {
-    description = "Allow all outgoing traffic"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -304,7 +271,6 @@ resource "aws_security_group" "app" {
   }
 
   ingress {
-    description     = "Allow HTTP traffic to application container port"
     protocol        = "tcp"
     from_port       = var.container_port
     to_port         = var.container_port
@@ -312,7 +278,6 @@ resource "aws_security_group" "app" {
   }
 
   egress {
-    description = "Allow all outgoing traffic from application"
     protocol    = "-1"
     from_port   = 0
     to_port     = 0

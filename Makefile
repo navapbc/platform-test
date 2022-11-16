@@ -10,14 +10,9 @@ APP_NAME ?= app
 # in infra/modules and then stripping out the "infra/modules/" prefix
 MODULES := $(notdir $(wildcard infra/modules/*))
 
-# Get the list of accounts and environments in a manner similar to MODULES above
-ACCOUNTS := $(notdir $(wildcard infra/accounts/*))
-ENVIRONMENTS := $(notdir $(wildcard infra/app/envs/*))
-
 
 .PHONY : \
 	infra-validate-modules \
-	infra-validate-env-template \
 	infra-check-compliance \
 	infra-check-compliance-checkov \
 	infra-check-compliance-tfsec \
@@ -31,26 +26,14 @@ ENVIRONMENTS := $(notdir $(wildcard infra/app/envs/*))
 	db-migrate-down \
 	db-migrate-create
 
-# Validate all infra root and child modules.
-infra-validate: \
-	infra-validate-modules \
-	# !! Uncomment the following line once you've set up the infra/project-config module
-	# infra-validate-env-template
-
-# Validate all infra root and child modules.
-# Validate all infra reusable child modules. The prerequisite for this rule is obtained by
+# Validate all infra modules. The prerequisite for this rule is obtained by
 # prefixing each module with the string "infra-validate-module-"
 infra-validate-modules: $(patsubst %, infra-validate-module-%, $(MODULES))
 
 infra-validate-module-%:
-	@echo "Validate library module: $*"
+	@echo "Validate module: $*"
 	terraform -chdir=infra/modules/$* init -backend=false
 	terraform -chdir=infra/modules/$* validate
-
-infra-validate-env-template:
-	@echo "Validate module: env-template"
-	terraform -chdir=infra/app/env-template init -backend=false
-	terraform -chdir=infra/app/env-template validate
 
 infra-check-compliance: infra-check-compliance-checkov infra-check-compliance-tfsec
 
@@ -96,9 +79,3 @@ release-publish:
 	./bin/publish-release.sh $(APP_NAME) $(IMAGE_NAME) $(IMAGE_TAG)
 
 release-deploy:
-# check the varaible against the list of enviroments and suggest one of the correct envs.
-ifneq ($(filter $(ENV_NAME),$(ENVIRONMENTS)),)
-	./bin/deploy-release.sh $(APP_NAME) $(IMAGE_TAG) $(ENV_NAME)
-else
-	@echo "Please enter: make release-deploy ENV_NAME=<env_name>. The value for env_name must be one of these: $(ENVIRONMENTS)"
-endif

@@ -15,6 +15,12 @@ on:
           - staging
           - prod
 
+env:
+  ENV_NAME: ${{ inputs.env_name || "dev" }}
+
+concurrency:
+  group: cd-${{ env.ENV_NAME }}
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -39,7 +45,4 @@ jobs:
         run: make release-publish
 
       - name: Deploy release
-        run: |
-          ENV_NAME_INPUT="${{inputs.env_name}}"
-          ENV_NAME="${ENV_NAME_INPUT:-dev}"
-          make release-deploy ENV_NAME="$ENV_NAME"
+        run: make release-deploy ENV_NAME="$ENV_NAME"

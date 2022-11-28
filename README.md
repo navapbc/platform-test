@@ -6,6 +6,10 @@ This repo is used to test the platform.
 
 This repo consists of a Makefile called `platform-test.mak`. We avoided calling it `Makefile` in order to avoid conflicting with the Makefile that is copied over from [template-infra](https://github.com/navapbc/template-infra) when installing the template infrastructure.
 
+## Environment URLs
+
+* [Dev environment](http://app-dev-1582588227.us-east-1.elb.amazonaws.com/)
+
 ## Usage
 
 Test installing template infrastructure

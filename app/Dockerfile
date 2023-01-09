@@ -15,6 +15,9 @@ FROM busybox:latest AS release
 ADD index.html /www/index.html
 ADD health /www/health
 ADD start-server.sh /bin/start-server.sh
+ADD healthcheck.sh /bin/healthcheck.sh
+
+HEALTHCHECK --interval=1s --timeout=3s CMD healthcheck.sh
 
 # Create a basic webserver and run it until the container is stopped
 CMD start-server.sh

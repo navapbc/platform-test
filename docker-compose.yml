@@ -1,0 +1,8 @@
+services:
+  app:
+    image: platform-test-app
+    build: ./app
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000

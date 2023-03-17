@@ -18,6 +18,7 @@ locals {
   prefix       = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
   app_name     = module.app_config.app_name
   service_name = "${local.prefix}${local.app_name}-${var.environment_name}"
+  db_name      = local.service_name
 }
 
 module "project_config" {
@@ -35,4 +36,9 @@ module "service" {
   image_tag             = var.image_tag
   vpc_id                = data.aws_vpc.default.id
   subnet_ids            = data.aws_subnets.default.ids
+}
+
+module "database" {
+  source = "../../modules/database"
+  name   = local.db_name
 }

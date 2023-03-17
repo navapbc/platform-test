@@ -129,9 +129,9 @@ resource "aws_iam_role_policy_attachment" "db_backup_role_policy_attachment" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup"
 }
 
-################################################################################
-# IAM role for enhanced monitoring
-################################################################################
+#----------------------------------#
+# IAM role for enhanced monitoring #
+#----------------------------------#
 
 resource "aws_iam_role" "rds_enhanced_monitoring" {
   name_prefix        = "aurora-enhanced-monitoring-"
@@ -158,9 +158,9 @@ data "aws_iam_policy_document" "rds_enhanced_monitoring" {
   }
 }
 
-################################################################################
-# Parameters for Query Logging
-################################################################################
+#-------------------------#
+# Configure Query Logging #
+#-------------------------#
 
 resource "aws_rds_cluster_parameter_group" "rds_query_logging" {
   name        = var.name

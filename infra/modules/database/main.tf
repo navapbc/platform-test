@@ -2,7 +2,8 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 locals {
-  master_username = "postgres"
+  master_username       = "postgres"
+  primary_instance_name = "${var.name}-primary"
 }
 
 
@@ -38,6 +39,7 @@ resource "aws_rds_cluster" "db" {
 }
 
 resource "aws_rds_cluster_instance" "primary" {
+  identifier                 = local.primary_instance_name
   cluster_identifier         = aws_rds_cluster.db.id
   instance_class             = "db.serverless"
   engine                     = aws_rds_cluster.db.engine

@@ -61,9 +61,9 @@ resource "aws_ssm_parameter" "random_db_password" {
   value = random_password.random_db_password.result
 }
 
-#----------------------#
-# Backup Configuration #
-#----------------------#
+#------------------#
+# Database Backups #
+#------------------#
 
 # Backup plan that defines when and how to backup and which backup vault to store backups in
 # See https://docs.aws.amazon.com/aws-backup/latest/devguide/about-backup-plans.html
@@ -158,9 +158,9 @@ data "aws_iam_policy_document" "rds_enhanced_monitoring" {
   }
 }
 
-#-------------------------#
-# Configure Query Logging #
-#-------------------------#
+#---------------#
+# Query Logging #
+#---------------#
 
 resource "aws_rds_cluster_parameter_group" "rds_query_logging" {
   name        = var.name

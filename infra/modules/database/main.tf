@@ -66,10 +66,10 @@ resource "aws_ssm_parameter" "random_db_password" {
 # Backup plan that defines when and how to backup and which backup vault to store backups in
 # See https://docs.aws.amazon.com/aws-backup/latest/devguide/about-backup-plans.html
 resource "aws_backup_plan" "backup_plan" {
-  name = "${var.name}-backup-plan"
+  name = "${var.name}-db-backup-plan"
 
   rule {
-    rule_name         = "${var.name}-backup-rule"
+    rule_name         = "${var.name}-db-backup-rule"
     target_vault_name = aws_backup_vault.backup_vault.name
     schedule          = "cron(0 7 ? * SUN *)" # Run Sundays at 12pm (EST)
   }
@@ -78,7 +78,7 @@ resource "aws_backup_plan" "backup_plan" {
 # Backup vault that stores and organizes backups
 # See https://docs.aws.amazon.com/aws-backup/latest/devguide/vaults.html
 resource "aws_backup_vault" "backup_vault" {
-  name        = "${var.name}-vault"
+  name        = "${var.name}-db-backup-vault"
   kms_key_arn = data.aws_kms_key.backup_vault_key.arn
 }
 
@@ -91,8 +91,8 @@ data "aws_kms_key" "backup_vault_key" {
 # Backup selection defines which resources to backup
 # See https://docs.aws.amazon.com/aws-backup/latest/devguide/assigning-resources.html
 # and https://docs.aws.amazon.com/aws-backup/latest/devguide/API_BackupSelection.html
-resource "aws_backup_selection" "backup_db" {
-  name         = "${var.name}-backup"
+resource "aws_backup_selection" "db_backup" {
+  name         = "${var.name}-db-backup"
   plan_id      = aws_backup_plan.backup_plan.id
   iam_role_arn = aws_iam_role.db_backup_role.arn
 
@@ -122,7 +122,7 @@ data "aws_iam_policy_document" "db_backup_policy" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "postgresql_backup" {
+resource "aws_iam_role_policy_attachment" "db_backup_role_policy_attachment" {
   role       = aws_iam_role.db_backup_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup"
 }

@@ -299,6 +299,7 @@ resource "aws_security_group" "app" {
   # before the old one is destroyed. In this situation, the new one needs a unique name
   name_prefix = "${var.service_name}-app"
   description = "Allow inbound TCP access to application container port"
+  vpc_id      = var.vpc_id
   lifecycle {
     create_before_destroy = true
   }

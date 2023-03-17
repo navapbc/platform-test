@@ -48,9 +48,9 @@ resource "aws_rds_cluster_instance" "primary" {
 }
 
 resource "random_password" "random_db_password" {
-  length      = 48
-  special     = true
-  min_special = 6
+  length = 48
+  # Remove '@' sign from allowed characters since only printable ASCII characters besides '/', '@', '"', ' ' may be used.
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
 resource "aws_ssm_parameter" "random_db_password" {

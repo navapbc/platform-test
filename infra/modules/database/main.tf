@@ -68,7 +68,7 @@ resource "aws_backup_plan" "postgresql" {
 
   rule {
     rule_name         = "${var.name}-backup-rule"
-    target_vault_name = "${var.name}-vault"
+    target_vault_name = aws_backup_vault.postgresql.name
     schedule          = "cron(0 7 ? * SUN *)" # Run Sundays at 12pm (EST)
   }
 }
@@ -89,6 +89,7 @@ resource "aws_backup_selection" "postgresql_backup" {
 data "aws_kms_key" "postgresql" {
   key_id = "alias/aws/backup"
 }
+
 # create backup vault
 resource "aws_backup_vault" "postgresql" {
   name        = "${var.name}-vault"

@@ -172,9 +172,9 @@ resource "aws_rds_cluster_parameter_group" "rds_query_logging" {
   }
 }
 
-################################################################################
-# IAM role for user access
-################################################################################
+##############################
+## IAM role for user access ##
+##############################
 
 resource "aws_iam_policy" "db_access" {
   name        = "${var.name}-db-access"

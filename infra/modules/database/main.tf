@@ -10,7 +10,7 @@ locals {
 ## Database Configuration ##
 ###########################
 resource "aws_rds_cluster" "db" {
-  # checkov:skip=CKV2_AWS_27:TODO have concerns about sensitive data in logs; want better way to get this information
+  # checkov:skip=CKV2_AWS_27:have concerns about sensitive data in logs; want better way to get this information
   # checkov:skip=CKV2_AWS_8:TODO add backup selection plan using tags
 
   # cluster identifier is a unique identifier within the AWS account

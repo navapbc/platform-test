@@ -6,9 +6,10 @@ locals {
 }
 
 
-###########################
+############################
 ## Database Configuration ##
-###########################
+############################
+
 resource "aws_rds_cluster" "db" {
   # checkov:skip=CKV2_AWS_27:have concerns about sensitive data in logs; want better way to get this information
   # checkov:skip=CKV2_AWS_8:TODO add backup selection plan using tags
@@ -34,7 +35,6 @@ resource "aws_rds_cluster" "db" {
     max_capacity = 1.0
     min_capacity = 0.5
   }
-
 }
 
 resource "aws_rds_cluster_instance" "primary" {
@@ -175,6 +175,7 @@ resource "aws_rds_cluster_parameter_group" "rds_query_logging" {
 ################################################################################
 # IAM role for user access
 ################################################################################
+
 resource "aws_iam_policy" "db_access" {
   name        = "${var.name}-db-access"
   description = "Allows access to the database instance"

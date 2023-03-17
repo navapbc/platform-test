@@ -6,9 +6,9 @@ locals {
 }
 
 
-############################
-## Database Configuration ##
-############################
+#------------------------#
+# Database Configuration #
+#------------------------#
 
 resource "aws_rds_cluster" "db" {
   # checkov:skip=CKV2_AWS_27:have concerns about sensitive data in logs; want better way to get this information
@@ -59,55 +59,55 @@ resource "aws_ssm_parameter" "random_db_password" {
   value = random_password.random_db_password.result
 }
 
-################################################################################
-# Backup Configuration
-################################################################################
+#----------------------#
+# Backup Configuration #
+#----------------------#
 
-resource "aws_backup_plan" "postgresql" {
+# Backup plan that defines when and how to backup and which backup vault to store backups in
+# See https://docs.aws.amazon.com/aws-backup/latest/devguide/about-backup-plans.html
+resource "aws_backup_plan" "backup_plan" {
   name = "${var.name}-backup-plan"
 
   rule {
     rule_name         = "${var.name}-backup-rule"
-    target_vault_name = aws_backup_vault.postgresql.name
+    target_vault_name = aws_backup_vault.backup_vault.name
     schedule          = "cron(0 7 ? * SUN *)" # Run Sundays at 12pm (EST)
   }
 }
 
-# backup selection
-resource "aws_backup_selection" "postgresql_backup" {
-  iam_role_arn = aws_iam_role.postgresql_backup.arn
+# Backup vault that stores and organizes backups
+# See https://docs.aws.amazon.com/aws-backup/latest/devguide/vaults.html
+resource "aws_backup_vault" "backup_vault" {
+  name        = "${var.name}-vault"
+  kms_key_arn = data.aws_kms_key.backup_vault_key.arn
+}
+
+# KMS Key for the vault
+# This key was created by AWS by default alongside the vault
+data "aws_kms_key" "backup_vault_key" {
+  key_id = "alias/aws/backup"
+}
+
+# Backup selection defines which resources to backup
+# See https://docs.aws.amazon.com/aws-backup/latest/devguide/assigning-resources.html
+# and https://docs.aws.amazon.com/aws-backup/latest/devguide/API_BackupSelection.html
+resource "aws_backup_selection" "backup_db" {
   name         = "${var.name}-backup"
-  plan_id      = aws_backup_plan.postgresql.id
+  plan_id      = aws_backup_plan.backup_plan.id
+  iam_role_arn = aws_iam_role.db_backup_role.arn
 
   resources = [
     aws_rds_cluster.db.arn
   ]
 }
 
-# KMS Key for the vault
-# This key was created by AWS by default alongside the vault
-data "aws_kms_key" "postgresql" {
-  key_id = "alias/aws/backup"
+# Role that AWS Backup uses to authenticate when backing up the target resource
+resource "aws_iam_role" "db_backup_role" {
+  name_prefix        = "${var.name}-db-backup-role-"
+  assume_role_policy = data.aws_iam_policy_document.db_backup_policy.json
 }
 
-# create backup vault
-resource "aws_backup_vault" "postgresql" {
-  name        = "${var.name}-vault"
-  kms_key_arn = data.aws_kms_key.postgresql.arn
-}
-
-# create IAM role
-resource "aws_iam_role" "postgresql_backup" {
-  name_prefix        = "aurora-backup-"
-  assume_role_policy = data.aws_iam_policy_document.postgresql_backup.json
-}
-
-resource "aws_iam_role_policy_attachment" "postgresql_backup" {
-  role       = aws_iam_role.postgresql_backup.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup"
-}
-
-data "aws_iam_policy_document" "postgresql_backup" {
+data "aws_iam_policy_document" "db_backup_policy" {
   statement {
     actions = [
       "sts:AssumeRole",
@@ -120,6 +120,11 @@ data "aws_iam_policy_document" "postgresql_backup" {
       identifiers = ["backup.amazonaws.com"]
     }
   }
+}
+
+resource "aws_iam_role_policy_attachment" "postgresql_backup" {
+  role       = aws_iam_role.db_backup_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup"
 }
 
 ################################################################################

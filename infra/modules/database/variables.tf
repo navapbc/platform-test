@@ -14,3 +14,12 @@ variable "database_name" {
     error_message = "use only lower case letters, numbers, and underscores (no dashes)"
   }
 }
+
+variable "vpc_id" {
+  type        = string
+  description = "Uniquely identifies the VPC."
+}
+
+variable "ingress_security_group_ids" {
+  description = "list of security group IDs from which to allow network traffic to the database"
+}

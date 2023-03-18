@@ -39,6 +39,8 @@ module "service" {
 }
 
 module "database" {
-  source = "../../modules/database"
-  name   = local.db_name
+  source                     = "../../modules/database"
+  name                       = local.db_name
+  vpc_id                     = data.aws_vpc.default.id
+  ingress_security_group_ids = [module.service.app_security_group_id]
 }

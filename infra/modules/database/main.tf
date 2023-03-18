@@ -36,6 +36,8 @@ resource "aws_rds_cluster" "db" {
     max_capacity = 1.0
     min_capacity = 0.5
   }
+
+  vpc_security_group_ids = [aws_security_group.db.id]
 }
 
 resource "aws_rds_cluster_instance" "primary" {
@@ -59,6 +61,23 @@ resource "aws_ssm_parameter" "random_db_password" {
   name  = "/db/${var.name}/master-password"
   type  = "SecureString"
   value = random_password.random_db_password.result
+}
+
+#-----------------------#
+# Network Configuration #
+#-----------------------#
+
+resource "aws_security_group" "db" {
+  name_prefix = "${var.name}-db"
+  description = "Inbound traffic rules for the database layer"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    security_groups = var.ingress_security_group_ids
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+  }
 }
 
 #------------------#

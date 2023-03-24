@@ -63,9 +63,9 @@ resource "aws_ssm_parameter" "random_db_password" {
   value = random_password.random_db_password.result
 }
 
-#-----------------------#
-# Network Configuration #
-#-----------------------#
+#----------------#
+# Network Access #
+#----------------#
 
 resource "aws_security_group" "db" {
   name_prefix = "${var.name}-db"
@@ -79,6 +79,29 @@ resource "aws_security_group" "db" {
     protocol        = "tcp"
   }
 }
+
+#----------------#
+# Authentication #
+#----------------#
+
+# data "aws_iam_policy_document" "app_db_access" {
+#   # Policy to allow connection to RDS via IAM database authentication as pfml_api user
+#   # https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.IAMPolicy.html
+#   statement {
+#     actions = [
+#       "rds-db:connect"
+#     ]
+
+#     resources = [
+#       "${local.iam_db_user_arn_prefix}/app"
+#     ]
+#   }
+# }
+
+# resource "aws_iam_policy" "db_user_pfml_api" {
+#   name   = "${local.app_name}-${var.environment_name}-db_user_pfml_api-policy"
+#   policy = data.aws_iam_policy_document.db_user_pfml_api.json
+# }
 
 #------------------#
 # Database Backups #

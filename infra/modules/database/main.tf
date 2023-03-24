@@ -221,3 +221,74 @@ resource "aws_rds_cluster_parameter_group" "rds_query_logging" {
     value = "100"
   }
 }
+
+#-------------------------------------------#
+# Database Role Provisioner Lambda Function #
+#-------------------------------------------#
+
+resource "aws_lambda_function" "db_role_provisioner" {
+  function_name = "${var.name}-db-role-provisioner"
+
+  s3_bucket = aws_s3_bucket.db_role_provisioner_bucket.id
+  s3_key    = aws_s3_object.db_role_provisioner.key
+
+  runtime = "python3.9"
+  handler = "role_provisioner.lambda_handler"
+
+  source_code_hash = data.archive_file.db_role_provisioner.output_base64sha256
+
+  role = aws_iam_role.db_role_provisioner_lambda_exec.arn
+}
+
+resource "aws_cloudwatch_log_group" "db_role_provisioner" {
+  name = "/aws/lambda/${aws_lambda_function.db_role_provisioner.function_name}"
+
+  retention_in_days = 30
+}
+
+resource "aws_iam_role" "db_role_provisioner_lambda_exec" {
+  name = "serverless_lambda"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Sid    = ""
+      Principal = {
+        Service = "lambda.amazonaws.com"
+      }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_policy" {
+  role       = aws_iam_role.db_role_provisioner_lambda_exec.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+data "archive_file" "db_role_provisioner" {
+  type = "zip"
+
+  source_dir  = "${path.module}/role_provisioner"
+  output_path = "${path.module}/role_provisioner.zip"
+}
+
+resource "aws_s3_object" "db_role_provisioner" {
+  bucket = aws_s3_bucket.db_role_provisioner_bucket.id
+
+  key    = "role_provisioner.zip"
+  source = data.archive_file.db_role_provisioner.output_path
+
+  etag = filemd5(data.archive_file.db_role_provisioner.output_path)
+}
+
+resource "aws_s3_bucket" "db_role_provisioner_bucket" {
+  bucket = "${var.name}-db-role-provisioner"
+}
+
+resource "aws_s3_bucket_acl" "bucket_acl" {
+  bucket = aws_s3_bucket.db_role_provisioner_bucket.id
+  acl    = "private"
+}

@@ -9,3 +9,7 @@ output "tf_log_bucket_name" {
 output "tf_locks_table_name" {
   value = aws_dynamodb_table.terraform_lock.name
 }
+
+output "add_dummy_output" {
+  value = "dummy output to trigger deploy"
+}

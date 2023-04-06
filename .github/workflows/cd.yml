@@ -2,7 +2,8 @@ name: Deploy
 
 on:
   push:
-    branches: ["main","msanderson/test-deploy-only-on-code-changes"]
+    branches: 
+      - 'msanderson/test-deploy-only-on-code-changes'
     paths:
       - 'app/**'
       - 'bin/**'

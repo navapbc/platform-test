@@ -21,3 +21,4 @@ COPY start-server.sh /bin/start-server.sh
 
 # Create a basic webserver and run it until the container is stopped
 CMD ["start-server.sh"]
+

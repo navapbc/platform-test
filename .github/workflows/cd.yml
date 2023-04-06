@@ -4,11 +4,11 @@ on:
   push:
     branches: ["main","msanderson/test-deploy-only-on-code-changes"]
     paths:
-      - 'app'
-      - 'bin'
-      - 'infra'
-      - 'template-only-bin'
-      - 'template-only-test'
+      - 'app/**'
+      - 'bin/**'
+      - 'infra/**'
+      - 'template-only-bin/**'
+      - 'template-only-test/**'
   workflow_dispatch:
     inputs:
       env_name:

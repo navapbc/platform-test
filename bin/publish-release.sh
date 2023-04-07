@@ -26,7 +26,7 @@ aws ecr get-login-password --region $REGION \
   | docker login --username AWS --password-stdin $IMAGE_REGISTRY 
 echo
 echo "Describe image"
-aws ecr describe-registry --region $REGION
+aws ecr describe-registry --region $REGION --query registryId
 aws ecr batch-get-image --registry-id $IMAGE_REGISTRY --repository-name $IMAGE_NAME --image-ids imageTag=$IMAGE_TAG
 echo "Publishing image"
 docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_REPOSITORY_URL:$IMAGE_TAG

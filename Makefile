@@ -116,9 +116,6 @@ else
 	exit 1
 endif
 
-## Break after deploy for testing
-jgdhjvhgfygwyjgygf
-
 release-image-name: ## Prints the image name of the release image
 	@echo $(IMAGE_NAME)
 

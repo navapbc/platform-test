@@ -2,7 +2,7 @@ output "image_registry" {
   value = local.image_registry
 }
 
-output "image_registry" {
+output "image_registryid" {
   value = local.image_registryid
 }
 

@@ -2,6 +2,10 @@ output "image_registry" {
   value = local.image_registry
 }
 
+output "image_registry" {
+  value = local.image_registryid
+}
+
 output "image_repository_name" {
   value = aws_ecr_repository.app.name
 }

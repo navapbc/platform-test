@@ -9,6 +9,7 @@ IMAGE_TAG=$3
 terraform -chdir=infra/$APP_NAME/build-repository init
 REGION=$(terraform -chdir=infra/$APP_NAME/build-repository output -raw region)
 IMAGE_REGISTRY=$(terraform -chdir=infra/$APP_NAME/build-repository output -raw image_registry)
+IMAGE_REGISTRYID=$(terraform -chdir=infra/$APP_NAME/build-repository output -raw image_registryid)
 IMAGE_REPOSITORY_URL=$(terraform -chdir=infra/$APP_NAME/build-repository output -raw image_repository_url)
 
 echo "--------------------------"
@@ -19,6 +20,7 @@ echo "IMAGE_NAME=$IMAGE_NAME"
 echo "IMAGE_TAG=$IMAGE_TAG"
 echo "REGION=$REGION"
 echo "IMAGE_REGISTRY=$IMAGE_REGISTRY"
+echo "IMAGE_REGISTRYID=$IMAGE_REGISTRYID"
 echo "IMAGE_REPOSITORY_URL=$IMAGE_REPOSITORY_URL"
 echo
 echo "Authenticating Docker with ECR"
@@ -26,8 +28,7 @@ aws ecr get-login-password --region $REGION \
   | docker login --username AWS --password-stdin $IMAGE_REGISTRY 
 echo
 echo "Describe image"
-aws ecr describe-registry --region $REGION --query registryId
-aws ecr batch-get-image --registry-id $IMAGE_REGISTRY --repository-name $IMAGE_NAME --image-ids imageTag=$IMAGE_TAG
+aws ecr batch-get-image --registry-id $IMAGE_REGISTRYID --repository-name $IMAGE_NAME --image-ids imageTag=$IMAGE_TAG
 echo "Publishing image"
 docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_REPOSITORY_URL:$IMAGE_TAG
 docker push $IMAGE_REPOSITORY_URL:$IMAGE_TAG

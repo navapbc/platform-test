@@ -90,22 +90,13 @@ endif
 # Generate an informational tag so we can see where every image comes from.
 DATE := $(shell date -u '+%Y%m%d.%H%M%S')
 INFO_TAG := $(DATE).$(USER)
-TAG_EXISTS := $(shell docker image inspect $(IMAGE_NAME) | jq -c '.[].RepoTags' | grep $(IMAGE_TAG))
 
 release-build:
-ifdef $(TAG_EXISTS)
-	@echo "Tag $(IMAGE_TAG) already built"
-else
 	cd $(APP_NAME) && $(MAKE) release-build \
 		OPTS="--tag $(IMAGE_NAME):latest --tag $(IMAGE_NAME):$(IMAGE_TAG)"
-endif
 
 release-publish:
-ifdef $(TAG_EXISTS)
-	@echo "Tag $(IMAGE_TAG) already published"
-else
 	./bin/publish-release.sh $(APP_NAME) $(IMAGE_NAME) $(IMAGE_TAG)
-endif
 
 release-deploy:
 # check the varaible against the list of enviroments and suggest one of the correct envs.

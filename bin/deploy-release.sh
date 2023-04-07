@@ -20,6 +20,3 @@ echo
 echo "Starting $APP_NAME deploy of $IMAGE_TAG to $ENV_NAME"
 terraform -chdir=infra/$APP_NAME/envs/$ENV_NAME apply -auto-approve -var="image_tag=$IMAGE_TAG"
 echo "Completed $APP_NAME deploy of $IMAGE_TAG to $ENV_NAME"
-
-## Break deploy-release
-gowdjbqfjbwjfqwjg

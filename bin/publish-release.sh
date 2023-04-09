@@ -9,6 +9,7 @@ IMAGE_TAG=$3
 terraform -chdir=infra/$APP_NAME/build-repository init
 REGION=$(terraform -chdir=infra/$APP_NAME/build-repository output -raw region)
 IMAGE_REGISTRY=$(terraform -chdir=infra/$APP_NAME/build-repository output -raw image_registry)
+IMAGE_REGISTRYID=$(terraform -chdir=infra/$APP_NAME/build-repository output -raw image_registryid)
 IMAGE_REPOSITORY_URL=$(terraform -chdir=infra/$APP_NAME/build-repository output -raw image_repository_url)
 
 echo "--------------------------"
@@ -19,6 +20,7 @@ echo "IMAGE_NAME=$IMAGE_NAME"
 echo "IMAGE_TAG=$IMAGE_TAG"
 echo "REGION=$REGION"
 echo "IMAGE_REGISTRY=$IMAGE_REGISTRY"
+echo "IMAGE_REGISTRYID=$IMAGE_REGISTRYID"
 echo "IMAGE_REPOSITORY_URL=$IMAGE_REPOSITORY_URL"
 echo
 echo "Authenticating Docker with ECR"

@@ -2,7 +2,7 @@ output "image_registry" {
   value = module.container_image_repository.image_registry
 }
 
-output "image_registry" {
+output "image_registryid" {
   value = module.container_image_repository.image_registryid
 }
 

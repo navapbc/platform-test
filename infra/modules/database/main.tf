@@ -28,8 +28,8 @@ resource "aws_rds_cluster" "db" {
   storage_encrypted = true
   # checkov:skip=CKV_AWS_128:Auth decision needs to be ironed out
   # checkov:skip=CKV_AWS_162:Auth decision needs to be ironed out
-  # iam_database_authentication_enabled = true
-  deletion_protection = true
+  iam_database_authentication_enabled = true
+  deletion_protection                 = true
   # final_snapshot_identifier = "${var.name}-final"
   skip_final_snapshot = true
 

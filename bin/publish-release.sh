@@ -6,7 +6,6 @@ IMAGE_NAME=$2
 IMAGE_TAG=$3
 
 # Need to init module when running in CD since GitHub actions does a fresh checkout of repo
-terraform -chdir=infra/$APP_NAME/modules/container-image-repository init
 terraform -chdir=infra/$APP_NAME/build-repository init
 REGION=$(terraform -chdir=infra/$APP_NAME/build-repository output -raw region)
 IMAGE_REGISTRY=$(terraform -chdir=infra/$APP_NAME/build-repository output -raw image_registry)

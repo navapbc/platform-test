@@ -312,8 +312,15 @@ data "aws_iam_policy_document" "role_checker_assume_role" {
 }
 
 resource "aws_iam_role" "role_checker" {
-  name               = "${var.name}-checker"
-  assume_role_policy = data.aws_iam_policy_document.role_checker_assume_role.json
+  name                = "${var.name}-checker"
+  assume_role_policy  = data.aws_iam_policy_document.role_checker_assume_role.json
+  managed_policy_arns = [data.aws_iam_policy.lambda_vpc_access.arn]
+}
+
+# AWS managed policy required by Lambda functions in order to access VPC resources
+# see https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html
+data "aws_iam_policy" "lambda_vpc_access" {
+  name = "AWSLambdaVPCAccessExecutionRole"
 }
 
 data "archive_file" "role_checker" {

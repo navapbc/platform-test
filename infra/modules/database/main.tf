@@ -4,6 +4,7 @@ data "aws_region" "current" {}
 locals {
   master_username       = "postgres"
   primary_instance_name = "${var.name}-primary"
+  role_checker_package  = "${path.root}/role_checker.zip"
 }
 
 
@@ -272,7 +273,7 @@ data "archive_file" "db_role_provisioner" {
   type = "zip"
 
   source_dir  = "${path.module}/role_provisioner"
-  output_path = "${path.module}/role_provisioner.zip"
+  output_path = "${path.root}/role_provisioner.zip"
 }
 
 resource "aws_s3_object" "db_role_provisioner" {
@@ -291,4 +292,42 @@ resource "aws_s3_bucket" "db_role_provisioner_bucket" {
 resource "aws_s3_bucket_acl" "bucket_acl" {
   bucket = aws_s3_bucket.db_role_provisioner_bucket.id
   acl    = "private"
+}
+
+#------------------#
+# Database Checker #
+#------------------#
+
+data "aws_iam_policy_document" "role_checker_assume_role" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role" "role_checker" {
+  name               = "${var.name}-checker"
+  assume_role_policy = data.aws_iam_policy_document.role_checker_assume_role.json
+}
+
+data "archive_file" "role_checker" {
+  type        = "zip"
+  source_dir  = "${path.module}/role_checker"
+  output_path = local.role_checker_package
+}
+
+resource "aws_lambda_function" "role_checker" {
+  function_name = "${var.name}-role-checker"
+
+  filename         = local.role_checker_package
+  source_code_hash = data.archive_file.role_checker.output_base64sha256
+  runtime          = "python3.9"
+  handler          = "role_checker.lambda_handler"
+  role             = aws_iam_role.role_checker.arn
 }

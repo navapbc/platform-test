@@ -25,6 +25,8 @@ echo "Authenticating Docker with ECR"
 aws ecr get-login-password --region $REGION \
   | docker login --username AWS --password-stdin $IMAGE_REGISTRY
 echo
+echo "Describe Images"
+aws ecr describe-images --repository-name=$IMAGE_NAME --image-ids=imageTag=$IMAGE_TAG --region $REGION
 echo "Publishing image"
 docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_REPOSITORY_URL:$IMAGE_TAG
 docker push $IMAGE_REPOSITORY_URL:$IMAGE_TAG

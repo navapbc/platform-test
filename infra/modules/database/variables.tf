@@ -23,3 +23,8 @@ variable "vpc_id" {
 variable "ingress_security_group_ids" {
   description = "list of security group IDs from which to allow network traffic to the database"
 }
+
+variable "private_subnet_ids" {
+  type        = list(any)
+  description = "list of private subnet IDs to put the role provisioner and role checker lambda functions in"
+}

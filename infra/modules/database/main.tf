@@ -330,4 +330,9 @@ resource "aws_lambda_function" "role_checker" {
   runtime          = "python3.9"
   handler          = "role_checker.lambda_handler"
   role             = aws_iam_role.role_checker.arn
+
+  vpc_config {
+    subnet_ids         = var.private_subnet_ids
+    security_group_ids = var.ingress_security_group_ids
+  }
 }

@@ -3,7 +3,7 @@ output "image_registry" {
 }
 
 output "image_registryid" {
-  value = module.container_image_repository.image_registryid
+  value = local.image_registryid
 }
 
 output "image_repository_url" {

@@ -303,36 +303,6 @@ resource "aws_s3_bucket_acl" "bucket_acl" {
 # Database Checker #
 #------------------#
 
-data "aws_iam_policy_document" "role_checker_assume_role" {
-  statement {
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-
-    actions = ["sts:AssumeRole"]
-  }
-}
-
-resource "aws_iam_role" "role_checker" {
-  name                = "${var.name}-checker"
-  assume_role_policy  = data.aws_iam_policy_document.role_checker_assume_role.json
-  managed_policy_arns = [data.aws_iam_policy.lambda_vpc_access.arn]
-}
-
-# AWS managed policy required by Lambda functions in order to access VPC resources
-# see https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html
-data "aws_iam_policy" "lambda_vpc_access" {
-  name = "AWSLambdaVPCAccessExecutionRole"
-}
-
-data "archive_file" "role_checker" {
-  type        = "zip"
-  source_dir  = "${path.module}/role_checker"
-  output_path = local.role_checker_package
-}
 
 resource "aws_lambda_function" "role_checker" {
   function_name = "${var.name}-role-checker"
@@ -347,4 +317,35 @@ resource "aws_lambda_function" "role_checker" {
     subnet_ids         = var.private_subnet_ids
     security_group_ids = var.ingress_security_group_ids
   }
+}
+
+data "archive_file" "role_checker" {
+  type        = "zip"
+  source_dir  = "${path.module}/role_checker"
+  output_path = local.role_checker_package
+}
+
+resource "aws_iam_role" "role_checker" {
+  name                = "${var.name}-checker"
+  assume_role_policy  = data.aws_iam_policy_document.role_checker_assume_role.json
+  managed_policy_arns = [data.aws_iam_policy.lambda_vpc_access.arn]
+}
+
+data "aws_iam_policy_document" "role_checker_assume_role" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+# AWS managed policy required by Lambda functions in order to access VPC resources
+# see https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html
+data "aws_iam_policy" "lambda_vpc_access" {
+  name = "AWSLambdaVPCAccessExecutionRole"
 }

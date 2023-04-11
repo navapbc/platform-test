@@ -317,6 +317,15 @@ resource "aws_lambda_function" "role_checker" {
     subnet_ids         = var.private_subnet_ids
     security_group_ids = var.ingress_security_group_ids
   }
+
+  environment {
+    variables = {
+      DB_HOST     = aws_rds_cluster.db.endpoint
+      DB_PORT     = aws_rds_cluster.db.port
+      DB_USER     = local.master_username
+      DB_PASSwORD = aws_ssm_parameter.random_db_password.value
+    }
+  }
 }
 
 data "archive_file" "role_checker" {

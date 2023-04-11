@@ -5,6 +5,10 @@ locals {
   master_username       = "postgres"
   primary_instance_name = "${var.name}-primary"
   role_checker_package  = "${path.root}/role_checker.zip"
+
+  # The ARN that represents the users accessing the database are of the format: "arn:aws:rds-db:<region>:<account-id>:dbuser:<resource-id>/<database-user-name>""
+  # See https://aws.amazon.com/blogs/database/using-iam-authentication-to-connect-with-pgadmin-amazon-aurora-postgresql-or-amazon-rds-for-postgresql/
+  db_user_arn_prefix = "arn:aws:rds-db:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_rds_cluster_instance.primary.dbi_resource_id}"
 }
 
 
@@ -85,24 +89,25 @@ resource "aws_security_group" "db" {
 # Authentication #
 #----------------#
 
-# data "aws_iam_policy_document" "app_db_access" {
-#   # Policy to allow connection to RDS via IAM database authentication as pfml_api user
-#   # https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.IAMPolicy.html
-#   statement {
-#     actions = [
-#       "rds-db:connect"
-#     ]
+resource "aws_iam_policy" "db_access" {
+  name   = "${var.name}-db-access"
+  policy = data.aws_iam_policy_document.db_access.json
+}
 
-#     resources = [
-#       "${local.iam_db_user_arn_prefix}/app"
-#     ]
-#   }
-# }
+data "aws_iam_policy_document" "db_access" {
+  # Policy to allow connection to RDS via IAM database authentication as pfml_api user
+  # https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.IAMPolicy.html
+  statement {
+    actions = [
+      "rds-db:connect"
+    ]
 
-# resource "aws_iam_policy" "db_user_pfml_api" {
-#   name   = "${local.app_name}-${var.environment_name}-db_user_pfml_api-policy"
-#   policy = data.aws_iam_policy_document.db_user_pfml_api.json
-# }
+    resources = [
+      "${local.db_user_arn_prefix}/app",
+      "${local.db_user_arn_prefix}/role-checker",
+    ]
+  }
+}
 
 #------------------#
 # Database Backups #

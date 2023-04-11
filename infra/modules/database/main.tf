@@ -323,7 +323,7 @@ resource "aws_lambda_function" "role_checker" {
       DB_HOST     = aws_rds_cluster.db.endpoint
       DB_PORT     = aws_rds_cluster.db.port
       DB_USER     = local.master_username
-      DB_PASSwORD = aws_ssm_parameter.random_db_password.value
+      DB_PASSWORD = aws_ssm_parameter.random_db_password.value
     }
   }
 }

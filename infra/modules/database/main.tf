@@ -82,8 +82,8 @@ resource "aws_security_group" "db" {
 
   ingress {
     security_groups = var.ingress_security_group_ids
-    from_port       = 5432
-    to_port         = 5432
+    from_port       = aws_rds_cluster.db.port
+    to_port         = aws_rds_cluster.db.port
     protocol        = "tcp"
   }
 }

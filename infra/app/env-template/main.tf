@@ -29,6 +29,14 @@ module "app_config" {
   source = "../app-config"
 }
 
+module "database" {
+  source                     = "../../modules/database"
+  name                       = local.db_name
+  vpc_id                     = data.aws_vpc.default.id
+  ingress_security_group_ids = [module.service.app_security_group_id]
+  private_subnet_ids         = data.aws_subnets.default.ids
+}
+
 module "service" {
   source                = "../../modules/service"
   service_name          = local.service_name
@@ -36,12 +44,4 @@ module "service" {
   image_tag             = var.image_tag
   vpc_id                = data.aws_vpc.default.id
   subnet_ids            = data.aws_subnets.default.ids
-}
-
-module "database" {
-  source                     = "../../modules/database"
-  name                       = local.db_name
-  vpc_id                     = data.aws_vpc.default.id
-  ingress_security_group_ids = [module.service.app_security_group_id]
-  private_subnet_ids         = data.aws_subnets.default.ids
 }

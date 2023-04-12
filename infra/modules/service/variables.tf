@@ -51,6 +51,12 @@ variable "subnet_ids" {
   description = "Private subnet id from vpc module"
 }
 
+variable "service_policy_arns" {
+  type        = list(string)
+  description = "List of ARNs of IAM policies to attach to the service's task role"
+  default     = []
+}
+
 variable "env_vars" {
   type        = map(any)
   description = "Environment variables to be passed to the service container"

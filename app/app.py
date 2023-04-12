@@ -33,8 +33,7 @@ def get_db_token(host, port, user):
     region = os.environ.get("AWS_REGION")
 
     # gets the credentials from .aws/credentials
-    session = boto3.Session(profile_name='default')
-    client = session.client('rds')
+    client = boto3.client("rds", region_name=region)
 
     token = client.generate_db_auth_token(DBHostname=host, Port=port, DBUsername=user, Region=region)
     return token

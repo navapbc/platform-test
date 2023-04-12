@@ -34,7 +34,7 @@ module "database" {
   name   = local.db_name
   vpc_id = data.aws_vpc.default.id
 
-  # TODO move the security group creation to the VPC module
+  # TODO move the security group creation to the VPC module to avoid circular dependency between database and service
   ingress_security_group_ids = [module.service.app_security_group_id]
   private_subnet_ids         = data.aws_subnets.default.ids
 }
@@ -46,4 +46,5 @@ module "service" {
   image_tag             = var.image_tag
   vpc_id                = data.aws_vpc.default.id
   subnet_ids            = data.aws_subnets.default.ids
+  env_vars              = module.database.service_env_vars
 }

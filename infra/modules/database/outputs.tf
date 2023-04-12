@@ -17,3 +17,11 @@ output "migrator_username" {
 output "schema_name" {
   value = local.schema_name
 }
+
+output "service_env_vars" {
+  value = {
+    DB_HOST = aws_rds_cluster.db.endpoint
+    DB_NAME = aws_rds_cluster.db.database_name
+    DB_USER = local.app_username
+  }
+}

@@ -32,11 +32,11 @@ def lambda_handler(event, context):
     return {
         "roles": new_roles,
         "roles_with_groups": get_roles_with_groups(conn),
-        "schema_privileges": [
-            f"{schema_name}:{schema_acl}"
+        "schema_privileges": {
+            schema_name: schema_acl
             for schema_name, schema_acl
             in new_schema_privileges
-        ],
+        },
     }
 
 def connect() -> Connection:

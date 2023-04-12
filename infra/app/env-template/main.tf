@@ -30,9 +30,11 @@ module "app_config" {
 }
 
 module "database" {
-  source                     = "../../modules/database"
-  name                       = local.db_name
-  vpc_id                     = data.aws_vpc.default.id
+  source = "../../modules/database"
+  name   = local.db_name
+  vpc_id = data.aws_vpc.default.id
+
+  # TODO move the security group creation to the VPC module
   ingress_security_group_ids = [module.service.app_security_group_id]
   private_subnet_ids         = data.aws_subnets.default.ids
 }

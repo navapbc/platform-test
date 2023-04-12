@@ -23,5 +23,9 @@ RUN pip3 install -r requirements.txt
 
 ADD app.py ./
 
+# Set the host to 0.0.0.0 to make the server available external
+# to the Docker container that it's running in.
+ENV HOST=0.0.0.0
+
 # Create a basic webserver and run it until the container is stopped
 CMD ["python", "-m", "app"]

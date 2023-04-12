@@ -7,7 +7,7 @@ from pg8000.native import Connection
 app = Flask(__name__)
 
 def main():
-    host = "127.0.0.1"
+    host = os.environ.get("HOST")
     port = os.environ.get("PORT")
     app.run(host=host, port=port)
 

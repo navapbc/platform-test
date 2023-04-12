@@ -6,13 +6,21 @@ from pg8000.native import Connection
 
 app = Flask(__name__)
 
+def main():
+    host = "127.0.0.1"
+    port = os.environ.get("PORT")
+    app.run(host=host, port=port)
+
+
 @app.route("/")
 def hello_world():
     return "<p>Hello, World!</p>"
 
+
 @app.route("/health")
 def health():
     return "OK"
+
 
 @app.route("/dbhealth")
 def dbhealth():
@@ -41,3 +49,7 @@ def get_db_connection():
 
     conn = Connection(host=host, port=port, user=user, password=password, database=dbname)
     return conn
+
+
+if __name__ == "__main__":
+    main()

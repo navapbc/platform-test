@@ -24,4 +24,4 @@ RUN pip3 install -r requirements.txt
 ADD app.py ./
 
 # Create a basic webserver and run it until the container is stopped
-CMD ["python", "-m", "flask", "--app", "app", "run"]
+CMD ["python", "-m", "app"]

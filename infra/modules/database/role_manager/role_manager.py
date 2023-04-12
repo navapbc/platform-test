@@ -65,7 +65,7 @@ def get_roles_with_groups(conn: Connection) -> list[tuple[str, str]]:
     
     result = {}
     for user, groups in itertools.groupby(roles_groups, itemgetter(0)):
-        result[user] = ",".join(groups)
+        result[user] = ",".join(map(itemgetter(1), groups))
     return result
 
 

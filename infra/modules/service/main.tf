@@ -154,7 +154,14 @@ resource "aws_ecs_task_definition" "app" {
       memory         = var.memory
       awslogs_group  = aws_cloudwatch_log_group.service_logs.name
       aws_region     = data.aws_region.current.name
-      env_vars       = var.env_vars
+
+      env_vars = merge(
+        var.env_vars,
+        {
+          AWS_REGION = data.aws_region.current.name,
+          PORT       = tostring(var.container_port),
+        }
+      )
     }
   )
 

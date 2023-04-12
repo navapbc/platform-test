@@ -6,6 +6,11 @@ variable "name" {
   }
 }
 
+variable "port" {
+  description = "value of the port on which the database accepts connections. Defaults to 5432."
+  default     = 5432
+}
+
 variable "database_name" {
   description = "the name of the Postgres database. Defaults to 'app'."
   default     = "app"

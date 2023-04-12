@@ -30,6 +30,7 @@ resource "aws_rds_cluster" "db" {
   engine            = "aurora-postgresql"
   engine_mode       = "provisioned"
   database_name     = var.database_name
+  port              = var.port
   master_username   = local.master_username
   master_password   = aws_ssm_parameter.random_db_password.value
   storage_encrypted = true
@@ -82,8 +83,8 @@ resource "aws_security_group" "db" {
 
   ingress {
     security_groups = var.ingress_security_group_ids
-    from_port       = aws_rds_cluster.db.port
-    to_port         = aws_rds_cluster.db.port
+    from_port       = var.port
+    to_port         = var.port
     protocol        = "tcp"
   }
 }

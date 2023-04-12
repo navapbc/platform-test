@@ -1,16 +1,14 @@
 import os
 import logging
-import pg8000.native
+from pg8000.native import Connection, identifier
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-Connection = pg8000.native.Connection
-
 def lambda_handler(event, context):
     conn = connect()
 
-    print("Current database configuration")
+    logger.info("Current database configuration")
 
     prev_roles = get_roles(conn)
     print_roles(prev_roles)
@@ -18,10 +16,10 @@ def lambda_handler(event, context):
     prev_schema_privileges = get_schema_privileges(conn)
     print_schema_privileges(prev_schema_privileges)
 
-    print("Configuring database")
+    logger.info("Configuring database")
     configure_database(conn)
 
-    print("New database configuration")
+    logger.info("New database configuration")
 
     new_roles = get_roles(conn)
     print_roles(new_roles)
@@ -31,7 +29,11 @@ def lambda_handler(event, context):
 
     return {
         "roles": new_roles,
-        "schema_privileges": new_schema_privileges,
+        "schema_privileges": [
+            f"{schema_name}:{schema_acl}"
+            for schema_name, schema_acl
+            in new_schema_privileges
+        ],
     }
 
 def connect() -> Connection:
@@ -44,7 +46,7 @@ def connect() -> Connection:
     return Connection(user=user, host=host, port=port, password=password)
 
 
-def get_roles(conn: pg8000.native.Connection) -> list[str]:
+def get_roles(conn: Connection) -> list[str]:
     return [row[0] for row in conn.run("SELECT rolname \
                                        FROM pg_roles \
                                        WHERE rolname NOT LIKE 'pg_%'\
@@ -62,45 +64,55 @@ def get_schema_privileges(conn: Connection) -> list[tuple[str, str]]:
 
 
 def configure_database(conn: Connection) -> None:
-    configure_roles(conn)
-    configure_schema(conn)
-
-
-def configure_roles(conn: Connection) -> None:
+    logger.info("Configuring database")
     app_username = os.environ.get("APP_USER")
     migrator_username = os.environ.get("MIGRATOR_USER")
-    configure_role(conn, app_username)
-    configure_role(conn, migrator_username)
+    schema_name = os.environ.get("SCHEMA_NAME")
+
+    configure_roles(conn, [migrator_username, app_username])
+    configure_schema(conn, schema_name, migrator_username, app_username)
+
+
+def configure_roles(conn: Connection, roles: list[str]) -> None:
+    logger.info("Configuring roles")
+    for role in roles:
+        configure_role(conn, role)
 
 
 def configure_role(conn: Connection, username: str) -> None:
+    logger.info("Configuring role: username=%s", username)
     role = "rds_iam"
     conn.run(
         f"""
         DO $$
         BEGIN
-            CREATE USER {username} WITH ROLE {role};
+            CREATE USER {identifier(username)};
             EXCEPTION WHEN DUPLICATE_OBJECT THEN
-            RAISE NOTICE 'not creating user {username} -- it already exists';
+            RAISE NOTICE 'user already exists';
         END
         $$;
         """
     )
+    conn.run(f"GRANT {identifier(role)} TO {identifier(username)}")
 
 
-def configure_schema(conn: Connection) -> None:
-    schema_name = os.environ.get("SCHEMA_NAME")
-    migrator_username = os.environ.get("MIGRATOR_USER")
-    conn.run(f"CREATE SCHEMA IF NOT EXISTS {schema_name} AUTHORIZATION {migrator_username}")
+def configure_schema(conn: Connection, schema_name: str, migrator_username: str, app_username: str) -> None:
+    logger.info("Configuring schema")
+    logger.info("Creating schema: schema_name=%s", schema_name)
+    conn.run(f"CREATE SCHEMA IF NOT EXISTS {identifier(schema_name)}")
+    logger.info("Changing schema owner: schema_name=%s owner=%s", schema_name, migrator_username)
+    conn.run(f"ALTER SCHEMA {identifier(schema_name)} OWNER TO {identifier(migrator_username)}")
+    logger.info("Granting schema usage privileges: schema_name=%s role=%s", schema_name, app_username)
+    conn.run(f"GRANT USAGE ON SCHEMA {identifier(schema_name)} TO {identifier(app_username)}")
 
 
 def print_roles(roles: list[str]) -> None:
-    print("Roles")
+    logger.info("Roles")
     for role in roles:
-        print(f"Role info: name={role}")
+        logger.info(f"Role info: name={role}")
 
 
 def print_schema_privileges(schema_privileges: list[tuple[str, str]]) -> None:
-    print("Schema privileges")
+    logger.info("Schema privileges")
     for schema_name, schema_acl in schema_privileges:
-        print(f"Schema info: name={schema_name} acl={schema_acl}")
+        logger.info(f"Schema info: name={schema_name} acl={schema_acl}")

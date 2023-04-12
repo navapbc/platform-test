@@ -255,10 +255,13 @@ resource "aws_lambda_function" "role_manager" {
 
   environment {
     variables = {
-      DB_HOST     = aws_rds_cluster.db.endpoint
-      DB_PORT     = aws_rds_cluster.db.port
-      DB_USER     = local.master_username
-      DB_PASSWORD = aws_ssm_parameter.random_db_password.value
+      DB_HOST       = aws_rds_cluster.db.endpoint
+      DB_PORT       = aws_rds_cluster.db.port
+      DB_USER       = local.master_username
+      DB_PASSWORD   = aws_ssm_parameter.random_db_password.value
+      SCHEMA_NAME   = local.schema_name
+      APP_USER      = local.app_username
+      MIGRATOR_USER = local.migrator_username
     }
   }
 }

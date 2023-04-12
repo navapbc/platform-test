@@ -1,3 +1,5 @@
+import itertools
+from operator import itemgetter
 import os
 import logging
 from pg8000.native import Connection, identifier
@@ -29,6 +31,7 @@ def lambda_handler(event, context):
 
     return {
         "roles": new_roles,
+        "roles_with_groups": get_roles_with_groups(conn),
         "schema_privileges": [
             f"{schema_name}:{schema_acl}"
             for schema_name, schema_acl
@@ -51,6 +54,19 @@ def get_roles(conn: Connection) -> list[str]:
                                        FROM pg_roles \
                                        WHERE rolname NOT LIKE 'pg_%'\
                                        AND rolname NOT LIKE 'rds%'")]
+
+
+def get_roles_with_groups(conn: Connection) -> list[tuple[str, str]]:
+    roles_groups = conn.run("SELECT u.rolname AS user, g.rolname AS group \
+                            FROM pg_roles u \
+                            INNER JOIN pg_auth_members a ON u.oid = a.member \
+                            INNER JOIN pg_roles g ON g.oid = a.roleid \
+                            ORDER BY user ASC")
+    
+    result = {}
+    for user, groups in itertools.groupby(roles_groups, itemgetter(0)):
+        result[user] = ",".join(groups)
+    return result
 
 
 # Get schema access control lists. The format of the ACLs is abbreviated. To interpret

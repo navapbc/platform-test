@@ -13,25 +13,15 @@
 # Based on the image defined here: https://github.com/AerialTechnologies/docker-alpine-aws-cli/blob/master/Dockerfile
 # and here: https://github.com/AerialTechnologies/docker-alpine-aws-cli-postgresql/blob/master/Dockerfile
 
-FROM alpine:latest as builder
+FROM python:alpine as release
 
-RUN apk --no-cache add curl
-RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-RUN unzip awscliv2.zip
-RUN ./aws/install --bin-dir /usr/bin
-RUN rm /usr/bin/aws_completer
-RUN rm awscliv2.zip
-RUN apk del curl
+WORKDIR /app
 
-# Adds psql to /usr/bin
-RUN apk --update --no-cache add postgresql-client
+ADD requirements.txt ./
 
-FROM alpine:latest as release
-COPY --from=builder /usr/bin/ /usr/bin/
+RUN pip3 install -r requirements.txt
 
-ADD index.html /www/index.html
-ADD health /www/health
-ADD start-server.sh /usr/bin/start-server.sh
+ADD app.py ./
 
 # Create a basic webserver and run it until the container is stopped
-CMD start-server.sh
+CMD ["python", "-m", "flask", "--app", "app", "run"]

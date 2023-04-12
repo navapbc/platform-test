@@ -15,6 +15,12 @@
       ]
     },
     "environment": [
+      %{ for name, value in env_vars }
+        {
+          "name": "${name}",
+          "value": "${value}"
+        },
+      %{ endfor ~}
       {
         "name": "PORT",
         "value": "${container_port}"

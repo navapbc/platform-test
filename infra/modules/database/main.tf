@@ -3,6 +3,8 @@ data "aws_region" "current" {}
 
 locals {
   master_username       = "postgres"
+  app_username          = "app"
+  migrator_username     = "migrator"
   primary_instance_name = "${var.name}-primary"
   role_manager_package  = "${path.root}/role_manager.zip"
 
@@ -103,8 +105,8 @@ data "aws_iam_policy_document" "db_access" {
     ]
 
     resources = [
-      "${local.db_user_arn_prefix}/app",
-      "${local.db_user_arn_prefix}/role-manager",
+      "${local.db_user_arn_prefix}/${local.app_username}",
+      "${local.db_user_arn_prefix}/${local.migrator_username}",
     ]
   }
 }

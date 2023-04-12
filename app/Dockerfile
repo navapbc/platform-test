@@ -10,33 +10,28 @@
 #
 # then visit localhost in a browser (or can use curl from a terminal)
 
-# This image is based on the docker-aws-cli-postgres image defined in:
-# https://github.com/osodevops/docker-aws-cli-postgres/blob/master/Dockerfile
+# Based on the image defined here: https://github.com/AerialTechnologies/docker-alpine-aws-cli/blob/master/Dockerfile
+# and here: https://github.com/AerialTechnologies/docker-alpine-aws-cli-postgresql/blob/master/Dockerfile
 
-FROM amazonlinux:2 AS installer
+FROM alpine:latest as builder
+
+RUN apk --no-cache add curl
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-RUN yum update -y \
-  && yum install -y unzip \
-  && unzip awscliv2.zip \
-  # The --bin-dir is specified so that we can copy the
-  # entire bin directory from the installer stage into
-  # into /usr/local/bin of the final stage without
-  # accidentally copying over any other executables that
-  # may be present in /usr/local/bin of the installer stage.
-  && ./aws/install --bin-dir /aws-cli-bin/
+RUN unzip awscliv2.zip
+RUN ./aws/install --bin-dir /usr/bin
+RUN rm /usr/bin/aws_completer
+RUN rm awscliv2.zip
+RUN apk del curl
 
-FROM amazonlinux:2 AS release
-RUN yum update -y \
-  && yum install -y less groff gzip \
-  && yum clean all
-COPY --from=installer /usr/local/aws-cli/ /usr/local/aws-cli/
-COPY --from=installer /aws-cli-bin/ /usr/local/bin/
+# Adds psql to /usr/bin
+RUN apk --update --no-cache add postgresql-client
 
-RUN amazon-linux-extras install -y postgresql10 vim epel
+FROM alpine:latest as release
+COPY --from=builder /usr/bin/ /usr/bin/
 
 ADD index.html /www/index.html
 ADD health /www/health
-ADD start-server.sh /bin/start-server.sh
+ADD start-server.sh /usr/bin/start-server.sh
 
 # Create a basic webserver and run it until the container is stopped
 CMD start-server.sh

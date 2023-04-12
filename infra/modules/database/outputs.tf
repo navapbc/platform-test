@@ -13,3 +13,7 @@ output "app_username" {
 output "migrator_username" {
   value = local.migrator_username
 }
+
+output "schema_name" {
+  value = local.schema_name
+}

@@ -5,6 +5,7 @@ locals {
   master_username       = "postgres"
   app_username          = "app"
   migrator_username     = "migrator"
+  schema_name           = "app"
   primary_instance_name = "${var.name}-primary"
   role_manager_package  = "${path.root}/role_manager.zip"
 

@@ -22,6 +22,10 @@ output "schema_name" {
   value = local.schema_name
 }
 
+output "access_policy_arn" {
+  value = aws_iam_policy.db_access.arn
+}
+
 output "service_env_vars" {
   value = {
     DB_HOST = aws_rds_cluster.db.endpoint

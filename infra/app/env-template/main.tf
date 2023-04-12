@@ -46,5 +46,6 @@ module "service" {
   image_tag             = var.image_tag
   vpc_id                = data.aws_vpc.default.id
   subnet_ids            = data.aws_subnets.default.ids
+  service_policy_arns   = [module.database.access_policy_arn]
   env_vars              = module.database.service_env_vars
 }

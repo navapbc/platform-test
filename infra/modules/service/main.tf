@@ -141,9 +141,8 @@ resource "aws_ecs_service" "app" {
 resource "aws_ecs_task_definition" "app" {
   family             = var.service_name
   execution_role_arn = aws_iam_role.task_executor.arn
+  task_role_arn      = aws_iam_role.service.arn
 
-  # when is this needed?
-  # task_role_arn      = aws_iam_role.api_service.arn
   container_definitions = templatefile(
     "${path.module}/container-definitions.json.tftpl",
     {
@@ -205,12 +204,17 @@ resource "aws_cloudwatch_log_group" "service_logs" {
 
 resource "aws_iam_role" "task_executor" {
   name               = local.task_executor_role_name
-  assume_role_policy = data.aws_iam_policy_document.ecs_assume_task_executor_role.json
+  assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role_policy.json
 }
 
-data "aws_iam_policy_document" "ecs_assume_task_executor_role" {
+resource "aws_iam_role" "service" {
+  name               = var.service_name
+  assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role_policy.json
+}
+
+data "aws_iam_policy_document" "ecs_tasks_assume_role_policy" {
   statement {
-    sid = "ECSTaskExecution"
+    sid = "ECSTasksAssumeRole"
     actions = [
       "sts:AssumeRole"
     ]
@@ -258,6 +262,12 @@ resource "aws_iam_role_policy" "task_executor" {
   name   = "${var.service_name}-task-executor-role-policy"
   role   = aws_iam_role.task_executor.id
   policy = data.aws_iam_policy_document.task_executor.json
+}
+
+resource "aws_iam_role_policy_attachment" "service" {
+  count      = length(var.service_policy_arns)
+  role       = aws_iam_role.service.name
+  policy_arn = var.service_policy_arns[count.index]
 }
 
 ###########################

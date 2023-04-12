@@ -50,3 +50,9 @@ variable "subnet_ids" {
   type        = list(any)
   description = "Private subnet id from vpc module"
 }
+
+variable "env_vars" {
+  type        = map(any)
+  description = "Environment variables to be passed to the service container"
+  default     = {}
+}

@@ -4,7 +4,7 @@ data "aws_region" "current" {}
 locals {
   master_username       = "postgres"
   primary_instance_name = "${var.name}-primary"
-  role_checker_package  = "${path.root}/role_checker.zip"
+  role_manager_package  = "${path.root}/role_manager.zip"
 
   # The ARN that represents the users accessing the database are of the format: "arn:aws:rds-db:<region>:<account-id>:dbuser:<resource-id>/<database-user-name>""
   # See https://aws.amazon.com/blogs/database/using-iam-authentication-to-connect-with-pgadmin-amazon-aurora-postgresql-or-amazon-rds-for-postgresql/
@@ -104,7 +104,7 @@ data "aws_iam_policy_document" "db_access" {
 
     resources = [
       "${local.db_user_arn_prefix}/app",
-      "${local.db_user_arn_prefix}/role-checker",
+      "${local.db_user_arn_prefix}/role-manager",
     ]
   }
 }
@@ -228,90 +228,22 @@ resource "aws_rds_cluster_parameter_group" "rds_query_logging" {
   }
 }
 
-#-------------------------------------------#
-# Database Role Provisioner Lambda Function #
-#-------------------------------------------#
+#-----------------------------------------------------------------------------#
+# Role Manager Lambda Function                                                #
+#                                                                             #
+# Resources for the lambda function that is used for managing database roles  #
+# This includes creating and granting permissions to roles                    #
+# as well as viewing existing roles                                           #
+#-----------------------------------------------------------------------------#
 
-resource "aws_lambda_function" "db_role_provisioner" {
-  function_name = "${var.name}-db-role-provisioner"
+resource "aws_lambda_function" "role_manager" {
+  function_name = "${var.name}-role-manager"
 
-  s3_bucket = aws_s3_bucket.db_role_provisioner_bucket.id
-  s3_key    = aws_s3_object.db_role_provisioner.key
-
-  runtime = "python3.9"
-  handler = "role_provisioner.lambda_handler"
-
-  source_code_hash = data.archive_file.db_role_provisioner.output_base64sha256
-
-  role = aws_iam_role.db_role_provisioner_lambda_exec.arn
-}
-
-resource "aws_cloudwatch_log_group" "db_role_provisioner" {
-  name = "/aws/lambda/${aws_lambda_function.db_role_provisioner.function_name}"
-
-  retention_in_days = 30
-}
-
-resource "aws_iam_role" "db_role_provisioner_lambda_exec" {
-  name = "serverless_lambda"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Sid    = ""
-      Principal = {
-        Service = "lambda.amazonaws.com"
-      }
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_policy" {
-  role       = aws_iam_role.db_role_provisioner_lambda_exec.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
-
-data "archive_file" "db_role_provisioner" {
-  type = "zip"
-
-  source_dir  = "${path.module}/role_provisioner"
-  output_path = "${path.root}/role_provisioner.zip"
-}
-
-resource "aws_s3_object" "db_role_provisioner" {
-  bucket = aws_s3_bucket.db_role_provisioner_bucket.id
-
-  key    = "role_provisioner.zip"
-  source = data.archive_file.db_role_provisioner.output_path
-
-  etag = filemd5(data.archive_file.db_role_provisioner.output_path)
-}
-
-resource "aws_s3_bucket" "db_role_provisioner_bucket" {
-  bucket = "${var.name}-db-role-provisioner"
-}
-
-resource "aws_s3_bucket_acl" "bucket_acl" {
-  bucket = aws_s3_bucket.db_role_provisioner_bucket.id
-  acl    = "private"
-}
-
-#------------------#
-# Database Checker #
-#------------------#
-
-
-resource "aws_lambda_function" "role_checker" {
-  function_name = "${var.name}-role-checker"
-
-  filename         = local.role_checker_package
-  source_code_hash = data.archive_file.role_checker.output_base64sha256
+  filename         = local.role_manager_package
+  source_code_hash = data.archive_file.role_manager.output_base64sha256
   runtime          = "python3.9"
-  handler          = "role_checker.lambda_handler"
-  role             = aws_iam_role.role_checker.arn
+  handler          = "role_manager.lambda_handler"
+  role             = aws_iam_role.role_manager.arn
 
   vpc_config {
     subnet_ids         = var.private_subnet_ids
@@ -328,19 +260,19 @@ resource "aws_lambda_function" "role_checker" {
   }
 }
 
-data "archive_file" "role_checker" {
+data "archive_file" "role_manager" {
   type        = "zip"
-  source_dir  = "${path.module}/role_checker"
-  output_path = local.role_checker_package
+  source_dir  = "${path.module}/role_manager"
+  output_path = local.role_manager_package
 }
 
-resource "aws_iam_role" "role_checker" {
-  name                = "${var.name}-checker"
-  assume_role_policy  = data.aws_iam_policy_document.role_checker_assume_role.json
+resource "aws_iam_role" "role_manager" {
+  name                = "${var.name}-manager"
+  assume_role_policy  = data.aws_iam_policy_document.role_manager_assume_role.json
   managed_policy_arns = [data.aws_iam_policy.lambda_vpc_access.arn]
 }
 
-data "aws_iam_policy_document" "role_checker_assume_role" {
+data "aws_iam_policy_document" "role_manager_assume_role" {
   statement {
     effect = "Allow"
 

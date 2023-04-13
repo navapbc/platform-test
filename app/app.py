@@ -1,4 +1,5 @@
 import os
+import ssl
 
 from flask import Flask
 import boto3
@@ -46,7 +47,9 @@ def get_db_connection():
     password = get_db_token(host, port, user)
     dbname = os.environ.get("DB_NAME")
 
-    conn = Connection(host=host, port=port, user=user, password=password, database=dbname, ssl_context=True)
+    ssl_context = ssl.create_default_context()
+    ssl_context.request_ssl = False
+    conn = Connection(host=host, port=port, user=user, password=password, database=dbname, ssl_context=ssl_context)
     return conn
 
 

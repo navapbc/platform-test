@@ -2,7 +2,8 @@ import os
 
 from flask import Flask
 import boto3
-from pg8000.native import Connection
+import psycopg
+import psycopg.conninfo
 
 app = Flask(__name__)
 
@@ -25,7 +26,7 @@ def health():
 @app.route("/dbhealth")
 def dbhealth():
     conn = get_db_connection()
-    conn.run("SELECT 1")
+    conn.execute("SELECT 1")
     return "OK"
 
 
@@ -44,9 +45,11 @@ def get_db_connection():
     port = os.environ.get("DB_PORT")
     user = os.environ.get("DB_USER")
     password = get_db_token(host, port, user)
-    # dbname = os.environ.get("DB_NAME")
+    dbname = os.environ.get("DB_NAME")
 
-    conn = Connection(host=host, port=port, user=user, password=password)
+    conninfo = psycopg.conninfo.make_conninfo(host=host, port=port, user=user, password=password, dbname=dbname)
+
+    conn = psycopg.connect(conninfo)
     return conn
 
 

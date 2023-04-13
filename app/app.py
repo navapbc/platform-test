@@ -25,9 +25,10 @@ def health():
 
 @app.route("/dbhealth")
 def dbhealth():
+    print("dbhealth")
     conn = get_db_connection()
     conn.execute("SELECT 1")
-    return "OK"
+    return "DB OK"
 
 
 def get_db_token(host, port, user):
@@ -36,6 +37,7 @@ def get_db_token(host, port, user):
     # gets the credentials from .aws/credentials
     client = boto3.client("rds", region_name=region)
 
+    print("generating token")
     token = client.generate_db_auth_token(DBHostname=host, Port=port, DBUsername=user, Region=region)
     return token
 
@@ -44,7 +46,11 @@ def get_db_connection():
     host = os.environ.get("DB_HOST")
     port = os.environ.get("DB_PORT")
     user = os.environ.get("DB_USER")
-    password = get_db_token(host, port, user)
+    password = os.environ.get("DB_PASSWORD")
+    if password is None:
+        password = get_db_token(host, port, user)
+    else:
+        print("already have token")
     dbname = os.environ.get("DB_NAME")
 
     conninfo = psycopg.conninfo.make_conninfo(host=host, port=port, user=user, password=password, dbname=dbname)

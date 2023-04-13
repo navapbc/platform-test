@@ -46,7 +46,7 @@ def get_db_connection():
     password = get_db_token(host, port, user)
     dbname = os.environ.get("DB_NAME")
 
-    conn = Connection(host=host, port=port, user=user, password=password, database=dbname)
+    conn = Connection(host=host, port=port, user=user, password=password, database=dbname, ssl_context=True)
     return conn
 
 

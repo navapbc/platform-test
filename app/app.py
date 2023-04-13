@@ -57,7 +57,6 @@ def get_db_connection():
 
 
     password = os.environ.get("DB_PASSWORD")
-    print("password: " + password)
     if password is None:
         password = get_db_token(host, port, user)
     else:

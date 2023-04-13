@@ -53,6 +53,7 @@ def get_db_connection():
         print("already have token")
     dbname = os.environ.get("DB_NAME")
 
+    print(password)
     conninfo = psycopg.conninfo.make_conninfo(host=host, port=port, user=user, password=password, dbname=dbname)
 
     conn = psycopg.connect(conninfo)

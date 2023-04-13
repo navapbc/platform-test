@@ -15,11 +15,13 @@ def main():
 
 @app.route("/")
 def hello_world():
+    print("hello_world")
     return "<p>Hello, World!</p>"
 
 
 @app.route("/health")
 def health():
+    print("health")
     return "OK"
 
 
@@ -32,7 +34,9 @@ def dbhealth():
 
 
 def get_db_token(host, port, user):
+    print("get_db_token")
     region = os.environ.get("AWS_REGION")
+    print("region: " + region)
 
     # gets the credentials from .aws/credentials
     client = boto3.client("rds", region_name=region)
@@ -43,10 +47,17 @@ def get_db_token(host, port, user):
 
 
 def get_db_connection():
+    print("get_db_connection")
     host = os.environ.get("DB_HOST")
     port = os.environ.get("DB_PORT")
     user = os.environ.get("DB_USER")
+    print("host: " + host)
+    print("port: " + port)
+    print("user: " + user)
+
+
     password = os.environ.get("DB_PASSWORD")
+    print("password: " + password)
     if password is None:
         password = get_db_token(host, port, user)
     else:

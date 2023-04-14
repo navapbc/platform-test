@@ -47,9 +47,6 @@ resource "aws_rds_cluster" "db" {
   }
 
   vpc_security_group_ids = [aws_security_group.db.id]
-
-  # TODO: remove
-  enabled_cloudwatch_logs_exports = ["postgresql"]
 }
 
 resource "aws_rds_cluster_instance" "primary" {
@@ -61,9 +58,6 @@ resource "aws_rds_cluster_instance" "primary" {
   auto_minor_version_upgrade = true
   monitoring_role_arn        = aws_iam_role.rds_enhanced_monitoring.arn
   monitoring_interval        = 30
-
-  # TODO: remove
-  publicly_accessible = true
 }
 
 resource "random_password" "random_db_password" {
@@ -92,19 +86,6 @@ resource "aws_security_group" "db" {
     from_port       = var.port
     to_port         = var.port
     protocol        = "tcp"
-  }
-
-  # TODO: remove
-  ingress {
-    cidr_blocks      = ["0.0.0.0/0"]
-    description      = "test from local"
-    from_port        = 5432
-    ipv6_cidr_blocks = []
-    prefix_list_ids  = []
-    protocol         = "tcp"
-    security_groups  = []
-    self             = false
-    to_port          = 5432
   }
 }
 

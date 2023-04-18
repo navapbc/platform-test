@@ -162,7 +162,7 @@ resource "aws_ecs_task_definition" "app" {
       },
       environment = [
         {
-          name : "PORT", value : var.container_port
+          name : "PORT", value : tostring(var.container_port)
         }
       ],
       portMappings = [

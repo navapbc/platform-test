@@ -146,26 +146,26 @@ resource "aws_ecs_task_definition" "app" {
   # task_role_arn      = aws_iam_role.app_service.arn
   container_definitions = jsonencode([
     {
-      name = var.service_name,
-      image = local.image_url,
-      memory = var.memory,
-      cpu = var.cpu,
-      networkMode = "awsvpc",
-      essential = true,
+      name                   = var.service_name,
+      image                  = local.image_url,
+      memory                 = var.memory,
+      cpu                    = var.cpu,
+      networkMode            = "awsvpc",
+      essential              = true,
       readonlyRootFilesystem = true,
       healthcheck = {
         command = ["CMD-SHELL",
-        "wget --no-verbose --tries=1 --spider http://localhost:${var.container_port}/health || exit 1"
+          "wget --no-verbose --tries=1 --spider http://localhost:${var.container_port}/health || exit 1"
         ]
       },
       enviroment = [
         {
-        name: "PORT", value: var.container_port
+          name : "PORT", value : var.container_port
         }
       ],
       portMappings = [
         {
-        containerPort = var.container_port,
+          containerPort = var.container_port,
         }
       ],
       linuxParameters = {
@@ -177,8 +177,8 @@ resource "aws_ecs_task_definition" "app" {
       logConfiguration = {
         logDriver = "awslogs",
         options = {
-          "awslogs-group" = aws_cloudwatch_log_group.service_logs.name,
-          "awslogs-region" = data.aws_region.current.name,
+          "awslogs-group"         = aws_cloudwatch_log_group.service_logs.name,
+          "awslogs-region"        = data.aws_region.current.name,
           "awslogs-stream-prefix" = var.service_name
         }
       }

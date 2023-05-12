@@ -10,6 +10,7 @@ The application build repository setup process will:
 Before setting up the application's build repository you'll need to have:
 
 1. [Set up the AWS account](./set-up-aws-account.md)
+2. [Set up the network](./set-up-network.md)
 
 ## 1. Configure backend
 

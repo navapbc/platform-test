@@ -34,12 +34,30 @@ module "project_config" {
 
 resource "aws_security_group" "public_load_balancer" {
   name_prefix = "${module.project_config.project_name}-pub-lb"
+  description = "Public load balancer security group"
+  lifecycle {
+    # changing the description is a destructive change
+    # just ignore it
+    ignore_changes = [description]
+  }
 }
 
 resource "aws_security_group" "private_service" {
   name_prefix = "${module.project_config.project_name}-pvt-app-"
+  description = "Security group for the application service"
+  lifecycle {
+    # changing the description is a destructive change
+    # just ignore it
+    ignore_changes = [description]
+  }
 }
 
 resource "aws_security_group" "private_database" {
   name_prefix = "${module.project_config.project_name}-pvt-db-"
+  description = "Security group for the database"
+  lifecycle {
+    # changing the description is a destructive change
+    # just ignore it
+    ignore_changes = [description]
+  }
 }

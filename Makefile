@@ -71,6 +71,9 @@ infra-update-current-account:
 infra-update-app-build-repository:
 	./bin/terraform-init-and-apply.sh infra/$(APP_NAME)/build-repository shared
 
+infra-update-app-database:
+	./bin/terraform-init-and-apply.sh infra/$(APP_NAME)/database $(ENVIRONMENT)
+
 infra-update-app-service:
 	./bin/terraform-init-and-apply.sh infra/$(APP_NAME)/service $(ENVIRONMENT)
 

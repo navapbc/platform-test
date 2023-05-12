@@ -33,7 +33,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~>4.20.1"
+      version = "~>4.67.0"
     }
   }
 
@@ -58,12 +58,14 @@ module "app_config" {
 }
 
 module "service" {
-  source                = "../../modules/service"
-  service_name          = local.service_name
-  image_repository_name = module.app_config.image_repository_name
-  image_tag             = local.image_tag
-  vpc_id                = data.aws_vpc.default.id
-  subnet_ids            = data.aws_subnets.default.ids
+  source                          = "../../modules/service"
+  service_name                    = local.service_name
+  image_repository_name           = module.app_config.image_repository_name
+  load_balancer_security_group_id = var.load_balancer_security_group_id
+  service_security_group_id       = var.service_security_group_id
+  image_tag                       = local.image_tag
+  vpc_id                          = data.aws_vpc.default.id
+  subnet_ids                      = data.aws_subnets.default.ids
 }
 
 moved {

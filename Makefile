@@ -59,6 +59,9 @@ infra-set-up-account:  # Set up the AWS account for the first time
 infra-configure-app-build-repository:
 	./bin/configure-app-build-repository.sh $(APP_NAME)
 
+infra-configure-app-database:
+	./bin/configure-app-database.sh $(APP_NAME) $(ENVIRONMENT)
+
 infra-configure-app-service:
 	./bin/configure-app-service.sh $(APP_NAME) $(ENVIRONMENT)
 

@@ -38,9 +38,9 @@ TF_STATE_KEY="$MODULE_DIR/$BACKEND_CONFIG_NAME.tfstate"
 REGION=$(terraform -chdir=infra/accounts output -raw region)
 
 
-echo "======================================"
-echo "Setting up tfvars file for app service"
-echo "======================================"
+echo "======================================="
+echo "Setting up tfvars file for app database"
+echo "======================================="
 echo "Input parameters"
 echo "  APP_NAME=$APP_NAME"
 echo "  ENVIRONMENT=$ENVIRONMENT"
@@ -48,8 +48,6 @@ echo
 
 cp $MODULE_DIR/example.tfvars $TF_VARS_FILE
 sed -i.bak "s/<ENVIRONMENT>/$ENVIRONMENT/g" $TF_VARS_FILE
-sed -i.bak "s/<TF_STATE_BUCKET_NAME>/$TF_STATE_BUCKET_NAME/g" $TF_VARS_FILE
-sed -i.bak "s|<TF_STATE_KEY>|$TF_STATE_KEY|g" $TF_VARS_FILE
 sed -i.bak "s/<REGION>/$REGION/g" $TF_VARS_FILE
 rm $TF_VARS_FILE.bak
 

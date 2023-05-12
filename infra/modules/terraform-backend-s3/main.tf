@@ -3,9 +3,9 @@ data "aws_region" "current" {}
 data "aws_partition" "current" {}
 
 locals {
-  tf_state_bucket_name = "${var.project_name}-${data.aws_caller_identity.current.account_id}-${data.aws_region.current.name}-tf-state"
-  tf_logs_bucket_name  = "${var.project_name}-${data.aws_caller_identity.current.account_id}-${data.aws_region.current.name}-tf-logs"
-  tf_locks_table_name  = "${var.project_name}-tf-state-locks"
+  tf_state_bucket_name = var.name
+  tf_logs_bucket_name  = "${var.name}-logs"
+  tf_locks_table_name  = "${var.name}-state-locks"
 }
 
 # Create the dynamodb table required for state locking.
@@ -47,6 +47,8 @@ resource "aws_s3_bucket" "tf_state" {
   bucket = local.tf_state_bucket_name
 
   # checkov:skip=CKV_AWS_144:Cross region replication not required by default
+  # checkov:skip=CKV2_AWS_62:S3 bucket does not need notifications enabled
+  # checkov:skip=CKV2_AWS_61:No need to define S3 bucket lifecycle configuration to expire or transition tfstate files since they will always be needed and the file sizes are small anyways
 
   # Prevent accidental destruction a developer executing terraform destory in the wrong directory. Contains terraform state files.
   lifecycle {
@@ -124,10 +126,16 @@ resource "aws_s3_bucket_policy" "tf_state" {
 }
 
 # Create the S3 bucket to provide server access logging.
+#
+# Ignore bucket logging complaince check for this bucket since 
+# the bucket is used for logging only and doesn't need server access logging itself
+# (see https://docs.aws.amazon.com/AmazonS3/latest/userguide/ServerLogs.html)
+# tfsec:ignore:aws-s3-enable-bucket-logging
 resource "aws_s3_bucket" "tf_log" {
   bucket = local.tf_logs_bucket_name
 
   # checkov:skip=CKV_AWS_144:Cross region replication not required by default
+  # checkov:skip=CKV2_AWS_62:S3 bucket does not need notifications enabled
 }
 
 resource "aws_s3_bucket_versioning" "tf_log" {
@@ -265,11 +273,4 @@ resource "aws_s3_bucket_logging" "tf_state" {
 
   target_bucket = aws_s3_bucket.tf_log.id
   target_prefix = "logs/${aws_s3_bucket.tf_state.bucket}/"
-}
-
-resource "aws_s3_bucket_logging" "tf_log" {
-  bucket = aws_s3_bucket.tf_log.id
-
-  target_bucket = aws_s3_bucket.tf_log.id
-  target_prefix = "logs/${aws_s3_bucket.tf_log.bucket}/"
 }

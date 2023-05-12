@@ -1,24 +1,24 @@
 #!/bin/bash
 # -----------------------------------------------------------------------------
-# This script configures the network module by creating the .tfvars file and
-# .tfbackend file for the module.
-#
-# Depending on the project, a project may want a separate network for each
-# environment.
+# This script configures the network module for the specified application
+# and environment by creating the .tfvars file and .tfbackend file for the module.
 #
 # Positional parameters:
-#   NETWORK_NAME (required) – the name of network to configure
+#   APP_NAME (required) – the name of subdirectory of /infra that holds the
+#     application's infrastructure code.
+#   ENVIRONMENT is the name of the application environment (e.g. dev, staging, prod)
 # -----------------------------------------------------------------------------
 set -euo pipefail
 
-NETWORK_NAME=$1
+APP_NAME=$1
+ENVIRONMENT=$2
 
 #--------------------------------------
 # Create terraform backend config file
 #--------------------------------------
 
-MODULE_DIR="infra/network"
-CONFIG_NAME=$NETWORK_NAME
+MODULE_DIR="infra/$APP_NAME/network"
+CONFIG_NAME=$ENVIRONMENT
 
 ./bin/create-tfbackend.sh $MODULE_DIR $CONFIG_NAME
 
@@ -39,7 +39,7 @@ echo "======================================"
 echo "Setting up tfvars file for app service"
 echo "======================================"
 echo "Input parameters"
-echo "  NETWORK_NAME=$NETWORK_NAME"
+echo "  ENVIRONMENT=$ENVIRONMENT"
 echo
 
 cp $MODULE_DIR/example.tfvars $TF_VARS_FILE

@@ -29,7 +29,7 @@ provider "aws" {
 }
 
 module "project_config" {
-  source = "../project-config"
+  source = "../../project-config"
 }
 
 resource "aws_security_group" "public_load_balancer" {

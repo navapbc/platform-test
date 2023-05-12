@@ -56,6 +56,10 @@ infra-set-up-account:  # Set up the AWS account for the first time
 	@:$(call check_defined, ACCOUNT_NAME, human readable name for account e.g. "prod" or the AWS account alias)
 	./bin/set-up-current-account.sh $(ACCOUNT_NAME)
 
+infra-configure-network:
+	@:$(call check_defined, NETWORK_NAME, the name of network to configure)
+	./bin/configure-network.sh $(NETWORK_NAME)
+
 infra-configure-app-build-repository:
 	./bin/configure-app-build-repository.sh $(APP_NAME)
 

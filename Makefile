@@ -69,6 +69,10 @@ infra-configure-app-service:
 infra-update-current-account:
 	./bin/terraform-init-and-apply.sh infra/accounts `./bin/current-account-config-name.sh`
 
+infra-update-network:
+	@:$(call check_defined, NETWORK_NAME, the name of network to configure)
+	./bin/terraform-init-and-apply.sh infra/network $(NETWORK_NAME)
+
 infra-update-app-build-repository:
 	./bin/terraform-init-and-apply.sh infra/$(APP_NAME)/build-repository shared
 

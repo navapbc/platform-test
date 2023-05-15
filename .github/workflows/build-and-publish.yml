@@ -1,4 +1,4 @@
-name: Check GitHub Actions AWS Authentication
+name: Build and Publish
 
 on:
   workflow_dispatch:

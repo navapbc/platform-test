@@ -1,4 +1,0 @@
-bucket         = "platform-test-430004246987-us-east-1-tf-state"
-key            = "infra/account.tfstate"
-dynamodb_table = "platform-test-tf-state-locks"
-region         = "us-east-1"

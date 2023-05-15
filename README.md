@@ -8,7 +8,7 @@ This repo consists of a Makefile called `platform-test.mak`. We avoided calling 
 
 ## Environment URLs
 
-* [Dev environment](http://app-dev-1582588227.us-east-1.elb.amazonaws.com/)
+* [Dev environment](http://app-dev-2068097977.us-east-1.elb.amazonaws.com/)
 
 ## Usage
 

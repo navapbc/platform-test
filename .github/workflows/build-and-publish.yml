@@ -11,7 +11,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
       - name: Build release
         run: make release-build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::430004246987:role/platform-test-github-actions
+          aws-region: us-east-1
+
       - name: Publish release
         run: make release-publish

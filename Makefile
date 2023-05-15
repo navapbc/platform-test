@@ -16,10 +16,6 @@ CURRENT_ACCOUNT_ID = $(./bin/current-account-id.sh)
 # in infra/modules and then stripping out the "infra/modules/" prefix
 MODULES := $(notdir $(wildcard infra/modules/*))
 
-# Get the list of accounts and environments in a manner similar to MODULES above
-ACCOUNTS := $(notdir $(wildcard infra/accounts/*))
-ENVIRONMENTS := $(notdir $(wildcard infra/app/envs/*))
-
 # Check that given variables are set and all have non-empty values,
 # die with an error otherwise.
 #

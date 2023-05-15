@@ -296,6 +296,9 @@ resource "aws_iam_role_policy" "task_executor" {
 resource "aws_vpc_security_group_ingress_rule" "lb" {
   security_group_id = var.load_balancer_security_group_id
 
+  # TODO(https://github.com/navapbc/template-infra/issues/163) Disallow incoming traffic to port 80
+  # checkov:skip=CKV_AWS_260:Disallow ingress from 0.0.0.0:0 to port 80 when implementing HTTPS support in issue #163
+
   description = "Allow HTTP traffic from public internet"
   from_port   = 80
   to_port     = 80

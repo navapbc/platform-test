@@ -35,6 +35,8 @@ module "project_config" {
 resource "aws_security_group" "public_load_balancer" {
   name_prefix = "${module.project_config.project_name}-pub-lb"
   description = "Public load balancer security group"
+
+  # checkov:skip=CKV2_AWS_5:This security group will be attached to the load balancer later in the infra/app/service/ module
   lifecycle {
     # changing the description is a destructive change
     # just ignore it
@@ -45,6 +47,8 @@ resource "aws_security_group" "public_load_balancer" {
 resource "aws_security_group" "private_service" {
   name_prefix = "${module.project_config.project_name}-pvt-app-"
   description = "Security group for the application service"
+
+  # checkov:skip=CKV2_AWS_5:This security group will be attached to the service later in the infra/app/service/ module
   lifecycle {
     # changing the description is a destructive change
     # just ignore it
@@ -55,6 +59,9 @@ resource "aws_security_group" "private_service" {
 resource "aws_security_group" "private_database" {
   name_prefix = "${module.project_config.project_name}-pvt-db-"
   description = "Security group for the database"
+
+  # checkov:skip=CKV2_AWS_5:This security group will be attached to database later in the infra/app/database/ module
+
   lifecycle {
     # changing the description is a destructive change
     # just ignore it

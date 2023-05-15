@@ -140,13 +140,8 @@ release-publish:
 	./bin/publish-release.sh $(APP_NAME) $(IMAGE_NAME) $(IMAGE_TAG)
 
 release-deploy:
-# check the variable against the list of enviroments and suggest one of the correct envs.
-ifneq ($(filter $(ENVIRONMENT),$(ENVIRONMENTS)),)
+	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
 	./bin/deploy-release.sh $(APP_NAME) $(IMAGE_TAG) $(ENVIRONMENT)
-else
-	@echo "Please enter: make release-deploy ENVIRONMENT=<environment>. The value for environment must be one of these: $(ENVIRONMENTS)"
-	exit 1
-endif
 
 release-image-name: ## Prints the image name of the release image
 	@echo $(IMAGE_NAME)

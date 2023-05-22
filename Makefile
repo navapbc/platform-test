@@ -31,21 +31,6 @@ __check_defined = \
 		$(error Undefined $1$(if $2, ($2))$(if $(value @), \
 			required by target `$@')))
 
-# Check that given variables are set and all have non-empty values,
-# die with an error otherwise.
-#
-# Params:
-#   1. Variable name(s) to test.
-#   2. (optional) Error message to print.
-# Based off of https://stackoverflow.com/questions/10858261/how-to-abort-makefile-if-variable-not-set
-check_defined = \
-	$(strip $(foreach 1,$1, \
-        $(call __check_defined,$1,$(strip $(value 2)))))
-__check_defined = \
-	$(if $(value $1),, \
-		$(error Undefined $1$(if $2, ($2))$(if $(value @), \
-			required by target `$@')))
-
 
 .PHONY : \
 	infra-validate-modules \

@@ -6,7 +6,7 @@
 # After running `make release-build` (see [Releases](../docs/releases.md)),
 # you can verify the image works by running
 #
-#   docker run -p 80:8000 template-infra-app
+#   docker run -e PORT=8000 -p 80:8000 template-infra-app
 #
 # then visit localhost in a browser (or can use curl from a terminal)
 

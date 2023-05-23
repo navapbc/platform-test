@@ -10,6 +10,11 @@ output "database_name" {
   value = aws_rds_cluster.db.database_name
 }
 
+output "database_security_group_id" {
+  description = "The ID of the security group for the database."
+  value       = aws_security_group.db.id
+}
+
 output "app_username" {
   value = local.app_username
 }

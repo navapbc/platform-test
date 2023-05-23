@@ -186,7 +186,7 @@ resource "aws_iam_role_policy_attachment" "db_backup_role_policy_attachment" {
 #----------------------------------#
 
 resource "aws_iam_role" "rds_enhanced_monitoring" {
-  name_prefix        = "aurora-enhanced-monitoring-"
+  name_prefix        = "${var.name}-enhanced-monitoring-"
   assume_role_policy = data.aws_iam_policy_document.rds_enhanced_monitoring.json
 }
 

@@ -72,14 +72,30 @@ resource "aws_ssm_parameter" "random_db_password" {
   value = random_password.random_db_password.result
 }
 
-#----------------#
-# Network Access #
-#----------------#
+#-----------------------#
+# Network Configuration #
+#-----------------------#
 
 resource "aws_security_group" "db" {
   name_prefix = "${var.name}-db"
   description = "Database layer security group"
   vpc_id      = var.vpc_id
+}
+
+resource "aws_security_group" "role_manager" {
+  name_prefix = "${var.name}-role-manager"
+  description = "Database role manager security group"
+  vpc_id      = var.vpc_id
+}
+
+resource "aws_vpc_security_group_egress_rule" "role_manager_egress" {
+  security_group_id = aws_security_group.role_manager.id
+  description       = "Allow role manager to access database"
+
+  from_port                    = 5432
+  to_port                      = 5432
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.db.id
 }
 
 #----------------#
@@ -244,7 +260,7 @@ resource "aws_lambda_function" "role_manager" {
 
   vpc_config {
     subnet_ids         = var.private_subnet_ids
-    security_group_ids = var.ingress_security_group_ids
+    security_group_ids = [aws_security_group.role_manager.id]
   }
 
   environment {

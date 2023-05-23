@@ -21,10 +21,14 @@ variable "region" {
   type = string
 }
 
-# variable "db_access_policy_arn" {
-#   type = string
-# }
+variable "db_security_group_id" {
+  type = string
+}
 
-# variable "db_service_env_vars" {
-#   type = map(string)
-# }
+variable "db_access_policy_arn" {
+  type = string
+}
+
+variable "db_service_env_vars" {
+  type = map(string)
+}

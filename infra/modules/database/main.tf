@@ -78,15 +78,8 @@ resource "aws_ssm_parameter" "random_db_password" {
 
 resource "aws_security_group" "db" {
   name_prefix = "${var.name}-db"
-  description = "Inbound traffic rules for the database layer"
+  description = "Database layer security group"
   vpc_id      = var.vpc_id
-
-  ingress {
-    security_groups = var.ingress_security_group_ids
-    from_port       = var.port
-    to_port         = var.port
-    protocol        = "tcp"
-  }
 }
 
 #----------------#

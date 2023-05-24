@@ -21,14 +21,12 @@ variable "region" {
   type = string
 }
 
-variable "db_security_group_id" {
-  type = string
-}
-
-variable "db_access_policy_arn" {
-  type = string
-}
-
-variable "db_service_env_vars" {
-  type = map(string)
+variable "db_vars" {
+  description = "Variables for integrating the app service with a database"
+  type = object({
+    db_security_group_id = string
+    db_access_policy_arn = string
+    db_service_env_vars  = map(any)
+  })
+  default = null
 }

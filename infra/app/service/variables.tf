@@ -24,9 +24,9 @@ variable "region" {
 variable "db_vars" {
   description = "Variables for integrating the app service with a database"
   type = object({
-    db_security_group_id = string
-    db_access_policy_arn = string
-    db_service_env_vars  = map(any)
+    security_group_id = string
+    access_policy_arn = string
+    service_env_vars  = map(any)
   })
   default = null
 }

@@ -65,7 +65,5 @@ module "service" {
   vpc_id                = data.aws_vpc.default.id
   subnet_ids            = data.aws_subnets.default.ids
 
-  # TODO add these variables from database output
-  # service_policy_arns = [var.db_access_policy_arn]
-  # env_vars            = var.db_service_env_vars
+  db_vars = var.db_vars
 }

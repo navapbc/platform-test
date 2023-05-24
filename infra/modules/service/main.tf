@@ -11,6 +11,20 @@ locals {
   log_group_name          = "service/${var.service_name}"
   task_executor_role_name = "${var.service_name}-task-executor"
   image_url               = "${data.aws_ecr_repository.app.repository_url}:${var.image_tag}"
+
+  # Convert DB env vars from a map to a list of { name = string, value = string} objects
+  # to make it easier to pass into the container definition
+  db_env_vars_list = [
+    for name, value in var.db_vars.service_env_vars : {
+      name  = name
+      value = value
+    }
+  ]
+  base_env_vars_list = [
+    {
+      name : "PORT", value : tostring(var.container_port)
+    }
+  ]
 }
 
 ###################
@@ -168,11 +182,10 @@ resource "aws_ecs_task_definition" "app" {
           "wget --no-verbose --tries=1 --spider http://localhost:${var.container_port}/health || exit 1"
         ]
       },
-      environment = [
-        {
-          name : "PORT", value : tostring(var.container_port)
-        }
-      ],
+      environment = concat(
+        local.base_env_vars_list,
+        local.db_env_vars_list,
+      ),
       portMappings = [
         {
           containerPort = var.container_port,
@@ -296,9 +309,9 @@ resource "aws_iam_role_policy" "task_executor" {
 }
 
 resource "aws_iam_role_policy_attachment" "service" {
-  count      = length(var.service_policy_arns)
+  count      = var.db_vars != null ? 1 : 0
   role       = aws_iam_role.service.name
-  policy_arn = var.service_policy_arns[count.index]
+  policy_arn = var.db_vars.access_policy_arn
 }
 
 ###########################
@@ -369,3 +382,11 @@ resource "aws_security_group" "app" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+# TODO: define ingress rule to database
+# ingress {
+#     security_groups = var.ingress_security_group_ids
+#     from_port       = var.port
+#     to_port         = var.port
+#     protocol        = "tcp"
+#   }

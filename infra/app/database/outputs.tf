@@ -1,9 +1,13 @@
+output "access_policy_arn" {
+  value = module.database.access_policy_arn
+}
+
 output "cluster_security_group_id" {
   value = module.database.cluster_security_group_id
 }
 
-output "access_policy_arn" {
-  value = module.database.access_policy_arn
+output "role_manager_function_name" {
+  value = module.database.role_manager_function_name
 }
 
 output "service_env_vars" {

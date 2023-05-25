@@ -11,6 +11,20 @@ locals {
   log_group_name          = "service/${var.service_name}"
   task_executor_role_name = "${var.service_name}-task-executor"
   image_url               = "${data.aws_ecr_repository.app.repository_url}:${var.image_tag}"
+
+  # Convert DB env vars from a map to a list of { name = string, value = string} objects
+  # to make it easier to pass into the container definition
+  db_env_vars_list = [
+    for name, value in var.db_vars.service_env_vars : {
+      name  = name
+      value = value
+    }
+  ]
+  base_env_vars_list = [
+    {
+      name : "PORT", value : tostring(var.container_port)
+    }
+  ]
 }
 
 ###################
@@ -142,6 +156,7 @@ resource "aws_ecs_service" "app" {
 resource "aws_ecs_task_definition" "app" {
   family             = var.service_name
   execution_role_arn = aws_iam_role.task_executor.arn
+  task_role_arn      = aws_iam_role.service.arn
 
   # when is this needed?
   # task_role_arn      = aws_iam_role.app_service.arn
@@ -167,11 +182,10 @@ resource "aws_ecs_task_definition" "app" {
           "wget --no-verbose --tries=1 --spider http://localhost:${var.container_port}/health || exit 1"
         ]
       },
-      environment = [
-        {
-          name : "PORT", value : tostring(var.container_port)
-        }
-      ],
+      environment = concat(
+        local.base_env_vars_list,
+        local.db_env_vars_list,
+      ),
       portMappings = [
         {
           containerPort = var.container_port,
@@ -234,12 +248,17 @@ resource "aws_cloudwatch_log_group" "service_logs" {
 
 resource "aws_iam_role" "task_executor" {
   name               = local.task_executor_role_name
-  assume_role_policy = data.aws_iam_policy_document.ecs_assume_task_executor_role.json
+  assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role_policy.json
 }
 
-data "aws_iam_policy_document" "ecs_assume_task_executor_role" {
+resource "aws_iam_role" "service" {
+  name               = var.service_name
+  assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role_policy.json
+}
+
+data "aws_iam_policy_document" "ecs_tasks_assume_role_policy" {
   statement {
-    sid = "ECSTaskExecution"
+    sid = "ECSTasksAssumeRole"
     actions = [
       "sts:AssumeRole"
     ]
@@ -289,6 +308,12 @@ resource "aws_iam_role_policy" "task_executor" {
   policy = data.aws_iam_policy_document.task_executor.json
 }
 
+resource "aws_iam_role_policy_attachment" "service" {
+  count      = var.db_vars != null ? 1 : 0
+  role       = aws_iam_role.service.name
+  policy_arn = var.db_vars.access_policy_arn
+}
+
 ###########################
 ## Network Configuration ##
 ###########################
@@ -336,6 +361,7 @@ resource "aws_security_group" "app" {
   # before the old one is destroyed. In this situation, the new one needs a unique name
   name_prefix = "${var.service_name}-app"
   description = "Allow inbound TCP access to application container port"
+  vpc_id      = var.vpc_id
   lifecycle {
     create_before_destroy = true
   }
@@ -356,3 +382,11 @@ resource "aws_security_group" "app" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+# TODO: define ingress rule to database
+# ingress {
+#     security_groups = var.ingress_security_group_ids
+#     from_port       = var.port
+#     to_port         = var.port
+#     protocol        = "tcp"
+#   }

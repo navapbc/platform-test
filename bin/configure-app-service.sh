@@ -33,9 +33,6 @@ TF_STATE_BUCKET_NAME=$(terraform -chdir=infra/accounts output -raw tf_state_buck
 TF_LOCKS_TABLE_NAME=$(terraform -chdir=infra/accounts output -raw tf_locks_table_name)
 TF_STATE_KEY="$MODULE_DIR/$BACKEND_CONFIG_NAME.tfstate"
 REGION=$(terraform -chdir=infra/accounts output -raw region)
-DB_SECURITY_GROUP_ID=$(terraform -chdir=infra/$APP_NAME/database output -raw cluster_security_group_id)
-DB_ACCESS_POLICY_ARN=$(terraform -chdir=infra/$APP_NAME/database output -raw access_policy_arn)
-DB_SERVICE_ENV_VARS=$(terraform -chdir=infra/$APP_NAME/database output -json service_env_vars)
 
 
 echo "======================================"
@@ -51,9 +48,6 @@ sed -i.bak "s/<ENVIRONMENT>/$ENVIRONMENT/g" $TF_VARS_FILE
 sed -i.bak "s/<TF_STATE_BUCKET_NAME>/$TF_STATE_BUCKET_NAME/g" $TF_VARS_FILE
 sed -i.bak "s|<TF_STATE_KEY>|$TF_STATE_KEY|g" $TF_VARS_FILE
 sed -i.bak "s/<REGION>/$REGION/g" $TF_VARS_FILE
-sed -i.bak "s/<DB_SECURITY_GROUP_ID>/$DB_SECURITY_GROUP_ID/g" $TF_VARS_FILE
-sed -i.bak "s|<DB_ACCESS_POLICY_ARN>|$DB_ACCESS_POLICY_ARN|g" $TF_VARS_FILE
-sed -i.bak "s/<DB_SERVICE_ENV_VARS>/$DB_SERVICE_ENV_VARS/g" $TF_VARS_FILE
 rm $TF_VARS_FILE.bak
 
 echo "Created file: $TF_VARS_FILE"

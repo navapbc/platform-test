@@ -37,8 +37,31 @@ make infra-update-app-database APP_NAME=app ENVIRONMENT=<ENVIRONMENT>
 
 Trigger the role manager Lambda function that was created in the previous step in order to create the application and migrator Postgres users.
 
+```bash
+make infra-update-app-database-roles APP_NAME=app ENVIRONMENT=<ENVIRONMENT>
 ```
-make infra-update-app-database-roles
+
+The Lambda function's response should describe the resulting PostgreSQL roles and groups that are configured in the dataabase. It should look like a minified version of the following:
+
+```json
+{
+  "roles": [
+    "postgres",
+    "migrator",
+    "app"
+  ],
+  "roles_with_groups": {
+    "rds_superuser": "rds_password",
+    "pg_monitor": "pg_read_all_settings,pg_read_all_stats,pg_stat_scan_tables",
+    "postgres": "rds_superuser",
+    "app": "rds_iam",
+    "migrator": "rds_iam"
+  },
+  "schema_privileges": {
+    "public": "{postgres=UC/postgres,=UC/postgres}",
+    "app": "{migrator=UC/migrator,app=U/migrator}"
+  }
+}
 ```
 
 ## Set up application environments

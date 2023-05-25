@@ -20,13 +20,3 @@ variable "tfstate_key" {
 variable "region" {
   type = string
 }
-
-variable "db_vars" {
-  description = "Variables for integrating the app service with a database"
-  type = object({
-    security_group_id = string
-    access_policy_arn = string
-    service_env_vars  = map(any)
-  })
-  default = null
-}

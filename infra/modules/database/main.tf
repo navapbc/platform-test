@@ -282,7 +282,18 @@ resource "aws_lambda_function" "role_manager" {
       SCHEMA_NAME   = local.schema_name
       APP_USER      = local.app_username
       MIGRATOR_USER = local.migrator_username
+      PYTHONPATH    = "vendor"
     }
+  }
+}
+
+# Installs python packages needed by the role manager lambda function before
+# creating the zip archive. Reinstalls whenever requirements.txt changes
+resource "terraform_data" "role_manager_python_vendor_packages" {
+  triggers_replace = file("${path.module}/role_manager/requirements.txt")
+
+  provisioner "local-exec" {
+    command = "pip install -r ${path.module}/role_manager/requirements.txt -t ${path.module}/role_manager/vendor"
   }
 }
 
@@ -290,6 +301,7 @@ data "archive_file" "role_manager" {
   type        = "zip"
   source_dir  = "${path.module}/role_manager"
   output_path = local.role_manager_package
+  depends_on  = [terraform_data.role_manager_python_vendor_packages]
 }
 
 resource "aws_iam_role" "role_manager" {

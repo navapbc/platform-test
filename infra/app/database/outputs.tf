@@ -13,7 +13,7 @@ output "role_manager_function_name" {
   description = "The name of the Lambda function that manages PostgreSQL database roles. Invoke this function to create or update database roles."
 }
 
-output "service_env_vars" {
-  value       = module.database.service_env_vars
+output "connection_info" {
+  value       = module.database.connection_info
   description = "A map of key value pairs with database connection information (host, port, user, and PostgreSQL database name). Set as environment variables to provide application service with database credentials."
 }

@@ -38,12 +38,12 @@ output "access_policy_arn" {
   description = "The ARN of the IAM policy that allows access to the database. Attach to an IAM role to grant access to the database."
 }
 
-output "service_env_vars" {
+output "connection_info" {
   value = {
-    DB_HOST = aws_rds_cluster.db.endpoint
-    DB_PORT = aws_rds_cluster.db.port
-    DB_NAME = aws_rds_cluster.db.database_name
-    DB_USER = local.app_username
+    host    = aws_rds_cluster.db.endpoint
+    port    = aws_rds_cluster.db.port
+    db_name = aws_rds_cluster.db.database_name
+    user    = local.app_username
   }
   description = "A map of key value pairs with database connection information (host, port, user, and PostgreSQL database name). Set as environment variables to provide application service with database credentials."
 }

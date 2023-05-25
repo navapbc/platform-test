@@ -10,22 +10,15 @@
 #
 # then visit localhost in a browser (or can use curl from a terminal)
 
-# Based on the image defined here: https://github.com/AerialTechnologies/docker-alpine-aws-cli/blob/master/Dockerfile
-# and here: https://github.com/AerialTechnologies/docker-alpine-aws-cli-postgresql/blob/master/Dockerfile
+FROM busybox:uclibc AS release
 
-FROM python:alpine as release
+ARG RUN_USER=nobody
+USER ${RUN_USER}
 
-WORKDIR /app
-
-ADD requirements.txt ./
-
-RUN pip3 install -r requirements.txt
-
-ADD app.py ./
-
-# Set the host to 0.0.0.0 to make the server available external
-# to the Docker container that it's running in.
-ENV HOST=0.0.0.0
+COPY index.html /www/index.html
+COPY health /www/health
+COPY start-server.sh /bin/start-server.sh
 
 # Create a basic webserver and run it until the container is stopped
-CMD ["python", "-m", "app"]
+CMD ["start-server.sh"]
+

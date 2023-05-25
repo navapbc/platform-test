@@ -1,8 +1,8 @@
 # Database module design
 
 * Status: proposed
-* Deciders: @lorenyu @kyeah @rocketnova
-* Date: 2023-05-23
+* Deciders: @lorenyu @kyeah @shawnvanderjagt @rocketnova
+* Date: 2023-05-25
 
 ## Context and Problem Statement
 
@@ -21,7 +21,7 @@ There are some dependencies to keep in mind:
 * Avoid circular dependencies
 * Avoid the need to revisit a layer (e.g. database layer, application layer) more than one time during setup of the application environment
 * Keep things simple to understand and customize
-* Minimize number of steps
+* Minimize number of steps to set up an environment
 
 ## Module Architecture Options
 

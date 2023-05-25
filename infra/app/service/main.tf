@@ -64,4 +64,6 @@ module "service" {
   image_tag             = local.image_tag
   vpc_id                = data.aws_vpc.default.id
   subnet_ids            = data.aws_subnets.default.ids
+
+  db_vars = var.db_vars
 }

@@ -51,6 +51,8 @@ resource "aws_rds_cluster" "db" {
   }
 
   vpc_security_group_ids = [aws_security_group.db.id]
+
+  enabled_cloudwatch_logs_exports = ["postgresql"]
 }
 
 resource "aws_rds_cluster_instance" "primary" {
@@ -303,6 +305,8 @@ resource "aws_lambda_function" "role_manager" {
   tracing_config {
     mode = "Active"
   }
+
+  # checkov:skip=CKV_AWS_116:Dead letter queue (DLQ) configuration is only relevant for asynchronous invocations
 }
 
 # Installs python packages needed by the role manager lambda function before

@@ -3,13 +3,13 @@
 #
 
 # Route 53 zone that will be used - assumed created elsewhere.
-data "aws_route53_zone" "navateam" {
-  name = "platform-test.navateam.com."
+data "aws_route53_zone" "zone" {
+  name = var.dns_zone
 }
 
 # DNS record that maps the public name to the load balancer.
 resource "aws_route53_record" "app" {
-  zone_id = data.aws_route53_zone.navateam.zone_id
+  zone_id = data.aws_route53_zone.zone.zone_id
   name    = var.service_name
 
   type = "A"
@@ -22,7 +22,7 @@ resource "aws_route53_record" "app" {
 
 # ACM certificate that will be used by the load balancer.
 resource "aws_acm_certificate" "app" {
-  domain_name       = "${aws_route53_record.app.name}.${data.aws_route53_zone.navateam.name}"
+  domain_name       = "${aws_route53_record.app.name}.${var.dns_zone}"
   validation_method = "DNS"
 }
 
@@ -38,7 +38,7 @@ resource "aws_route53_record" "validation" {
   }
 
   allow_overwrite = true
-  zone_id         = data.aws_route53_zone.navateam.zone_id
+  zone_id         = data.aws_route53_zone.zone.zone_id
   name            = each.value.name
   type            = each.value.type
   ttl             = 60

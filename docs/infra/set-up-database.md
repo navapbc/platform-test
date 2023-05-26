@@ -13,6 +13,7 @@ The database setup process will:
 Before setting up the database you'll need to have:
 
 1. [Set up the AWS account](./set-up-aws-account.md)
+2. pip installed (pip is needed to download dependencies for the role manager Lambda function)
 
 ## 1. Configure backend
 

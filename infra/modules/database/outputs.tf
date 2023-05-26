@@ -38,16 +38,6 @@ output "access_policy_arn" {
   description = "The ARN of the IAM policy that allows access to the database. Attach to an IAM role to grant access to the database."
 }
 
-output "connection_info" {
-  value = {
-    host    = aws_rds_cluster.db.endpoint
-    port    = aws_rds_cluster.db.port
-    db_name = aws_rds_cluster.db.database_name
-    user    = local.app_username
-  }
-  description = "A map of key value pairs with database connection information (host, port, user, and PostgreSQL database name). Set as environment variables to provide application service with database credentials."
-}
-
 output "role_manager_function_name" {
   value       = aws_lambda_function.role_manager.function_name
   description = "The name of the Lambda function that manages PostgreSQL database roles. Invoke this function to create or update database roles."

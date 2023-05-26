@@ -79,7 +79,8 @@ resource "aws_ssm_parameter" "random_db_password" {
 }
 
 resource "aws_kms_key" "db" {
-  description = "Key for RDS cluster ${var.name}"
+  description         = "Key for RDS cluster ${var.name}"
+  enable_key_rotation = true
 }
 
 #-----------------------#
@@ -353,5 +354,6 @@ data "aws_iam_policy" "lambda_vpc_access" {
 
 # KMS key used to encrypt role manager's environment variables
 resource "aws_kms_key" "role_manager" {
-  description = "Key for Lambda function ${local.role_manager_name}"
+  description         = "Key for Lambda function ${local.role_manager_name}"
+  enable_key_rotation = true
 }

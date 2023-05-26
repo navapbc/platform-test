@@ -26,7 +26,13 @@ variable "db_vars" {
   type = object({
     security_group_id = string
     access_policy_arn = string
-    service_env_vars  = map(any)
+    connection_info = object({
+      host        = string
+      port        = string
+      user        = string
+      db_name     = string
+      schema_name = string
+    })
   })
   default = null
 }

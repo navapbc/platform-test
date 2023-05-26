@@ -12,19 +12,15 @@ locals {
   task_executor_role_name = "${var.service_name}-task-executor"
   image_url               = "${data.aws_ecr_repository.app.repository_url}:${var.image_tag}"
 
-  # Convert DB env vars from a map to a list of { name = string, value = string} objects
-  # to make it easier to pass into the container definition
-  db_env_vars_list = [
-    for name, value in var.db_vars.service_env_vars : {
-      name  = name
-      value = value
-    }
+  base_environment_variables = [{ name : "PORT", value : tostring(var.container_port) }]
+  db_environment_variables = var.db_vars == null ? [] : [
+    { name : "DB_HOST", value : var.db_vars.connection_info.host },
+    { name : "DB_PORT", value : var.db_vars.connection_info.port },
+    { name : "DB_USER", value : var.db_vars.connection_info.user },
+    { name : "DB_NAME", value : var.db_vars.connection_info.db_name },
+    { name : "DB_SCHEMA", value : var.db_vars.connection_info.schema_name },
   ]
-  base_env_vars_list = [
-    {
-      name : "PORT", value : tostring(var.container_port)
-    }
-  ]
+  environment_variables = concat(local.base_environment_variables, local.db_environment_variables)
 }
 
 ###################
@@ -182,10 +178,7 @@ resource "aws_ecs_task_definition" "app" {
           "wget --no-verbose --tries=1 --spider http://localhost:${var.container_port}/health || exit 1"
         ]
       },
-      environment = concat(
-        local.base_env_vars_list,
-        local.db_env_vars_list,
-      ),
+      environment = local.environment_variables,
       portMappings = [
         {
           containerPort = var.container_port,

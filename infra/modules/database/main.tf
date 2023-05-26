@@ -35,7 +35,7 @@ resource "aws_rds_cluster" "db" {
   master_username   = local.master_username
   master_password   = aws_ssm_parameter.random_db_password.value
   storage_encrypted = true
-  kms_key_id        = 
+  kms_key_id        = aws_kms_key.db.id
 
   # checkov:skip=CKV_AWS_128:Auth decision needs to be ironed out
   # checkov:skip=CKV_AWS_162:Auth decision needs to be ironed out
@@ -77,7 +77,7 @@ resource "aws_ssm_parameter" "random_db_password" {
 }
 
 resource "aws_kms_key" "db" {
-  description             = "Key for RDS cluster ${var.name}"
+  description = "Key for RDS cluster ${var.name}"
 }
 
 #-----------------------#
@@ -275,7 +275,7 @@ resource "aws_lambda_function" "role_manager" {
   runtime          = "python3.9"
   handler          = "role_manager.lambda_handler"
   role             = aws_iam_role.role_manager.arn
-  kms_key_arn      = aws_kms_key.role_manager
+  kms_key_arn      = aws_kms_key.role_manager.arn
 
   # Only allow 1 concurrent execution at a time
   reserved_concurrent_executions = 1
@@ -349,5 +349,5 @@ data "aws_iam_policy" "lambda_vpc_access" {
 
 # KMS key used to encrypt role manager's environment variables
 resource "aws_kms_key" "role_manager" {
-  description             = "Key for Lambda function ${local.role_manager_name}"
+  description = "Key for Lambda function ${local.role_manager_name}"
 }

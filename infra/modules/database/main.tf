@@ -7,6 +7,7 @@ locals {
   migrator_username     = "migrator"
   schema_name           = "app"
   primary_instance_name = "${var.name}-primary"
+  role_manager_name     = "${var.name}-role-manager"
   role_manager_package  = "${path.root}/role_manager.zip"
 
   # The ARN that represents the users accessing the database are of the format: "arn:aws:rds-db:<region>:<account-id>:dbuser:<resource-id>/<database-user-name>""
@@ -260,13 +261,17 @@ resource "aws_rds_cluster_parameter_group" "rds_query_logging" {
 #-----------------------------------------------------------------------------#
 
 resource "aws_lambda_function" "role_manager" {
-  function_name = "${var.name}-role-manager"
+  function_name = local.role_manager_name
 
   filename         = local.role_manager_package
   source_code_hash = data.archive_file.role_manager.output_base64sha256
   runtime          = "python3.9"
   handler          = "role_manager.lambda_handler"
   role             = aws_iam_role.role_manager.arn
+  kms_key_arn      = aws_kms_key.role_manager
+
+  # Only allow 1 concurrent execution at a time
+  reserved_concurrent_executions = 1
 
   vpc_config {
     subnet_ids         = var.private_subnet_ids
@@ -284,6 +289,12 @@ resource "aws_lambda_function" "role_manager" {
       MIGRATOR_USER = local.migrator_username
       PYTHONPATH    = "vendor"
     }
+  }
+
+  # Ensure AWS Lambda functions with tracing are enabled
+  # https://docs.bridgecrew.io/docs/bc_aws_serverless_4
+  tracing_config {
+    mode = "Active"
   }
 }
 
@@ -327,4 +338,10 @@ data "aws_iam_policy_document" "role_manager_assume_role" {
 # see https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html
 data "aws_iam_policy" "lambda_vpc_access" {
   name = "AWSLambdaVPCAccessExecutionRole"
+}
+
+# KMS key used to encrypt role manager's environment variables
+resource "aws_kms_key" "role_manager" {
+  description             = "Key for Lambda function ${local.role_manager_name}"
+  deletion_window_in_days = "10"
 }

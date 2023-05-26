@@ -87,6 +87,7 @@ resource "aws_lb_listener" "alb_listener_https" {
   port              = 443
   protocol          = "HTTPS"
   certificate_arn   = aws_acm_certificate.app.arn
+  depends_on        = [aws_acm_certificate_validation.validation]
 
   default_action {
     type = "fixed-response"

@@ -35,10 +35,13 @@ resource "aws_rds_cluster" "db" {
   master_username   = local.master_username
   master_password   = aws_ssm_parameter.random_db_password.value
   storage_encrypted = true
+  kms_key_id        = 
+
   # checkov:skip=CKV_AWS_128:Auth decision needs to be ironed out
   # checkov:skip=CKV_AWS_162:Auth decision needs to be ironed out
   iam_database_authentication_enabled = true
   deletion_protection                 = true
+  copy_tags_to_snapshot               = true
   # final_snapshot_identifier = "${var.name}-final"
   skip_final_snapshot = true
 
@@ -71,6 +74,10 @@ resource "aws_ssm_parameter" "random_db_password" {
   name  = "/db/${var.name}/master-password"
   type  = "SecureString"
   value = random_password.random_db_password.result
+}
+
+resource "aws_kms_key" "db" {
+  description             = "Key for RDS cluster ${var.name}"
 }
 
 #-----------------------#
@@ -343,5 +350,4 @@ data "aws_iam_policy" "lambda_vpc_access" {
 # KMS key used to encrypt role manager's environment variables
 resource "aws_kms_key" "role_manager" {
   description             = "Key for Lambda function ${local.role_manager_name}"
-  deletion_window_in_days = "10"
 }

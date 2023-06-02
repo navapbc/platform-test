@@ -36,5 +36,10 @@ jobs:
     needs: [build-and-publish]
     steps:
       - uses: actions/checkout@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::430004246987:role/platform-test-github-actions
+          aws-region: us-east-1
       - name: Deploy release
         run: make release-deploy ENVIRONMENT="$ENVIRONMENT"

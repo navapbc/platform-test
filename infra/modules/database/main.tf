@@ -15,10 +15,8 @@ locals {
   db_user_arn_prefix = "arn:aws:rds-db:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_rds_cluster.db.cluster_resource_id}"
 }
 
-
-#------------------------#
-# Database Configuration #
-#------------------------#
+# Database Configuration
+# ----------------------
 
 resource "aws_rds_cluster" "db" {
   # checkov:skip=CKV2_AWS_27:have concerns about sensitive data in logs; want better way to get this information
@@ -83,9 +81,8 @@ resource "aws_kms_key" "db" {
   enable_key_rotation = true
 }
 
-#-----------------------#
-# Network Configuration #
-#-----------------------#
+# Network Configuration
+# ---------------------
 
 resource "aws_security_group" "db" {
   name_prefix = "${var.name}-db"
@@ -99,12 +96,6 @@ resource "aws_security_group" "role_manager" {
   vpc_id      = var.vpc_id
 }
 
-resource "aws_security_group" "vpc_endpoints" {
-  name_prefix = "${var.name}-vpc-endpoints"
-  description = "VPC endpoints to access SSM and KMS"
-  vpc_id      = var.vpc_id
-}
-
 resource "aws_vpc_security_group_egress_rule" "role_manager_egress_to_db" {
   security_group_id = aws_security_group.role_manager.id
   description       = "Allow role manager to access database"
@@ -113,16 +104,6 @@ resource "aws_vpc_security_group_egress_rule" "role_manager_egress_to_db" {
   to_port                      = 5432
   ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.db.id
-}
-
-resource "aws_vpc_security_group_egress_rule" "role_manager_egress_to_vpc_endpoints" {
-  security_group_id = aws_security_group.role_manager.id
-  description       = "Allow role manager to access VPC endpoints for SSM and KMS"
-
-  from_port                    = 443
-  to_port                      = 443
-  ip_protocol                  = "tcp"
-  referenced_security_group_id = aws_security_group.vpc_endpoints.id
 }
 
 resource "aws_vpc_security_group_ingress_rule" "db_ingress_from_role_manager" {
@@ -135,19 +116,8 @@ resource "aws_vpc_security_group_ingress_rule" "db_ingress_from_role_manager" {
   referenced_security_group_id = aws_security_group.role_manager.id
 }
 
-resource "aws_vpc_security_group_ingress_rule" "vpc_endpoints_ingress_from_role_manager" {
-  security_group_id = aws_security_group.vpc_endpoints.id
-  description       = "Allow inbound requests to SSM from role manager"
-
-  from_port                    = 443
-  to_port                      = 443
-  ip_protocol                  = "tcp"
-  referenced_security_group_id = aws_security_group.role_manager.id
-}
-
-#----------------#
-# Authentication #
-#----------------#
+# Authentication
+# --------------
 
 resource "aws_iam_policy" "db_access" {
   name   = "${var.name}-db-access"
@@ -170,9 +140,8 @@ data "aws_iam_policy_document" "db_access" {
   }
 }
 
-#------------------#
-# Database Backups #
-#------------------#
+# Database Backups
+# ----------------
 
 # Backup plan that defines when and how to backup and which backup vault to store backups in
 # See https://docs.aws.amazon.com/aws-backup/latest/devguide/about-backup-plans.html
@@ -267,9 +236,8 @@ data "aws_iam_policy_document" "rds_enhanced_monitoring" {
   }
 }
 
-#---------------#
-# Query Logging #
-#---------------#
+# Query Logging
+# -------------
 
 resource "aws_rds_cluster_parameter_group" "rds_query_logging" {
   name        = var.name
@@ -289,13 +257,12 @@ resource "aws_rds_cluster_parameter_group" "rds_query_logging" {
   }
 }
 
-#-----------------------------------------------------------------------------#
-# Role Manager Lambda Function                                                #
-#                                                                             #
-# Resources for the lambda function that is used for managing database roles  #
-# This includes creating and granting permissions to roles                    #
-# as well as viewing existing roles                                           #
-#-----------------------------------------------------------------------------#
+# Role Manager Lambda Function
+# ----------------------------
+#
+# Resources for the lambda function that is used for managing database roles
+# This includes creating and granting permissions to roles
+# as well as viewing existing roles
 
 resource "aws_lambda_function" "role_manager" {
   function_name = local.role_manager_name
@@ -412,11 +379,18 @@ resource "aws_kms_key" "role_manager" {
   enable_key_rotation = true
 }
 
-# Since the Lambda is in the VPC (which is needed to be able to access the database)
-# we need to allow the Lambda function to access AWS Systems Manager paramter store.
-# We can do this by either allowing internet access to the Lambda, or by using a VPC
+# VPC Endpoints for accessing AWS Services
+# ----------------------------------------
+#
+# Since the role manager Lambda function is in the VPC (which is needed to be
+# able to access the database) we need to allow the Lambda function to access
+# AWS Systems Manager Parameter Store (to fetch the database password) and
+# KMS (to decrypt SecureString parameters from Parameter Store). We can do
+# this by either allowing internet access to the Lambda, or by using a VPC
 # endpoint. The latter is more secure.
 # See https://repost.aws/knowledge-center/lambda-vpc-parameter-store
+# See https://docs.aws.amazon.com/vpc/latest/privatelink/create-interface-endpoint.html#create-interface-endpoint
+
 resource "aws_vpc_endpoint" "ssm" {
   vpc_id              = var.vpc_id
   service_name        = "com.amazonaws.${data.aws_region.current.name}.ssm"
@@ -433,4 +407,33 @@ resource "aws_vpc_endpoint" "kms" {
   security_group_ids  = [aws_security_group.vpc_endpoints.id]
   subnet_ids          = var.private_subnet_ids
   private_dns_enabled = true
+}
+
+resource "aws_security_group" "vpc_endpoints" {
+  name_prefix = "${var.name}-vpc-endpoints"
+  description = "VPC endpoints to access SSM and KMS"
+  vpc_id      = var.vpc_id
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_vpc_security_group_egress_rule" "role_manager_egress_to_vpc_endpoints" {
+  security_group_id = aws_security_group.role_manager.id
+  description       = "Allow outbound requests from role manager to VPC endpoints"
+
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.vpc_endpoints.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "vpc_endpoints_ingress_from_role_manager" {
+  security_group_id = aws_security_group.vpc_endpoints.id
+  description       = "Allow inbound requests to VPC endpoints from role manager"
+
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.role_manager.id
 }

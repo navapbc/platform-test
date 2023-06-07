@@ -12,7 +12,10 @@ locals {
   task_executor_role_name = "${var.service_name}-task-executor"
   image_url               = "${data.aws_ecr_repository.app.repository_url}:${var.image_tag}"
 
-  base_environment_variables = [{ name : "PORT", value : tostring(var.container_port) }]
+  base_environment_variables = [
+    { name : "PORT", value : tostring(var.container_port) },
+    { name : "AWS_REGION", value : data.aws_region.current.name },
+  ]
   db_environment_variables = var.db_vars == null ? [] : [
     { name : "DB_HOST", value : var.db_vars.connection_info.host },
     { name : "DB_PORT", value : var.db_vars.connection_info.port },

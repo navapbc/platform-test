@@ -379,10 +379,12 @@ resource "aws_security_group" "app" {
   }
 }
 
-# TODO: define ingress rule to database
-# ingress {
-#     security_groups = var.ingress_security_group_ids
-#     from_port       = var.port
-#     to_port         = var.port
-#     protocol        = "tcp"
-#   }
+resource "aws_vpc_security_group_ingress_rule" "db_ingress_from_service" {
+  security_group_id = var.db_vars.security_group_id
+  description       = "Allow inbound requests to database from ${var.service_name} service"
+
+  from_port                    = tonumber(var.db_vars.connection_info.port)
+  to_port                      = tonumber(var.db_vars.connection_info.port)
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.app.id
+}

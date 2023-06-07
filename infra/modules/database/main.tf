@@ -413,9 +413,6 @@ resource "aws_security_group" "vpc_endpoints" {
   name_prefix = "${var.name}-vpc-endpoints"
   description = "VPC endpoints to access SSM and KMS"
   vpc_id      = var.vpc_id
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
 resource "aws_vpc_security_group_egress_rule" "role_manager_egress_to_vpc_endpoints" {

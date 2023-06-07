@@ -15,18 +15,19 @@ def main():
     host = os.environ.get("HOST")
     port = os.environ.get("PORT")
     logger.info(f"Running Flask app on host {host} and port {port}")
+    print(f"Running Flask app on host {host} and port {port}")
     app.run(host=host, port=port)
 
 
 @app.route("/")
 def hello_world():
+    conn = get_db_connection()
+    conn.execute("SELECT 1")
     return "<p>Hello, World!</p>"
 
 
 @app.route("/health")
 def health():
-    conn = get_db_connection()
-    conn.execute("SELECT 1")
     return "OK"
 
 
@@ -35,9 +36,11 @@ def get_db_token(host, port, user):
 
     # gets the credentials from .aws/credentials
     logger.info(f"Getting RDS client for region {region}")
+    print(f"Getting RDS client for region {region}")
     client = boto3.client("rds", region_name=region)
 
     logger.info(f"Generating auth token for user {user}")
+    print(f"Generating auth token for user {user}")
     token = client.generate_db_auth_token(DBHostname=host, Port=port, DBUsername=user, Region=region)
     return token
 

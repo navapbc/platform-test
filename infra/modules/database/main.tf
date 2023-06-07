@@ -99,6 +99,12 @@ resource "aws_security_group" "role_manager" {
   vpc_id      = var.vpc_id
 }
 
+resource "aws_security_group" "vpc_endpoints" {
+  name_prefix = "${var.name}-vpc-endpoints"
+  description = "VPC endpoints to access SSM and KMS"
+  vpc_id      = var.vpc_id
+}
+
 resource "aws_vpc_security_group_egress_rule" "role_manager_egress_to_db" {
   security_group_id = aws_security_group.role_manager.id
   description       = "Allow role manager to access database"
@@ -109,12 +115,32 @@ resource "aws_vpc_security_group_egress_rule" "role_manager_egress_to_db" {
   referenced_security_group_id = aws_security_group.db.id
 }
 
+resource "aws_vpc_security_group_egress_rule" "role_manager_egress_to_vpc_endpoints" {
+  security_group_id = aws_security_group.role_manager.id
+  description       = "Allow role manager to access VPC endpoints for SSM and KMS"
+
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.vpc_endpoints.id
+}
+
 resource "aws_vpc_security_group_ingress_rule" "db_ingress_from_role_manager" {
   security_group_id = aws_security_group.db.id
   description       = "Allow inbound requests to database from role manager"
 
   from_port                    = 5432
   to_port                      = 5432
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.role_manager.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "vpc_endpoints_ingress_from_role_manager" {
+  security_group_id = aws_security_group.vpc_endpoints.id
+  description       = "Allow inbound requests to SSM from role manager"
+
+  from_port                    = 443
+  to_port                      = 443
   ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.role_manager.id
 }
@@ -291,14 +317,14 @@ resource "aws_lambda_function" "role_manager" {
 
   environment {
     variables = {
-      DB_HOST       = aws_rds_cluster.db.endpoint
-      DB_PORT       = aws_rds_cluster.db.port
-      DB_USER       = local.master_username
-      DB_PASSWORD   = aws_ssm_parameter.random_db_password.value
-      SCHEMA_NAME   = local.schema_name
-      APP_USER      = local.app_username
-      MIGRATOR_USER = local.migrator_username
-      PYTHONPATH    = "vendor"
+      DB_HOST                = aws_rds_cluster.db.endpoint
+      DB_PORT                = aws_rds_cluster.db.port
+      DB_USER                = local.master_username
+      DB_PASSWORD_PARAM_NAME = aws_ssm_parameter.random_db_password.name
+      SCHEMA_NAME            = local.schema_name
+      APP_USER               = local.app_username
+      MIGRATOR_USER          = local.migrator_username
+      PYTHONPATH             = "vendor"
     }
   }
 
@@ -336,6 +362,31 @@ resource "aws_iam_role" "role_manager" {
   managed_policy_arns = [data.aws_iam_policy.lambda_vpc_access.arn]
 }
 
+resource "aws_iam_role_policy" "ssm_access" {
+  name = "${var.name}-role-manager-ssm-access"
+  role = aws_iam_role.role_manager.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["ssm:GetParameter*"]
+        Resource = "${aws_ssm_parameter.random_db_password.arn}"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["kms:Decrypt"]
+        Resource = [data.aws_kms_key.default_ssm_key.arn]
+      }
+    ]
+  })
+}
+
+data "aws_kms_key" "default_ssm_key" {
+  key_id = "alias/aws/ssm"
+}
+
 data "aws_iam_policy_document" "role_manager_assume_role" {
   statement {
     effect = "Allow"
@@ -359,4 +410,27 @@ data "aws_iam_policy" "lambda_vpc_access" {
 resource "aws_kms_key" "role_manager" {
   description         = "Key for Lambda function ${local.role_manager_name}"
   enable_key_rotation = true
+}
+
+# Since the Lambda is in the VPC (which is needed to be able to access the database)
+# we need to allow the Lambda function to access AWS Systems Manager paramter store.
+# We can do this by either allowing internet access to the Lambda, or by using a VPC
+# endpoint. The latter is more secure.
+# See https://repost.aws/knowledge-center/lambda-vpc-parameter-store
+resource "aws_vpc_endpoint" "ssm" {
+  vpc_id              = var.vpc_id
+  service_name        = "com.amazonaws.${data.aws_region.current.name}.ssm"
+  vpc_endpoint_type   = "Interface"
+  security_group_ids  = [aws_security_group.vpc_endpoints.id]
+  subnet_ids          = var.private_subnet_ids
+  private_dns_enabled = true
+}
+
+resource "aws_vpc_endpoint" "kms" {
+  vpc_id              = var.vpc_id
+  service_name        = "com.amazonaws.${data.aws_region.current.name}.kms"
+  vpc_endpoint_type   = "Interface"
+  security_group_ids  = [aws_security_group.vpc_endpoints.id]
+  subnet_ids          = var.private_subnet_ids
+  private_dns_enabled = true
 }

@@ -15,6 +15,9 @@
 
 FROM python:alpine as release
 
+ARG RUN_USER=nobody
+USER ${RUN_USER}
+
 WORKDIR /app
 
 COPY requirements.txt ./

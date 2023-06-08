@@ -16,6 +16,10 @@
 FROM python:alpine as release
 
 ARG RUN_USER=nobody
+
+RUN mkdir /app \
+  && chown -R ${RUN_USER} /app
+
 USER ${RUN_USER}
 
 WORKDIR /app
@@ -29,6 +33,7 @@ COPY app.py ./
 # Set the host to 0.0.0.0 to make the server available external
 # to the Docker container that it's running in.
 ENV HOST=0.0.0.0
+
 
 # Create a basic webserver and run it until the container is stopped
 CMD ["python", "-m", "app"]

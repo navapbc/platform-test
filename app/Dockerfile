@@ -15,6 +15,8 @@
 
 FROM python:alpine as release
 
+RUN adduser --system --disabled-password --no-create-home app
+
 WORKDIR /app
 
 COPY requirements.txt ./
@@ -27,7 +29,8 @@ COPY app.py ./
 # to the Docker container that it's running in.
 ENV HOST=0.0.0.0
 
-USER nonroot
+# Run as non-root user
+USER app
 
 # Create a basic webserver and run it until the container is stopped
 CMD ["python", "-m", "app"]

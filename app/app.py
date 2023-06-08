@@ -21,13 +21,13 @@ def main():
 
 @app.route("/")
 def hello_world():
-    conn = get_db_connection()
-    conn.execute("SELECT 1")
     return "<p>Hello, World!</p>"
 
 
 @app.route("/health")
 def health():
+    conn = get_db_connection()
+    conn.execute("SELECT 1")
     return "OK"
 
 

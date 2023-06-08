@@ -26,9 +26,9 @@ locals {
   environment_variables = concat(local.base_environment_variables, local.db_environment_variables)
 }
 
-###################
-## Load balancer ##
-###################
+#---------------
+# Load balancer
+#---------------
 
 # ALB for an app running in ECS
 resource "aws_lb" "alb" {
@@ -120,9 +120,9 @@ resource "aws_lb_target_group" "app_tg" {
   }
 }
 
-#######################
-## Service Execution ##
-#######################
+#-------------------
+# Service Execution
+#-------------------
 
 resource "aws_ecs_service" "app" {
   name            = var.service_name
@@ -222,9 +222,9 @@ resource "aws_ecs_cluster" "cluster" {
   }
 }
 
-##########
-## Logs ##
-##########
+#------
+# Logs
+#------
 
 # Cloudwatch log group to for streaming ECS application logs.
 resource "aws_cloudwatch_log_group" "service_logs" {
@@ -238,9 +238,9 @@ resource "aws_cloudwatch_log_group" "service_logs" {
   # checkov:skip=CKV_AWS_158:Encrypt service logs with customer key in future work
 }
 
-####################
-## Access Control ##
-####################
+#----------------
+# Access Control
+#----------------
 
 resource "aws_iam_role" "task_executor" {
   name               = local.task_executor_role_name
@@ -310,9 +310,9 @@ resource "aws_iam_role_policy_attachment" "service" {
   policy_arn = var.db_vars.access_policy_arn
 }
 
-###########################
-## Network Configuration ##
-###########################
+#-----------------------
+# Network Configuration
+#-----------------------
 
 resource "aws_security_group" "alb" {
   # Specify name_prefix instead of name because when a change requires creating a new
@@ -393,4 +393,11 @@ resource "aws_vpc_security_group_ingress_rule" "db_ingress_from_service" {
   to_port                      = tonumber(var.db_vars.connection_info.port)
   ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.app.id
+}
+
+resource "aws_iam_role_policy_attachment" "app_db_access" {
+  count = var.db_vars != null ? 1 : 0
+
+  role       = aws_iam_role.service.name
+  policy_arn = var.db_vars.access_policy_arn
 }

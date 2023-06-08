@@ -47,6 +47,10 @@ def get_db_connection():
     host = os.environ.get("DB_HOST")
     port = os.environ.get("DB_PORT")
     user = os.environ.get("DB_USER")
+
+    # Tokens last for 15 minutes, so normally you wouldn't need to generate
+    # an auth token every time you create a new connection, but we do that
+    # here to keep the example app simple.
     password = get_db_token(host, port, user)
     dbname = os.environ.get("DB_NAME")
 

@@ -379,7 +379,13 @@ resource "aws_security_group" "app" {
   }
 }
 
+#-----------------
+# Database Access 
+#-----------------
+
 resource "aws_vpc_security_group_ingress_rule" "db_ingress_from_service" {
+  count = var.db_vars != null ? 1 : 0
+
   security_group_id = var.db_vars.security_group_id
   description       = "Allow inbound requests to database from ${var.service_name} service"
 

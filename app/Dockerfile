@@ -15,14 +15,6 @@
 
 FROM python:alpine as release
 
-ARG RUN_USER=nobody
-
-RUN useradd ${RUN_USER} \
-  && mkdir /app \
-  && chown -R ${RUN_USER} /app
-
-USER ${RUN_USER}
-
 WORKDIR /app
 
 COPY requirements.txt ./
@@ -35,6 +27,7 @@ COPY app.py ./
 # to the Docker container that it's running in.
 ENV HOST=0.0.0.0
 
+USER nonroot
 
 # Create a basic webserver and run it until the container is stopped
 CMD ["python", "-m", "app"]

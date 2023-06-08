@@ -1,11 +1,12 @@
+import logging
 import os
 
-from flask import Flask
 import boto3
-import logging
+from flask import Flask
 import psycopg
 import psycopg.conninfo
 
+logging.basicConfig()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
@@ -14,8 +15,7 @@ app = Flask(__name__)
 def main():
     host = os.environ.get("HOST")
     port = os.environ.get("PORT")
-    logger.info(f"Running Flask app on host {host} and port {port}")
-    print(f"Running Flask app on host {host} and port {port}")
+    logger.info("Running Flask app on host %s and port %s", host, port)
     app.run(host=host, port=port)
 
 
@@ -35,12 +35,10 @@ def get_db_token(host, port, user):
     region = os.environ.get("AWS_REGION")
 
     # gets the credentials from .aws/credentials
-    logger.info(f"Getting RDS client for region {region}")
-    print(f"Getting RDS client for region {region}")
+    logger.info("Getting RDS client for region %s", region)
     client = boto3.client("rds", region_name=region)
 
-    logger.info(f"Generating auth token for user {user}")
-    print(f"Generating auth token for user {user}")
+    logger.info("Generating auth token for user %s", user)
     token = client.generate_db_auth_token(DBHostname=host, Port=port, DBUsername=user, Region=region)
     return token
 

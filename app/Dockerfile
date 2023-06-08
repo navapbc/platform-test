@@ -17,7 +17,8 @@ FROM python:alpine as release
 
 ARG RUN_USER=nobody
 
-RUN mkdir /app \
+RUN useradd ${RUN_USER} \
+  && mkdir /app \
   && chown -R ${RUN_USER} /app
 
 USER ${RUN_USER}

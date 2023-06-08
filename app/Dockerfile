@@ -17,11 +17,11 @@ FROM python:alpine as release
 
 WORKDIR /app
 
-ADD requirements.txt ./
+COPY requirements.txt ./
 
-RUN pip3 install -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-ADD app.py ./
+COPY app.py ./
 
 # Set the host to 0.0.0.0 to make the server available external
 # to the Docker container that it's running in.

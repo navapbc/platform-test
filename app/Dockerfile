@@ -2,7 +2,9 @@ FROM python:alpine as release
 
 RUN adduser --system --disabled-password --no-create-home app
 
-RUN apk add postgresql14-client
+RUN apk --no-cache add \
+  aws-cli \
+  postgresql14-client
 
 WORKDIR /app
 
@@ -11,7 +13,7 @@ COPY requirements.txt ./
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 COPY app.py ./
-COPY db-migrate ./
+COPY db-migrate /usr/bin
 
 # Set the host to 0.0.0.0 to make the server available external
 # to the Docker container that it's running in.

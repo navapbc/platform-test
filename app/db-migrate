@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -euo pipefail
 
 export PGPASSWORD=$(aws rds generate-db-auth-token --hostname=$DB_HOST --port=$DB_PORT --username=$DB_USER)

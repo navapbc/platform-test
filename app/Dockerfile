@@ -9,6 +9,7 @@ COPY requirements.txt ./
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 COPY app.py ./
+COPY db-migrate ./
 
 # Set the host to 0.0.0.0 to make the server available external
 # to the Docker container that it's running in.

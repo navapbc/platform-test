@@ -14,9 +14,9 @@ APP_NAME="$1"
 ENVIRONMENT="$2"
 
 
-echo "==============="
-echo "Running command"
-echo "==============="
+echo "=================="
+echo "Running migrations"
+echo "=================="
 echo "Input parameters"
 echo "  APP_NAME=$APP_NAME"
 echo "  ENVIRONMENT=$ENVIRONMENT"

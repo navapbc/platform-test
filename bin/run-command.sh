@@ -18,7 +18,7 @@ set -euo pipefail
 APP_NAME="$1"
 ENVIRONMENT="$2"
 COMMAND="$3"
-
+ENVIRONMENT_VARIABLES=${4:-""}
 
 echo "==============="
 echo "Running command"
@@ -27,6 +27,7 @@ echo "Input parameters"
 echo "  APP_NAME=$APP_NAME"
 echo "  ENVIRONMENT=$ENVIRONMENT"
 echo "  COMMAND=$COMMAND"
+echo "  ENVIRONMENT_VARIABLES=$ENVIRONMENT_VARIABLES"
 echo
 
 # Use the same cluster, task definition, and network configuration that the application service uses
@@ -38,11 +39,16 @@ NETWORK_CONFIG=$(aws ecs describe-services --no-cli-pager --cluster $CLUSTER_NAM
 CURRENT_REGION=$(./bin/current-region.sh)
 AWS_USER_ID=$(aws sts get-caller-identity --no-cli-pager --query UserId --output text)
 
+ENVIRONMENT_OVERRIDES=""
+if [ ! -z "$ENVIRONMENT_VARIABLES" ]; then
+  ENVIRONMENT_OVERRIDES="\"environment\": $ENVIRONMENT_VARIABLES,"
+fi
 CONTAINER_NAME=$(aws ecs describe-task-definition --task-definition $TASK_DEFINITION --query "taskDefinition.containerDefinitions[0].name" --output text)
 OVERRIDES=$(cat << EOF
 {
   "containerOverrides": [
     {
+      $ENVIRONMENT_OVERRIDES
       "name": "$CONTAINER_NAME",
       "command": $COMMAND
     }

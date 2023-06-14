@@ -22,9 +22,15 @@ on:
 concurrency: database-migrations-${{ inputs.environment }}
 
 jobs:
-  run:
-    name: Run
+  build-and-publish:
+    name: Build
+    uses: ./.github/workflows/build-and-publish.yml
+    with:
+      ref: ${{ github.ref }}
+  run-migrations:
+    name: Run migrations
     runs-on: ubuntu-latest
+    needs: [build-and-publish]
 
     permissions:
       contents: read

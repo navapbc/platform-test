@@ -2,6 +2,8 @@ FROM python:alpine as release
 
 RUN adduser --system --disabled-password --no-create-home app
 
+RUN apk add postgresql14-client
+
 WORKDIR /app
 
 COPY requirements.txt ./

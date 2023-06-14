@@ -22,7 +22,8 @@ on:
 concurrency: database-migrations-${{ inputs.environment }}
 
 jobs:
-  deploy:
+  run:
+    name: Run
     runs-on: ubuntu-latest
 
     permissions:

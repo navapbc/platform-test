@@ -28,7 +28,7 @@ concurrency: cd-${{ inputs.environment || 'dev' }}
 
 jobs:
   database-migrations:
-    name: Run database migrations
+    name: Database migrations
     uses: ./.github/workflows/database-migrations.yml
     with:
       environment: ${{ inputs.environment }}

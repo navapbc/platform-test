@@ -13,7 +13,6 @@ on:
       app_name:
         description: "name of application folder under infra directory"
         default: app
-        required: true
         type: string
       environment:
         description: "the name of the application environment (e.g. dev, staging, prod)"

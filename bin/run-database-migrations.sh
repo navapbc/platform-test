@@ -45,8 +45,8 @@ TF_CLI_ARGS_apply="-input=false -auto-approve -target=module.service.aws_ecs_tas
 
 echo
 echo 'Step 2. Run "db-migrate" command'
- 
-terraform -chdir=infra/$APP_NAME/database init
+
+./bin/terraform-init.sh infra/$APP_NAME/database $ENVIRONMENT
 DB_HOST=$(terraform -chdir=infra/$APP_NAME/database output -raw database_host)
 DB_PORT=$(terraform -chdir=infra/$APP_NAME/database output -raw database_port)
 DB_MIGRATOR_USER=$(terraform -chdir=infra/$APP_NAME/database output -raw migrator_username)

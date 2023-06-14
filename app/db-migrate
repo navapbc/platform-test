@@ -3,7 +3,7 @@ set -euo pipefail
 
 export PGPASSWORD=$(aws rds generate-db-auth-token --hostname=$DB_HOST --port=$DB_PORT --username=$DB_USER)
 psql \
-  --hostname=$DB_HOST \
+  --host=$DB_HOST \
   --port=$DB_PORT \
   --username=$DB_USER \
   --dbname=$DB_NAME \

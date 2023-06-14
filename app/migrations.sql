@@ -6,3 +6,5 @@ TRUNCATE TABLE migrations;
 
 INSERT INTO migrations (last_migration_date)
 VALUES (NOW());
+
+SELECT * FROM migrations;

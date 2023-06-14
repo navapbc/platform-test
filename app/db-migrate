@@ -7,5 +7,5 @@ psql \
   --port=$DB_PORT \
   --username=$DB_USER \
   --dbname=$DB_NAME \
+  --echo-all \
   --file=migrations.sql
-

@@ -29,6 +29,7 @@ echo
 
 # Step 0. Check if app has a database
 
+terraform -chdir=infra/$APP_NAME/app-config refresh > /dev/null
 HAS_DATABASE=$(terraform -chdir=infra/$APP_NAME/app-config output -raw has_database)
 if [ $HAS_DATABASE = "false" ]; then
   echo "Application does not have a database, no migrations to run"

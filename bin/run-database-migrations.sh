@@ -1,27 +1,39 @@
 #!/bin/bash
 # -----------------------------------------------------------------------------
-# Run migrations
-# 
+# Run database migrations
+# 1. Update the application's task definition with the latest build, but
+#    do not update the service
+# 2. Run the "db-migrate" command in the container as a new task
+#
 # Positional parameters:
 #   APP_NAME (required) – the name of subdirectory of /infra that holds the
 #     application's infrastructure code.
+#   IMAGE_TAG (required) – the tag of the latest build
 #   ENVIRONMENT (required) – the name of the application environment (e.g. dev,
 #     staging, prod)
 # -----------------------------------------------------------------------------
 set -euo pipefail
 
 APP_NAME="$1"
-ENVIRONMENT="$2"
-
+IMAGE_TAG="$2"
+ENVIRONMENT="$3"
 
 echo "=================="
 echo "Running migrations"
 echo "=================="
 echo "Input parameters"
 echo "  APP_NAME=$APP_NAME"
+echo "  IMAGE_TAG=$IMAGE_TAG"
 echo "  ENVIRONMENT=$ENVIRONMENT"
 echo
 
+# Step 0. Check if app has a database
+
+HAS_DATABASE=$(terraform -chdir=infra/$APP_NAME/app-config output -raw has_database)
+if [ $HAS_DATABASE = "false" ]; then
+  echo "Application does not have a database, no migrations to run"
+  exit 0
+fi
  
 DB_HOST=$(terraform -chdir=infra/$APP_NAME/database output -raw database_host)
 DB_PORT=$(terraform -chdir=infra/$APP_NAME/database output -raw database_port)

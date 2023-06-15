@@ -83,3 +83,23 @@ echo "Created file: $TF_VARS_FILE"
 echo "------------------ file contents ------------------"
 cat $TF_VARS_FILE
 echo "----------------------- end -----------------------"
+
+echo "========================================"
+echo "Set up role-to-assume for GitHub Actions"
+echo "========================================"
+echo
+ROLES_CONFIG=infra/$APP_NAME/app-config/github-actions-role-to-assume.ini
+source $ROLES_CONFIG
+
+ROLE_ARN=${!ENVIRONMENT:-}
+if [ -z $ROLE_ARN ]; then
+  terraform -chdir=infra/project-config refresh > /dev/null
+  PROJECT_NAME=$(terraform -chdir=infra/project-config output -raw project_name)
+  ACCOUNT_ID=$(./bin/current-account-id.sh)
+  ROLE_ARN="arn:aws:iam::$ACCOUNT_ID:role/$PROJECT_NAME-github-actions"
+
+  echo "$ENVIRONMENT=\"$ROLE_ARN\"" >> $ROLES_CONFIG
+fi
+
+echo "Roles defined:"
+cat $ROLES_CONFIG

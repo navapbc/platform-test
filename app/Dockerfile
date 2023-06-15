@@ -1,12 +1,12 @@
-FROM python:alpine as release
+FROM python:3-alpine as release
 
 RUN adduser --system --disabled-password --no-create-home app
 
 WORKDIR /app
 
 RUN apk --no-cache add \
-  aws-cli=2.11.27-r0 \
-  postgresql14-client=14.8-r0
+  aws-cli~=2 \
+  postgresql14-client~=14
 
 COPY requirements.txt ./
 

@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "environment input"
+        description: "target environment"
         required: true
         default: "dev"
         type: choice
@@ -21,6 +21,7 @@ on:
           - prod
 
 env:
+  APP_NAME: app
   ENVIRONMENT: ${{ inputs.environment || 'dev' }}
 
 # Need to repeat the expression since env.ENV_NAME is not accessible in this context
@@ -41,10 +42,14 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v3
+
+      - name: Get role to assume
+        run: echo "ROLE_TO_ASSUME=$(./bin/github-actions-role-to-assume.sh $APP_NAME $ENVIRONMENT)" >> "$GITHUB_ENV"
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::430004246987:role/platform-test-github-actions
+          role-to-assume: ${{ env.ROLE_TO_ASSUME }}
           aws-region: us-east-1
       - name: Deploy release
-        run: make release-deploy ENVIRONMENT="$ENVIRONMENT"
+        run: make release-deploy APP_NAME=$APP_NAME ENVIRONMENT="$ENVIRONMENT"

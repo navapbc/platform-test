@@ -28,7 +28,6 @@ ROLE_ARN=${!ENVIRONMENT:-}
 
 if [ -z $ROLE_ARN ]; then
   echo "No role defined for environment: $ENVIRONMENT" >&2
-  echo "Have you finished configuring the environment?" >&2
   exit 1
 fi
 

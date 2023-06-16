@@ -35,7 +35,7 @@ jobs:
     name: Database migrations
     uses: ./.github/workflows/database-migrations.yml
     with:
-      environment: ${{ inputs.environment }}
+      environment: ${{ env.ENVIRONMENT }}
   deploy:
     name: Deploy
     runs-on: ubuntu-latest

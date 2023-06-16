@@ -20,8 +20,5 @@ COPY app.py /app/
 # to the Docker container that it's running in.
 ENV HOST=0.0.0.0
 
-# Run as non-root user
-USER app
-
 # Create a basic webserver and run it until the container is stopped
 CMD ["python", "-m", "app"]

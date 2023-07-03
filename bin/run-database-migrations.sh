@@ -28,9 +28,9 @@ echo "  ENVIRONMENT=$ENVIRONMENT"
 echo
 echo "Step 0. Check if app has a database"
 
-terraform -chdir=infra/$APP_NAME/app-config init > /dev/null
-terraform -chdir=infra/$APP_NAME/app-config refresh > /dev/null
-HAS_DATABASE=$(terraform -chdir=infra/$APP_NAME/app-config output -raw has_database)
+terraform -chdir=infra/project-config init > /dev/null
+terraform -chdir=infra/project-config refresh > /dev/null
+HAS_DATABASE=$(terraform -chdir=infra/project-config output -json app_configs | jq .$APP_NAME.has_database)
 if [ $HAS_DATABASE = "false" ]; then
   echo "Application does not have a database, no migrations to run"
   exit 0

@@ -15,9 +15,9 @@ echo "  IMAGE_NAME=$IMAGE_NAME"
 echo "  IMAGE_TAG=$IMAGE_TAG"
 
 # Need to init module when running in CD since GitHub actions does a fresh checkout of repo
-terraform -chdir=infra/$APP_NAME/app-config init > /dev/null
-terraform -chdir=infra/$APP_NAME/app-config refresh > /dev/null
-IMAGE_REPOSITORY_NAME=$(terraform -chdir=infra/$APP_NAME/app-config output -raw image_repository_name)
+terraform -chdir=infra/project-config init > /dev/null
+terraform -chdir=infra/project-config refresh > /dev/null
+IMAGE_REPOSITORY_NAME=$(terraform -chdir=infra/project-config output -json app_configs | jq --raw-output .$APP_NAME.image_repository_name)
 
 REGION=$(./bin/current-region.sh)
 read -r IMAGE_REGISTRY_ID IMAGE_REPOSITORY_URL <<< $(aws ecr describe-repositories --repository-names $IMAGE_REPOSITORY_NAME --query "repositories[0].[registryId,repositoryUri]" --output text)

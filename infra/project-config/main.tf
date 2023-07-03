@@ -12,4 +12,14 @@ locals {
   default_region = "us-east-1"
 
   github_actions_role_name = "${local.project_name}-github-actions"
+
+  app_configs = {
+    app = module.app_config
+  }
 }
+
+module "app_config" {
+  source       = "../app/app-config"
+  project_name = local.project_name
+}
+

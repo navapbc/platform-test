@@ -68,7 +68,7 @@ resource "aws_s3_bucket" "load_balancer_logs" {
 
 resource "aws_s3_bucket_policy" "log_access_bucket_policy" {
   bucket = aws_s3_bucket.load_balancer_logs.id
-  policy = data.aws_iam_policy_document.log_access_bucket_policy.json
+  policy = data.aws_iam_policy_document.log_access_bucket_pol_doc.json
 }
 
 data "aws_iam_policy_document" "log_access_bucket_pol_doc" {

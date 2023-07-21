@@ -55,6 +55,34 @@ resource "aws_lb" "alb" {
 
   # TODO(https://github.com/navapbc/template-infra/issues/162) Add access logs
   # checkov:skip=CKV_AWS_91:Add access logs in future PR
+  access_logs {
+    bucket = aws_s3_bucket.load_balancer_logs.id
+    prefix = "${var.service_name}-lb"
+    enabled = true
+  }
+}
+
+resource "aws_s3_bucket" "load_balancer_logs" {
+  bucket = "${var.service_name}-log"
+}
+
+resource "aws_s3_bucket_policy" "name" {
+  bucket = aws_s3_bucket.load_balancer_logs
+  policy = data.aws_iam_policy_document.log_access_bucket_policy
+}
+
+data "aws_iam_policy_document" "log_access_bucket_policy" {
+  statement {
+    sid       = ""
+    effect    = "Allow"
+    resources = [aws_s3_bucket.load_balancer_logs.arn]
+    actions   = ["s3:PutObject"]
+
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::elb-account-id:root"]
+    }
+  }
 }
 
 # NOTE: for the demo we expose private http endpoint

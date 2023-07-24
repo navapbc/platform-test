@@ -4,7 +4,6 @@ data "aws_ecr_repository" "app" {
   name = var.image_repository_name
 }
 
-
 locals {
   alb_name                = var.service_name
   cluster_name            = var.service_name
@@ -56,8 +55,8 @@ resource "aws_lb" "alb" {
   # TODO(https://github.com/navapbc/template-infra/issues/162) Add access logs
   # checkov:skip=CKV_AWS_91:Add access logs in future PR
   access_logs {
-    bucket = aws_s3_bucket.load_balancer_logs.id
-    prefix = "${var.service_name}-lb"
+    bucket  = aws_s3_bucket.load_balancer_logs.id
+    prefix  = "${var.service_name}-lb"
     enabled = true
   }
 }
@@ -73,13 +72,16 @@ resource "aws_s3_bucket_policy" "log_access_bucket_policy" {
 
 data "aws_iam_policy_document" "log_access_bucket_pol_doc" {
   statement {
-    effect    = "Allow"
-    resources = [aws_s3_bucket.load_balancer_logs.arn]
-    actions   = ["s3:PutObject"]
+    Sid    = "AlbS3Write"
+    effect = "Allow"
+    resources = [
+      aws_s3_bucket.load_balancer_logs.arn,
+      "${aws_s3_bucket.load_balancer_logs.arn}/*"
+    ]
+    actions = ["s3:PutObject"]
 
     principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::elb-account-id:root"]
+      AWS = ["arn:aws:iam::elb-account-id:root"]
     }
   }
 }

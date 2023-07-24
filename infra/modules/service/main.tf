@@ -72,7 +72,7 @@ resource "aws_s3_bucket_policy" "log_access_bucket_policy" {
 
 data "aws_iam_policy_document" "log_access_bucket_pol_doc" {
   statement {
-    Sid    = "AlbS3Write"
+    sid    = "AlbS3Write"
     effect = "Allow"
     resources = [
       aws_s3_bucket.load_balancer_logs.arn,
@@ -81,7 +81,8 @@ data "aws_iam_policy_document" "log_access_bucket_pol_doc" {
     actions = ["s3:PutObject"]
 
     principals {
-      AWS = ["arn:aws:iam::elb-account-id:root"]
+      type = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
     }
   }
 }

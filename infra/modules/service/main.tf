@@ -23,6 +23,13 @@ locals {
     { name : "DB_SCHEMA", value : var.db_vars.connection_info.schema_name },
   ]
   environment_variables = concat(local.base_environment_variables, local.db_environment_variables)
+
+  elb_account_map = {
+    "us-east-1": "127311923021",
+    "us-east-2": "033677994240",
+    "us-west-1": "027434742980",
+    "us-west-2": "797873946194"
+  }
 }
 
 #---------------
@@ -72,7 +79,6 @@ resource "aws_s3_bucket_policy" "log_access_bucket_policy" {
 
 data "aws_iam_policy_document" "log_access_bucket_pol_doc" {
   statement {
-    sid    = "AlbS3Write"
     effect = "Allow"
     resources = [
       aws_s3_bucket.load_balancer_logs.arn,
@@ -82,7 +88,7 @@ data "aws_iam_policy_document" "log_access_bucket_pol_doc" {
 
     principals {
       type = "AWS"
-      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+      identifiers = ["arn:aws:iam::${local.elb_account_map[data.aws_region.current.name]}:root"]
     }
   }
 }

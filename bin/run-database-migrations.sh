@@ -57,5 +57,6 @@ ENVIRONMENT_VARIABLES=$(cat << EOF
 [{ "name" : "DB_USER", "value" : "$DB_MIGRATOR_USER" }]
 EOF
 )
-echo "::endgroup::"
+
 ./bin/run-command.sh $APP_NAME $ENVIRONMENT "$COMMAND" "$ENVIRONMENT_VARIABLES"
+echo "::endgroup::"

@@ -4,6 +4,7 @@ data "aws_ecr_repository" "app" {
   name = var.image_repository_name
 }
 
+
 locals {
   alb_name                = var.service_name
   cluster_name            = var.service_name
@@ -24,11 +25,14 @@ locals {
   ]
   environment_variables = concat(local.base_environment_variables, local.db_environment_variables)
 
+  # Maintain a list of AWS account IDs for Elastic Load Balancing for each of the US-based Amazon regions.
+  # This is needed to grant permissions to the ELB service for sending access logs to S3.
+  # The list was obtained from https://docs.aws.amazon.com/elasticloadbalancing/latest/application/enable-access-logging.html
   elb_account_map = {
-    "us-east-1": "127311923021",
-    "us-east-2": "033677994240",
-    "us-west-1": "027434742980",
-    "us-west-2": "797873946194"
+    "us-east-1" : "127311923021",
+    "us-east-2" : "033677994240",
+    "us-west-1" : "027434742980",
+    "us-west-2" : "797873946194"
   }
 }
 
@@ -57,39 +61,12 @@ resource "aws_lb" "alb" {
   # Drop invalid HTTP headers for improved security
   # Note that header names cannot contain underscores
   # https://docs.bridgecrew.io/docs/ensure-that-alb-drops-http-headers
-  drop_invalid_header_fields = true
 
-  # TODO(https://github.com/navapbc/template-infra/issues/162) Add access logs
-  # checkov:skip=CKV_AWS_91:Add access logs in future PR
+  drop_invalid_header_fields = true
   access_logs {
     bucket  = aws_s3_bucket.load_balancer_logs.id
     prefix  = "${var.service_name}-lb"
     enabled = true
-  }
-}
-
-resource "aws_s3_bucket" "load_balancer_logs" {
-  bucket = "${var.service_name}-log"
-}
-
-resource "aws_s3_bucket_policy" "log_access_bucket_policy" {
-  bucket = aws_s3_bucket.load_balancer_logs.id
-  policy = data.aws_iam_policy_document.log_access_bucket_pol_doc.json
-}
-
-data "aws_iam_policy_document" "log_access_bucket_pol_doc" {
-  statement {
-    effect = "Allow"
-    resources = [
-      aws_s3_bucket.load_balancer_logs.arn,
-      "${aws_s3_bucket.load_balancer_logs.arn}/*"
-    ]
-    actions = ["s3:PutObject"]
-
-    principals {
-      type = "AWS"
-      identifiers = ["arn:aws:iam::${local.elb_account_map[data.aws_region.current.name]}:root"]
-    }
   }
 }
 
@@ -153,6 +130,85 @@ resource "aws_lb_target_group" "app_tg" {
 
   lifecycle {
     create_before_destroy = true
+  }
+}
+
+#--------------------------
+## Load balancer log infra
+#--------------------------
+resource "aws_s3_bucket" "load_balancer_logs" {
+  bucket_prefix = "${var.service_name}-access-logs"
+  force_destroy = false
+  # checkov:skip=CKV2_AWS_62:Ensure S3 buckets should have event notifications enabled
+  # checkov:skip=CKV_AWS_18:Ensure the S3 bucket has access logging enabled
+}
+
+resource "s3_bucket_public_access_block" "load_balancer_logs" {
+  bucket = aws_s3_bucket.load_balancer_logs.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_replication_configuration" "load_balancer_logs" {
+  
+}
+
+# resource "aws_s3_bucket_lifecycle_configuration" "load_balancer_logs" {
+#   count = var.log_file_transition != [] || var.log_file_deletion !=0 ? 1 : 0
+#   bucket =   aws_s3_bucket.load_balancer_logs.id
+#   rule {
+#     id = "Logfile Lifecycle"
+#     filter {
+#       prefix = "${var.service_name}-lb"
+#       dynamic "transition" {
+#         for_each = var.log_file_transition
+#         content {
+
+#         }
+#       }
+#     }
+#   }
+# }
+
+resource "aws_s3_bucket_versioning" "load_balancer_logs" {
+  bucket = aws_s3_bucket.load_balancer_logs.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "load_balancer" {
+  bucket = aws_s3_bucket.load_balancer_logs.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "aws:kms"
+    }
+    bucket_key_enabled = true
+  }
+}
+
+resource "aws_s3_bucket_policy" "load_balancer_logs_put_access" {
+  bucket = aws_s3_bucket.load_balancer_logs.id
+  policy = data.aws_iam_policy_document.load_balancer_logs_put_access.json
+}
+
+data "aws_iam_policy_document" "load_balancer_logs_put_access" {
+  statement {
+    effect = "Allow"
+    resources = [
+      aws_s3_bucket.load_balancer_logs.arn,
+      "${aws_s3_bucket.load_balancer_logs.arn}/*"
+    ]
+    actions = ["s3:PutObject"]
+
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${local.elb_account_map[data.aws_region.current.name]}:root"]
+    }
   }
 }
 

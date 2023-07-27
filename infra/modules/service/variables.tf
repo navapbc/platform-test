@@ -66,3 +66,11 @@ variable "db_vars" {
   })
   default = null
 }
+
+variable "log_file_transition" {
+  default = []
+}
+
+variable "log_file_deletion" {
+  default = 0
+}

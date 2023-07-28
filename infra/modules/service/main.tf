@@ -24,7 +24,7 @@ locals {
     { name : "DB_SCHEMA", value : var.db_vars.connection_info.schema_name },
   ]
   environment_variables = concat(local.base_environment_variables, local.db_environment_variables)
-
+  prefix = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
   # Maintain a list of AWS account IDs for Elastic Load Balancing for each of the US-based Amazon regions.
   # This is needed to grant permissions to the ELB service for sending access logs to S3.
   # The list was obtained from https://docs.aws.amazon.com/elasticloadbalancing/latest/application/enable-access-logging.html
@@ -137,12 +137,13 @@ resource "aws_lb_target_group" "app_tg" {
 #--------------------------
 module "alb_log_s3" {
   source = "../compliant-s3"
-  
+
   bucket_policy_document = data.aws_iam_policy_document.load_balancer_logs_put_access.json
   service_name = var.service_name
   ia_storage_after = var.ia_storage_after
   glacier_storage_after = var.glacier_storage_after
   delete_objects_after = var.delete_objects_after
+  prefix = local.prefix
 }
 
 data "aws_iam_policy_document" "load_balancer_logs_put_access" {

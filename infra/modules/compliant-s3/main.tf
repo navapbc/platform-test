@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "load_balancer_logs" {
-  bucket_prefix = "${var.service_name}-access-logs"
+  bucket_prefix = "${var.prefix}${var.service_name}-access-logs"
   force_destroy = false
   # checkov:skip=CKV2_AWS_62:Ensure S3 buckets should have event notifications enabled
   # checkov:skip=CKV_AWS_18:Ensure the S3 bucket has access logging enabled

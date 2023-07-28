@@ -18,3 +18,7 @@ variable "delete_objects_after" {
   type = number
   default = 0
 }
+variable "prefix" {
+  type = string
+  default = ""
+}

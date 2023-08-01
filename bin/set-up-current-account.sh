@@ -83,42 +83,9 @@ if ! terraform state list module.backend.aws_s3_bucket.tf_state; then
   terraform import module.backend.aws_s3_bucket.tf_state $TF_STATE_BUCKET_NAME
 fi
 
-# Wrap terraform apply in a retry loop.
-#
-# This is a workaround to a race condition that seems to have been recently introduced
-# by AWS S3 and at the time of writing (2023-05-09) has yet to be resolved.
-# See https://github.com/hashicorp/terraform-provider-aws/issues/31139 for more details
-# about the issue.
-# There is an outstanding PR in the Terraform AWS provider created on Apr 24, 2023 that
-# may resolve this issue: https://github.com/hashicorp/terraform-provider-aws/pull/30916
-#
-# Once the issue is resolved, this retry loop can be removed and we can run terraform apply
-# directly.
-MAX_RETRIES=5
-
-# Define the command to execute
-COMMAND="terraform apply \
+terraform apply \
   -input=false \
-  -auto-approve"
-
-# Loop until the command succeeds or the maximum number of retries is reached
-for i in $(seq 1 $MAX_RETRIES); do
-  if $COMMAND; then
-    break
-  else
-    echo "Terraform apply failed. Sleeping and retrying..."
-    sleep 3
-  fi
-done
-
-# Save outputs to a local file so that GitHub Actions workflows can get the
-# IAM role to assume and AWS region for the aws-actions/configure-aws-credentials
-# action. GitHub Actions workflows cannot get this directly using the
-# `terraform output` command since that requires access to the remote tfstate
-# file in S3, which requires AWS credentials to have been configured, a chicken
-# and egg problem.
-OUTPUTS_FILE=$ACCOUNT_ID.outputs
-terraform output -json > $OUTPUTS_FILE
+  -auto-approve
 
 cd -
 

@@ -11,13 +11,16 @@ runs:
   using: "composite"
   steps:
     - run: |
-        terraform -chdir=infra/project-config init
+        terraform -chdir=infra/project-config init > /dev/null
         GITHUB_ACTIONS_ROLE_NAME=$(terraform -chdir=infra/project-config output -raw github_actions_role_name)
+        echo "GITHUB_ACTIONS_ROLE_NAME=$GITHUB_ACTIONS_ROLE_NAME"
         AWS_REGION=$(terraform -chdir=infra/project-config output -raw default_region)
+        echo "AWS_REGION=$AWS_REGION"
 
-        terraform -chdir=infra/${{ inputs.app_name }}/app-config init
-        terraform -chdir=infra/${{ inputs.app_name }}/app-config refresh
+        terraform -chdir=infra/${{ inputs.app_name }}/app-config init > /dev/null
+        terraform -chdir=infra/${{ inputs.app_name }}/app-config refresh > /dev/null 
         ACCOUNT_NAME=$(terraform -chdir=infra/${{ inputs.app_name }}/app-config output -json account_names | jq .${{ inputs.environment }})
+        echo "ACCOUNT_NAME=$ACCOUNT_NAME"
 
         # Get the account id associated with the account name
         # by listing files in the infra/accounts folder,
@@ -26,8 +29,10 @@ runs:
         # (there should be one file that looks like <ACCOUNT_NAME>.<ACCOUNT_ID>.s3.tfbackend),
         # and then stripping the suffix and prefix to just end up with <ACCOUNT_ID>.
         ACCOUNT_ID=$(ls -1 infra/accounts | grep "$ACCOUNT_NAME." | grep s3.tfbackend | sed 's/.s3.tfbackend//' | sed "s/$ACCOUNT_NAME.//")
+        echo "ACCOUNT_ID=$ACCOUNT_ID"
 
         AWS_ROLE_TO_ASSUME=arn:aws:iam::$ACCOUNT_ID:role/$GITHUB_ACTIONS_ROLE_NAME
+        echo "AWS_ROLE_TO_ASSUME=$AWS_ROLE_TO_ASSUME"
 
         echo "AWS_ROLE_TO_ASSUME=$AWS_ROLE_TO_ASSUME" >> "$GITHUB_ENV"
         echo "AWS_REGION=$AWS_REGION" >> "$GITHUB_ENV"

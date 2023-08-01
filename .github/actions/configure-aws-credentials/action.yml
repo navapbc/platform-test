@@ -15,8 +15,8 @@ runs:
         GITHUB_ACTIONS_ROLE_NAME=$(terraform -chdir=infra/project-config output -raw github_actions_role_name)
         AWS_REGION=$(terraform -chdir=infra/project-config output -raw default_region)
 
-        terraform -chdir=infra/$APP_NAME/app-config init
-        ACCOUNT_NAME=$(terraform -chdir=infra/${{ $APP_NAME }}/app-config output -json account_names | jq .${{ environment }})
+        terraform -chdir=infra/${{ inputs.app_name }}/app-config init
+        ACCOUNT_NAME=$(terraform -chdir=infra/${{ inputs.app_name }}/app-config output -json account_names | jq .${{ inputs.environment }})
         ACCOUNT_ID=$(./bin/get-account-id.sh $ACCOUNT_NAME)
 
         AWS_ROLE_TO_ASSUME=arn:aws:iam::$ACCOUNT_ID:role/$GITHUB_ACTIONS_ROLE_NAME

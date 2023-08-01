@@ -66,7 +66,7 @@ infra-configure-app-service:
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "staging")
 	./bin/configure-app-service.sh $(APP_NAME) $(ENVIRONMENT)
 
-infra-update-current-account:
+infra-update-current-account:  ## Init and apply changes to current AWS account
 	./bin/terraform-init-and-apply.sh infra/accounts `./bin/current-account-config-name.sh`
 
 infra-update-app-build-repository:

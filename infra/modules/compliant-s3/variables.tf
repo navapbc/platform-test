@@ -22,3 +22,7 @@ variable "prefix" {
   type = string
   default = ""
 }
+
+variable "purpose" {
+  type = string
+}

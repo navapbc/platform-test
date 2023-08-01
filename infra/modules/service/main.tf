@@ -144,6 +144,7 @@ module "alb_log_s3" {
   # glacier_storage_after = var.glacier_storage_after
   # delete_objects_after = var.delete_objects_after
   prefix = local.prefix
+  purpose = "access-logs"
 }
 
 data "aws_iam_policy_document" "load_balancer_logs_put_access" {

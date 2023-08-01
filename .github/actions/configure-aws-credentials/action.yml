@@ -16,6 +16,7 @@ runs:
         AWS_REGION=$(terraform -chdir=infra/project-config output -raw default_region)
 
         terraform -chdir=infra/${{ inputs.app_name }}/app-config init
+        terraform -chdir=infra/${{ inputs.app_name }}/app-config refresh
         ACCOUNT_NAME=$(terraform -chdir=infra/${{ inputs.app_name }}/app-config output -json account_names | jq .${{ inputs.environment }})
         ACCOUNT_ID=$(./bin/get-account-id.sh $ACCOUNT_NAME)
 

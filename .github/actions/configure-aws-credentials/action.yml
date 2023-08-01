@@ -12,6 +12,7 @@ runs:
   steps:
     - run: |
         terraform -chdir=infra/project-config init > /dev/null
+        terraform -chdir=infra/project-config refresh > /dev/null
         GITHUB_ACTIONS_ROLE_NAME=$(terraform -chdir=infra/project-config output -raw github_actions_role_name)
         echo "GITHUB_ACTIONS_ROLE_NAME=$GITHUB_ACTIONS_ROLE_NAME"
         AWS_REGION=$(terraform -chdir=infra/project-config output -raw default_region)

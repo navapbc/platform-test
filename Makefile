@@ -47,7 +47,7 @@ __check_defined = \
 	db-migrate-down \
 	db-migrate-create
 
-infra-set-up-account:  # Set up the AWS account for the first time
+infra-set-up-account:  ## Set up the AWS account for the first time
 	@:$(call check_defined, ACCOUNT_NAME, human readable name for account e.g. "prod" or the AWS account alias)
 	./bin/set-up-current-account.sh $(ACCOUNT_NAME)
 

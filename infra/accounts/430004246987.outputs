@@ -1,0 +1,32 @@
+{
+  "account_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "430004246987"
+  },
+  "project_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "platform-test"
+  },
+  "region": {
+    "sensitive": false,
+    "type": "string",
+    "value": "us-east-1"
+  },
+  "tf_locks_table_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "platform-test-430004246987-us-east-1-tf-state-locks"
+  },
+  "tf_log_bucket_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "platform-test-430004246987-us-east-1-tf-logs"
+  },
+  "tf_state_bucket_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "platform-test-430004246987-us-east-1-tf"
+  }
+}

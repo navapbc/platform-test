@@ -64,7 +64,7 @@ resource "aws_lb" "alb" {
 
   drop_invalid_header_fields = true
   access_logs {
-    bucket  = aws_s3_bucket.load_balancer_logs.id
+    bucket  = module.alb_log_s3.bucket_id
     prefix  = "${var.service_name}-lb"
     enabled = true
   }
@@ -140,9 +140,9 @@ module "alb_log_s3" {
 
   bucket_policy_document = data.aws_iam_policy_document.load_balancer_logs_put_access.json
   service_name = var.service_name
-  ia_storage_after = var.ia_storage_after
-  glacier_storage_after = var.glacier_storage_after
-  delete_objects_after = var.delete_objects_after
+  # ia_storage_after = var.ia_storage_after
+  # glacier_storage_after = var.glacier_storage_after
+  # delete_objects_after = var.delete_objects_after
   prefix = local.prefix
 }
 
@@ -150,8 +150,8 @@ data "aws_iam_policy_document" "load_balancer_logs_put_access" {
   statement {
     effect = "Allow"
     resources = [
-      aws_s3_bucket.load_balancer_logs.arn,
-      "${aws_s3_bucket.load_balancer_logs.arn}/*"
+      module.alb_log_s3.bucket_arn,
+      "${module.alb_log_s3.bucket_arn}/*"
     ]
     actions = ["s3:PutObject"]
 

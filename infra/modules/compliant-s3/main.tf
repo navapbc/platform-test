@@ -5,7 +5,7 @@ resource "aws_s3_bucket" "load_balancer_logs" {
   # checkov:skip=CKV_AWS_18:Ensure the S3 bucket has access logging enabled
 }
 
-resource "s3_bucket_public_access_block" "load_balancer_logs" {
+resource "aws_s3_bucket_public_access_block" "load_balancer_logs" {
   bucket = aws_s3_bucket.load_balancer_logs.id
 
   block_public_acls       = true

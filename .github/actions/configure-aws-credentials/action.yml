@@ -20,7 +20,7 @@ runs:
 
         terraform -chdir=infra/${{ inputs.app_name }}/app-config init > /dev/null
         terraform -chdir=infra/${{ inputs.app_name }}/app-config refresh > /dev/null 
-        ACCOUNT_NAME=$(terraform -chdir=infra/${{ inputs.app_name }}/app-config output -json account_names | jq .${{ inputs.environment }})
+        ACCOUNT_NAME=$(terraform -chdir=infra/${{ inputs.app_name }}/app-config output -json account_names | jq -r .${{ inputs.environment }})
         echo "ACCOUNT_NAME=$ACCOUNT_NAME"
 
         # Get the account id associated with the account name

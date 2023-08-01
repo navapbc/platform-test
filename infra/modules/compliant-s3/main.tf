@@ -14,26 +14,100 @@ resource "aws_s3_bucket_public_access_block" "block" {
   restrict_public_buckets = true
 }
 
+# data "aws_iam_policy_document" "assume_replication" {
+#   statement {
+#     effect = "Allow"
+
+#     principals {
+#       type        = "Service"
+#       identifiers = ["s3.amazonaws.com"]
+#     }
+
+#     actions = ["sts:AssumeRole"]
+#   }
+# }
+
+# resource "aws_iam_role" "replication" {
+#   name = "${var.service_name}-${var.purpose}-s3-replication"
+#   assume_assume_role_policy = data.aws_iam_policy_document.assume_replication.json  
+# }
+
+# data "aws_iam_policy_document" "rep_perms" {
+#   statement {
+#     effect = "Allow"
+
+#     actions = [
+#       "s3:GetReplicationConfiguration",
+#       "s3:ListBucket",
+#     ]
+
+#     resources = [aws_s3_bucket.source.arn]
+#   }
+
+#   statement {
+#     effect = "Allow"
+
+#     actions = [
+#       "s3:GetObjectVersionForReplication",
+#       "s3:GetObjectVersionAcl",
+#       "s3:GetObjectVersionTagging",
+#     ]
+
+#     resources = ["${aws_s3_bucket.source.arn}/*"]
+#   }
+
+#   statement {
+#     effect = "Allow"
+
+#     actions = [
+#       "s3:ReplicateObject",
+#       "s3:ReplicateDelete",
+#       "s3:ReplicateTags",
+#     ]
+
+#     resources = ["${aws_s3_bucket.destination.arn}/*"]
+#   }  
+# }
+
+# resource "aws_iam_policy" "replication" {
+#   name = "${var.service_name}-${var.purpose}-s3-replication"
+#   policy = data.aws_iam_policy_document.rep_perms
+# }
+
+# resource "aws_iam_role_policy_attachment" "replication" {
+#   role = aws_iam_role.replication.name
+#   policy_arn = aws_iam_policy.replication.arn
+# }
+
 # resource "aws_s3_bucket_replication_configuration" "rep_config" {
   
 # }
 
-# resource "aws_s3_bucket_lifecycle_configuration" "lc" {
-#   count = var.log_file_transition != [] || var.log_file_deletion !=0 ? 1 : 0
-#   bucket =   aws_s3_bucket.bucket.id
-#   rule {
-#     id = "Logfile Lifecycle"
-#     filter {
-#       prefix = "${var.service_name}-lb"
-#       dynamic "transition" {
-#         for_each = var.log_file_transition
-#         content {
-
-#         }
-#       }
-#     }
-#   }
-# }
+resource "aws_s3_bucket_lifecycle_configuration" "lc" {
+  count = var.transitions != [] && var.expiration!=0 ? 1 : 0
+  bucket =   aws_s3_bucket.bucket.id
+  rule {
+    id = "StorageClass"
+    status = "Enabled"
+    dynamic "transition" {
+      for_each = var.transitions
+      content {
+        days = each.day
+        storage_class = each.class
+      }
+    }
+  }
+  dynamic "rule" {
+    for_each = var.expiration != 0 ? [1] : []
+    content {
+      id = "Expiration"
+      status = "Enabled"
+      expiration {
+        days = var.expiration
+      }
+    }
+  }
+}
 
 resource "aws_s3_bucket_versioning" "versioning" {
   bucket = aws_s3_bucket.bucket.id

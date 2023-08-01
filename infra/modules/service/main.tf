@@ -143,7 +143,6 @@ module "alb_log_s3" {
   # ia_storage_after = var.ia_storage_after
   # glacier_storage_after = var.glacier_storage_after
   # delete_objects_after = var.delete_objects_after
-  prefix = local.prefix
   purpose = "access-logs"
 }
 

@@ -18,10 +18,6 @@ output "image_repository_name" {
   value = local.image_repository_name
 }
 
-output "image_repository_account_name" {
-  value = local.image_repository_account_name
-}
-
 output "environment_configs" {
   value = local.environment_configs
 }

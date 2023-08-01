@@ -10,7 +10,12 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: |
+    - name: Get AWS account authentication details (AWS account, IAM role, AWS region)
+      run: |
+        # Get the AWS account associated with the application environment
+        # to figure out which AWS account to log into, which IAM role to assume
+        # and which AWS region to use
+
         terraform -chdir=infra/project-config init > /dev/null
         terraform -chdir=infra/project-config refresh > /dev/null
         GITHUB_ACTIONS_ROLE_NAME=$(terraform -chdir=infra/project-config output -raw github_actions_role_name)

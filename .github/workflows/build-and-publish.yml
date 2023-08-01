@@ -32,7 +32,7 @@ jobs:
         run: make release-build
 
       - name: Configure AWS credentials
-        uses: ./actions/configure-aws-credentials
+        uses: ./.github/actions/configure-aws-credentials
         with:
           app_name: app
           environment: shared

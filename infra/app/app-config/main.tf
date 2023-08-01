@@ -6,6 +6,13 @@ locals {
   has_database                    = true
   has_incident_management_service = false
   environment_configs             = { for environment in local.environments : environment => module.env_config[environment] }
+
+  account_names = {
+    shared  = "dev"
+    dev     = "dev"
+    staging = "staging"
+    prod    = "prod"
+  }
 }
 
 module "project_config" {

@@ -2,8 +2,8 @@ output "app_name" {
   value = local.app_name
 }
 
-output "account_names" {
-  value = local.account_names
+output "account_names_by_environment" {
+  value = local.account_names_by_environment
 }
 
 output "environments" {

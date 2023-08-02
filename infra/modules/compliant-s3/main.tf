@@ -92,8 +92,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "lc" {
     dynamic "transition" {
       for_each = var.transitions
       content {
-        days = each.day
-        storage_class = each.class
+        days = transition.value
+        storage_class = transition.key
       }
     }
   }

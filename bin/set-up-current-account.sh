@@ -87,15 +87,6 @@ terraform apply \
   -input=false \
   -auto-approve
 
-# Save outputs to a local file so that GitHub Actions workflows can get the
-# IAM role to assume and AWS region for the aws-actions/configure-aws-credentials
-# action. GitHub Actions workflows cannot get this directly using the
-# `terraform output` command since that requires access to the remote tfstate
-# file in S3, which requires AWS credentials to have been configured, a chicken
-# and egg problem.
-OUTPUTS_FILE=$ACCOUNT_ID.outputs
-terraform output -json > $OUTPUTS_FILE
-
 cd -
 
 MODULE_DIR=infra/accounts

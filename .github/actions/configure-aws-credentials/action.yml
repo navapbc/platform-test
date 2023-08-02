@@ -12,16 +12,18 @@ runs:
   steps:
     - name: Get AWS account authentication details (AWS account, IAM role, AWS region)
       run: |
-        # Get the AWS account associated with the application environment
-        # to figure out which AWS account to log into, which IAM role to assume
-        # and which AWS region to use
+        # Get AWS account authentication details (AWS account, IAM role, AWS region)
+        # associated with the application environment to figure out which AWS
+        # account to log into, which IAM role to assume, and which AWS region to use
+
+        echo "::group::AWS account authentication details"
 
         terraform -chdir=infra/project-config init > /dev/null
         terraform -chdir=infra/project-config refresh > /dev/null
-        GITHUB_ACTIONS_ROLE_NAME=$(terraform -chdir=infra/project-config output -raw github_actions_role_name)
-        echo "GITHUB_ACTIONS_ROLE_NAME=$GITHUB_ACTIONS_ROLE_NAME"
         AWS_REGION=$(terraform -chdir=infra/project-config output -raw default_region)
         echo "AWS_REGION=$AWS_REGION"
+        GITHUB_ACTIONS_ROLE_NAME=$(terraform -chdir=infra/project-config output -raw github_actions_role_name)
+        echo "GITHUB_ACTIONS_ROLE_NAME=$GITHUB_ACTIONS_ROLE_NAME"
 
         terraform -chdir=infra/${{ inputs.app_name }}/app-config init > /dev/null
         terraform -chdir=infra/${{ inputs.app_name }}/app-config refresh > /dev/null 
@@ -40,6 +42,9 @@ runs:
         AWS_ROLE_TO_ASSUME=arn:aws:iam::$ACCOUNT_ID:role/$GITHUB_ACTIONS_ROLE_NAME
         echo "AWS_ROLE_TO_ASSUME=$AWS_ROLE_TO_ASSUME"
 
+        echo "::endgroup::"
+
+        echo "Setting env vars AWS_ROLE_TO_ASSUME and AWS_REGION..."
         echo "AWS_ROLE_TO_ASSUME=$AWS_ROLE_TO_ASSUME" >> "$GITHUB_ENV"
         echo "AWS_REGION=$AWS_REGION" >> "$GITHUB_ENV"
       shell: bash

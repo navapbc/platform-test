@@ -140,9 +140,8 @@ module "alb_log_s3" {
 
   bucket_policy_document = data.aws_iam_policy_document.load_balancer_logs_put_access.json
   service_name = var.service_name
-  # ia_storage_after = var.ia_storage_after
-  # glacier_storage_after = var.glacier_storage_after
-  # delete_objects_after = var.delete_objects_after
+  transitions = var.log_file_transition
+  expiration = var.log_file_deletion
   purpose = "access-logs"
 }
 

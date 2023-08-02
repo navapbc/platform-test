@@ -68,7 +68,6 @@ infra-configure-app-service:
 
 infra-update-current-account:  ## Init and apply changes to current AWS account
 	./bin/terraform-init-and-apply.sh infra/accounts `./bin/current-account-config-name.sh`
-	terraform -chdir=infra/accounts output -json > infra/accounts/`./bin/current-account-id.sh`.outputs
 
 infra-update-app-build-repository:
 	# APP_NAME has a default value defined above, but check anyways in case the default is ever removed

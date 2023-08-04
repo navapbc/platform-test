@@ -98,8 +98,29 @@ func RunEndToEndTests(t *testing.T, terraformOptions *terraform.Options) {
 	fmt.Println("::endgroup::")
 }
 
+func EnableForceDestroy() {
+	fmt.Println("::group::Enabling force-destroy for compliant s3")
+	// Based on https://www.socketloop.com/tutorials/golang-read-a-text-file-and-replace-certain-words
+	// I don't know Golang
+
+	input, err := ioutil.ReadFile("infra/modules/compliant-s3/main.tf")
+	if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+	}
+
+	output := bytes.Replace(input, []byte("force_destroy = false"), []byte("force_destroy = true"), -1)
+
+	if err = ioutil.WriteFile("infra/modules/compliant-s3/main.tf", output, 0666); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+	}
+}
+
 func DestroyDevEnvironmentAndWorkspace(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
 	fmt.Println("::group::Destroy environment and workspace")
+	// Need to do the replace string thing for s3 module
+	terraform.RunTerraformCommand(t, terraformOptions, "init", "-backend-config=dev.s3.tfbackend")
 	terraform.Destroy(t, terraformOptions)
 	terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
 	fmt.Println("::endgroup::")

@@ -1,9 +1,9 @@
 variable "bucket_policy_document" {
-  type = string
+  type    = string
   default = "{}"
 }
 variable "service_name" {
-  type = string
+  type    = string
   default = "platform-template"
 }
 
@@ -12,7 +12,7 @@ variable "transitions" {
 }
 
 variable "expiration" {
-  type = number
+  type    = number
   default = 0
 }
 

@@ -80,19 +80,19 @@ resource "aws_s3_bucket_public_access_block" "block" {
 # }
 
 # resource "aws_s3_bucket_replication_configuration" "rep_config" {
-  
+
 # }
 
 resource "aws_s3_bucket_lifecycle_configuration" "lc" {
-  count = var.transitions != [] && var.expiration!=0 ? 1 : 0
-  bucket =   aws_s3_bucket.bucket.id
+  count  = var.transitions != [] && var.expiration != 0 ? 1 : 0
+  bucket = aws_s3_bucket.bucket.id
   rule {
-    id = "StorageClass"
+    id     = "StorageClass"
     status = "Enabled"
     dynamic "transition" {
       for_each = var.transitions
       content {
-        days = transition.value
+        days          = transition.value
         storage_class = transition.key
       }
     }
@@ -100,7 +100,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "lc" {
   dynamic "rule" {
     for_each = var.expiration != 0 ? [1] : []
     content {
-      id = "Expiration"
+      id     = "Expiration"
       status = "Enabled"
       expiration {
         days = var.expiration
@@ -121,7 +121,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "encryption" {
   bucket = aws_s3_bucket.bucket.id
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm     = "aws:kms"
+      sse_algorithm = "aws:kms"
     }
     bucket_key_enabled = true
   }

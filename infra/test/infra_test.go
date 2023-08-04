@@ -103,20 +103,20 @@ func EnableDestroy() {
 	fmt.Println("::group::Enabling force-destroy and prevent_destroy = true for compliant s3")
 	shell.RunCommand(t, shell.Command{
 		Command:    "sed",
-		Args:       [
+		Args:       []string{
 			"-i.bak", 
 			"'s/resource \"aws_s3_bucket\" \"bucket\" {/&\n  force_destroy = true/'" 
 			"infra/modules/compliant-s3/main.tf"
-			],
+		},
 		WorkingDir: "../../",
 	})
 	shell.RunCommand(t, shell.Command{
 		Command:    "sed",
-		Args:       [
+		Args:       []string{
 			"-i.bak", 
 			"'s/prevent_destroy = true/prevent_destroy = false/g'" 
 			"infra/modules/compliant-s3/main.tf"
-			],
+		},
 		WorkingDir: "../../",
 	})
 }

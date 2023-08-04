@@ -5,7 +5,9 @@ import (
 	"strings"
 	"testing"
 	"time"
-
+	"ioutil"
+	"bytes"
+	"os"
 	http_helper "github.com/gruntwork-io/terratest/modules/http-helper"
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/shell"

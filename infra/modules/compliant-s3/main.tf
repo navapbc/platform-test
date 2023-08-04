@@ -3,6 +3,7 @@ resource "aws_s3_bucket" "bucket" {
   force_destroy = false
   # checkov:skip=CKV2_AWS_62:Ensure S3 buckets should have event notifications enabled
   # checkov:skip=CKV_AWS_18:Ensure the S3 bucket has access logging enabled
+  # checkov:skip=CKV_AWS_144:Ensure that S3 bucket has cross-region replication enabled
 }
 
 resource "aws_s3_bucket_public_access_block" "block" {
@@ -95,6 +96,13 @@ resource "aws_s3_bucket_lifecycle_configuration" "lc" {
         days          = transition.value
         storage_class = transition.key
       }
+    }
+  }
+  rule {
+    id = "AbortIncompleteUpload"
+    status = "Enabled"
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
     }
   }
   dynamic "rule" {

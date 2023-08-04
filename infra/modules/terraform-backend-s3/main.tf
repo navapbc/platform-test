@@ -196,6 +196,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "tf_log" {
       storage_class   = "STANDARD_IA"
     }
   }
+  # checkov:skip=CKV_AWS_300:Ensure S3 lifecycle configuration sets period for aborting failed uploads
 }
 
 data "aws_iam_policy_document" "tf_log" {

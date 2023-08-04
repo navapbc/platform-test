@@ -5,7 +5,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"ioutil"
 	"bytes"
 	"os"
 	http_helper "github.com/gruntwork-io/terratest/modules/http-helper"
@@ -100,23 +99,26 @@ func RunEndToEndTests(t *testing.T, terraformOptions *terraform.Options) {
 	fmt.Println("::endgroup::")
 }
 
-func EnableForceDestroy() {
-	fmt.Println("::group::Enabling force-destroy for compliant s3")
-	// Based on https://www.socketloop.com/tutorials/golang-read-a-text-file-and-replace-certain-words
-	// I don't know Golang
-
-	input, err := ioutil.ReadFile("infra/modules/compliant-s3/main.tf")
-	if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-	}
-
-	output := bytes.Replace(input, []byte("force_destroy = false"), []byte("force_destroy = true"), -1)
-
-	if err = ioutil.WriteFile("infra/modules/compliant-s3/main.tf", output, 0666); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-	}
+func EnableDestroy() {
+	fmt.Println("::group::Enabling force-destroy and prevent_destroy = true for compliant s3")
+	shell.RunCommand(t, shell.Command{
+		Command:    "sed",
+		Args:       [
+			"-i.bak", 
+			"'s/resource \"aws_s3_bucket\" \"bucket\" {/&\n  force_destroy = true/'" 
+			"infra/modules/compliant-s3/main.tf"
+			],
+		WorkingDir: "../../",
+	})
+	shell.RunCommand(t, shell.Command{
+		Command:    "sed",
+		Args:       [
+			"-i.bak", 
+			"'s/prevent_destroy = true/prevent_destroy = false/g'" 
+			"infra/modules/compliant-s3/main.tf"
+			],
+		WorkingDir: "../../",
+	})
 }
 
 func DestroyDevEnvironmentAndWorkspace(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {

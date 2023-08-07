@@ -105,7 +105,7 @@ func EnableDestroy(t *testing.T, terraformOptions *terraform.Options, workspaceN
 		Command:    "sed",
 		Args:       []string{
 			"-i.bak", 
-			"'s/resource \"aws_s3_bucket\" \"bucket\" {/&\n  force_destroy = true/'",
+			"'s/force_destroy = false/force_destroy = true/g'" ,
 			"infra/modules/compliant-s3/main.tf",
 		},
 		WorkingDir: "../../",

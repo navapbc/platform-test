@@ -119,6 +119,8 @@ func EnableDestroy(t *testing.T, terraformOptions *terraform.Options, workspaceN
 		},
 		WorkingDir: "../../",
 	})
+	terraform.RunTerraformCommand(t, terraformOptions, "init", "-backend-config=dev.s3.tfbackend")
+	terraform.Apply(t, terraformOptions)
 }
 
 func DestroyDevEnvironmentAndWorkspace(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {

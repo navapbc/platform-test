@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"bytes"
-	"os"
+	// "bytes"
+	// "os"
 	http_helper "github.com/gruntwork-io/terratest/modules/http-helper"
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/shell"
@@ -99,14 +99,14 @@ func RunEndToEndTests(t *testing.T, terraformOptions *terraform.Options) {
 	fmt.Println("::endgroup::")
 }
 
-func EnableDestroy() {
+func EnableDestroy(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
 	fmt.Println("::group::Enabling force-destroy and prevent_destroy = true for compliant s3")
 	shell.RunCommand(t, shell.Command{
 		Command:    "sed",
 		Args:       []string{
 			"-i.bak", 
-			"'s/resource \"aws_s3_bucket\" \"bucket\" {/&\n  force_destroy = true/'" 
-			"infra/modules/compliant-s3/main.tf"
+			"'s/resource \"aws_s3_bucket\" \"bucket\" {/&\n  force_destroy = true/'",
+			"infra/modules/compliant-s3/main.tf",
 		},
 		WorkingDir: "../../",
 	})
@@ -114,14 +114,15 @@ func EnableDestroy() {
 		Command:    "sed",
 		Args:       []string{
 			"-i.bak", 
-			"'s/prevent_destroy = true/prevent_destroy = false/g'" 
-			"infra/modules/compliant-s3/main.tf"
+			"'s/prevent_destroy = true/prevent_destroy = false/g'",
+			"infra/modules/compliant-s3/main.tf",
 		},
 		WorkingDir: "../../",
 	})
 }
 
 func DestroyDevEnvironmentAndWorkspace(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
+	EnableDestroy(t, terraformOptions, workspaceName)
 	fmt.Println("::group::Destroy environment and workspace")
 	// Need to do the replace string thing for s3 module
 	terraform.RunTerraformCommand(t, terraformOptions, "init", "-backend-config=dev.s3.tfbackend")

@@ -105,7 +105,7 @@ func EnableDestroy(t *testing.T, terraformOptions *terraform.Options, workspaceN
 		Command:    "sed",
 		Args:       []string{
 			"-i.bak", 
-			"'s/force_destroy = false/force_destroy = true/g'" ,
+			"s/force_destroy = false/force_destroy = true/g" ,
 			"infra/modules/compliant-s3/main.tf",
 		},
 		WorkingDir: "../../",
@@ -114,7 +114,7 @@ func EnableDestroy(t *testing.T, terraformOptions *terraform.Options, workspaceN
 		Command:    "sed",
 		Args:       []string{
 			"-i.bak", 
-			"'s/prevent_destroy = true/prevent_destroy = false/g'",
+			"s/prevent_destroy = true/prevent_destroy = false/g",
 			"infra/modules/compliant-s3/main.tf",
 		},
 		WorkingDir: "../../",

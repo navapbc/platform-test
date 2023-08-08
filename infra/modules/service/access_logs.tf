@@ -1,5 +1,9 @@
-resource "aws_s3_bucket" "bucket" {
-  bucket_prefix = "${var.service_name}-${var.purpose}"
+locals {
+  purpose = "access-logs"
+}
+
+resource "aws_s3_bucket" "alb" {
+  bucket_prefix = "${var.service_name}-${local.purpose}"
   force_destroy = true
   # checkov:skip=CKV2_AWS_62:Ensure S3 buckets should have event notifications enabled
   # checkov:skip=CKV_AWS_18:Ensure the S3 bucket has access logging enabled
@@ -9,7 +13,7 @@ resource "aws_s3_bucket" "bucket" {
 }
 
 resource "aws_s3_bucket_public_access_block" "block" {
-  bucket = aws_s3_bucket.bucket.id
+  bucket = aws_s3_bucket.alb.id
 
   block_public_acls       = true
   block_public_policy     = true
@@ -31,7 +35,7 @@ resource "aws_s3_bucket_public_access_block" "block" {
 # }
 
 # resource "aws_iam_role" "replication" {
-#   name = "${var.service_name}-${var.purpose}-s3-replication"
+#   name = "${var.service_name}-${local.purpose}-s3-replication"
 #   assume_assume_role_policy = data.aws_iam_policy_document.assume_replication.json  
 # }
 
@@ -73,7 +77,7 @@ resource "aws_s3_bucket_public_access_block" "block" {
 # }
 
 # resource "aws_iam_policy" "replication" {
-#   name = "${var.service_name}-${var.purpose}-s3-replication"
+#   name = "${var.service_name}-${local.purpose}-s3-replication"
 #   policy = data.aws_iam_policy_document.rep_perms
 # }
 
@@ -86,14 +90,40 @@ resource "aws_s3_bucket_public_access_block" "block" {
 
 # }
 
+# module "alb_log_s3" {
+#   source = "../compliant-s3"
+
+#   bucket_policy_document = data.aws_iam_policy_document.load_balancer_logs_put_access.json
+#   service_name           = var.service_name
+#   transitions            = var.log_file_transition
+#   expiration             = var.log_file_deletion
+#   purpose                = "access-logs"
+# }
+
+data "aws_iam_policy_document" "load_balancer_logs_put_access" {
+  statement {
+    effect = "Allow"
+    resources = [
+      aws_s3_bucket.alb.arn,
+      "${aws_s3_bucket.alb.arn}/*"
+    ]
+    actions = ["s3:PutObject"]
+
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${local.elb_account_map[data.aws_region.current.name]}:root"]
+    }
+  }
+}
+
 resource "aws_s3_bucket_lifecycle_configuration" "lc" {
-  count  = var.transitions != [] && var.expiration != 0 ? 1 : 0
-  bucket = aws_s3_bucket.bucket.id
+  count  = var.log_file_transition != [] && var.log_file_deletion != 0 ? 1 : 0
+  bucket = aws_s3_bucket.alb.id
   rule {
     id     = "StorageClass"
     status = "Enabled"
     dynamic "transition" {
-      for_each = var.transitions
+      for_each = var.log_file_transition
       content {
         days          = transition.value
         storage_class = transition.key
@@ -108,12 +138,12 @@ resource "aws_s3_bucket_lifecycle_configuration" "lc" {
     }
   }
   dynamic "rule" {
-    for_each = var.expiration != 0 ? [1] : []
+    for_each = var.log_file_deletion != 0 ? [1] : []
     content {
       id     = "Expiration"
       status = "Enabled"
       expiration {
-        days = var.expiration
+        days = var.log_file_deletion
       }
     }
   }
@@ -121,7 +151,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "lc" {
 }
 
 resource "aws_s3_bucket_versioning" "versioning" {
-  bucket = aws_s3_bucket.bucket.id
+  bucket = aws_s3_bucket.alb.id
   versioning_configuration {
     status = "Enabled"
   }
@@ -129,7 +159,7 @@ resource "aws_s3_bucket_versioning" "versioning" {
 
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "encryption" {
-  bucket = aws_s3_bucket.bucket.id
+  bucket = aws_s3_bucket.alb.id
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm = "aws:kms"
@@ -139,6 +169,6 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "encryption" {
 }
 
 resource "aws_s3_bucket_policy" "bucket_pol" {
-  bucket = aws_s3_bucket.bucket.id
-  policy = var.bucket_policy_document
+  bucket = aws_s3_bucket.alb.id
+  policy = data.aws_iam_policy_document.load_balancer_logs_put_access.json
 }

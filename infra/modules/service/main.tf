@@ -4,7 +4,6 @@ data "aws_ecr_repository" "app" {
   name = var.image_repository_name
 }
 
-
 locals {
   alb_name                = var.service_name
   cluster_name            = var.service_name
@@ -36,6 +35,7 @@ locals {
   }
 }
 
+
 #---------------
 # Load balancer
 #---------------
@@ -64,7 +64,7 @@ resource "aws_lb" "alb" {
 
   drop_invalid_header_fields = true
   access_logs {
-    bucket  = module.alb_log_s3.bucket_id
+    bucket  = aws_s3_bucket.alb.id
     prefix  = "${var.service_name}-lb"
     enabled = true
   }
@@ -129,35 +129,6 @@ resource "aws_lb_target_group" "app_tg" {
 
   lifecycle {
     create_before_destroy = true
-  }
-}
-
-#--------------------------
-## Load balancer log infra
-#--------------------------
-module "alb_log_s3" {
-  source = "../compliant-s3"
-
-  bucket_policy_document = data.aws_iam_policy_document.load_balancer_logs_put_access.json
-  service_name           = var.service_name
-  transitions            = var.log_file_transition
-  expiration             = var.log_file_deletion
-  purpose                = "access-logs"
-}
-
-data "aws_iam_policy_document" "load_balancer_logs_put_access" {
-  statement {
-    effect = "Allow"
-    resources = [
-      module.alb_log_s3.bucket_arn,
-      "${module.alb_log_s3.bucket_arn}/*"
-    ]
-    actions = ["s3:PutObject"]
-
-    principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::${local.elb_account_map[data.aws_region.current.name]}:root"]
-    }
   }
 }
 

@@ -453,7 +453,7 @@ resource "aws_vpc_security_group_ingress_rule" "vpc_endpoints_ingress_from_role_
 }
 
 resource "aws_iam_role" "service" {
-  name               = "${var.service_name}-migrator"
+  name               = "${var.name}-migrator"
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role_policy.json
 }
 

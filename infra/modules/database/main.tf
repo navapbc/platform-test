@@ -131,7 +131,7 @@ data "aws_iam_policy_document" "db_access" {
     ]
 
     resources = [
-      "${local.db_user_arn_prefix}/postgres",
+      "${local.db_user_arn_prefix}/${local.master_username}",
       "${local.db_user_arn_prefix}/${var.app_username}",
       "${local.db_user_arn_prefix}/${var.migrator_username}",
     ]

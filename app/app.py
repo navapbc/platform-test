@@ -34,7 +34,7 @@ def health():
 def migrations():
     conn = get_db_connection()
     cur = conn.execute("SELECT last_migration_date FROM migrations")
-    return cur.fetchone()
+    return str(cur.fetchone())
 
 def get_db_token(host, port, user):
     region = os.environ.get("AWS_REGION")

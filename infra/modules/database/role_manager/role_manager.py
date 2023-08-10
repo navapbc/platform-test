@@ -129,28 +129,10 @@ def configure_schema(conn: Connection, schema_name: str, migrator_username: str,
     logger.info("Configuring schema")
     logger.info("Creating schema: schema_name=%s", schema_name)
     conn.run(f"CREATE SCHEMA IF NOT EXISTS {identifier(schema_name)}")
-
-    # Add migrator role to the current user, which should be the postgres user
-    # This is needed in order to alter default privileges since you can only change
-    # default privileges for objects that will be created by yourself or by roles
-    # that you are a member of (See https://www.postgresql.org/docs/current/sql-alterdefaultprivileges.html).
-    cur_user = os.environ["DB_USER"]
-    conn.run(f"GRANT {identifier(migrator_username)} TO {identifier(cur_user)}")
-
-    logger.info("Granting all table privileges on future tables: schema_name=%s role=%s", schema_name, app_username)
-    conn.run(f"ALTER DEFAULT PRIVILEGES FOR ROLE {identifier(migrator_username)} IN SCHEMA {identifier(schema_name)} GRANT ALL ON TABLES TO {identifier(app_username)}")
-
-    # Now that we've altered the default privileges for the migrator role,
-    # remove the migrator role from the current user, since we do not want the
-    # postgres user to have the rds_iam role which would force it to log in via
-    # IAM authentication
-    conn.run(f"REVOKE {identifier(migrator_username)} FROM {identifier(cur_user)}")
-
-    logger.info("Granting schema usage privileges: schema_name=%s role=%s", schema_name, app_username)
-    conn.run(f"GRANT USAGE ON SCHEMA {identifier(schema_name)} TO {identifier(app_username)}")
-
     logger.info("Changing schema owner: schema_name=%s owner=%s", schema_name, migrator_username)
     conn.run(f"ALTER SCHEMA {identifier(schema_name)} OWNER TO {identifier(migrator_username)}")
+    logger.info("Granting schema usage privileges: schema_name=%s role=%s", schema_name, app_username)
+    conn.run(f"GRANT USAGE ON SCHEMA {identifier(schema_name)} TO {identifier(app_username)}")
 
 
 def print_roles(roles: list[str]) -> None:

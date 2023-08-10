@@ -150,14 +150,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "lc" {
   # checkov:skip=CKV_AWS_300:Ensure S3 lifecycle configuration sets period for aborting failed uploads
 }
 
-resource "aws_s3_bucket_versioning" "versioning" {
-  bucket = aws_s3_bucket.alb.id
-  versioning_configuration {
-    status = "Enabled"
-  }
-}
-
-
 resource "aws_s3_bucket_server_side_encryption_configuration" "encryption" {
   bucket = aws_s3_bucket.alb.id
   rule {

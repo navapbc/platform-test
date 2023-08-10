@@ -39,7 +39,7 @@ def migrations():
         return "No migrations run"
     else:
         last_migration_date = cur.fetchone()[0]
-        return f"Last migration on {cur.fetchone()[0]}"
+        return f"Last migration on {last_migration_date}"
 
 def get_db_token(host, port, user):
     region = os.environ.get("AWS_REGION")

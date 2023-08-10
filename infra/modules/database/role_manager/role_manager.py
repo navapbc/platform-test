@@ -138,7 +138,7 @@ def configure_schema(conn: Connection, schema_name: str, migrator_username: str,
     conn.run(f"GRANT {identifier(migrator_username)} TO {identifier(cur_user)}")
 
     logger.info("Granting all table privileges on future tables: schema_name=%s role=%s", schema_name, app_username)
-    conn.run(f"ALTER DEFAULT PRIVILEGES FOR {identifier(migrator_username)} IN SCHEMA {identifier(schema_name)} GRANT ALL ON TABLES TO {identifier(app_username)}")
+    conn.run(f"ALTER DEFAULT PRIVILEGES FOR ROLE {identifier(migrator_username)} IN SCHEMA {identifier(schema_name)} GRANT ALL ON TABLES TO {identifier(app_username)}")
 
     logger.info("Granting schema usage privileges: schema_name=%s role=%s", schema_name, app_username)
     conn.run(f"GRANT USAGE ON SCHEMA {identifier(schema_name)} TO {identifier(app_username)}")

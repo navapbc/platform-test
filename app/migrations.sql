@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS migrations;
+
 CREATE TABLE IF NOT EXISTS migrations (
     last_migration_date TIMESTAMP
 );

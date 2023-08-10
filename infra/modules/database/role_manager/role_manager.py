@@ -45,6 +45,7 @@ def connect() -> Connection:
     host = os.environ["DB_HOST"]
     port = os.environ["DB_PORT"]
     database = os.environ["DB_NAME"]
+
     password = get_password()
 
     logger.info("Connecting to database: user=%s host=%s port=%s database=%s", user, host, port, database)
@@ -52,14 +53,15 @@ def connect() -> Connection:
 
 
 def get_password() -> str:
-    ssm = boto3.client("ssm")
-    param_name = os.environ["DB_PASSWORD_PARAM_NAME"]
-    logger.info("Fetching password from parameter store")
-    result = ssm.get_parameter(
-        Name=param_name,
-        WithDecryption=True,
+    aws_region = os.environ["AWS_REGION"]
+    user = os.environ["DB_USER"]
+    host = os.environ["DB_HOST"]
+    port = os.environ["DB_PORT"]
+    client = boto3.client("rds", region_name=aws_region)
+    token = client.generate_db_auth_token(
+        DBHostname=host, Port=port, DBUsername=user, Region=aws_region
     )
-    return result["Parameter"]["Value"]
+    return token
 
 
 def get_roles(conn: Connection) -> list[str]:

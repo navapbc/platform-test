@@ -30,6 +30,11 @@ def health():
     conn.execute("SELECT 1")
     return "OK"
 
+@app.route("/migrations")
+def migrations():
+    conn = get_db_connection()
+    cur = conn.execute("SELECT last_migration_date FROM migrations")
+    return cur.fetchone()
 
 def get_db_token(host, port, user):
     region = os.environ.get("AWS_REGION")

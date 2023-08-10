@@ -34,7 +34,12 @@ def health():
 def migrations():
     conn = get_db_connection()
     cur = conn.execute("SELECT last_migration_date FROM migrations")
-    return str(cur.fetchone())
+    row = cur.fetchone
+    if row is None:
+        return "No migrations run"
+    else:
+        last_migration_date = cur.fetchone()[0]
+        return f"Last migration on {cur.fetchone()[0]}"
 
 def get_db_token(host, port, user):
     region = os.environ.get("AWS_REGION")

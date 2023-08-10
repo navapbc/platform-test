@@ -130,36 +130,15 @@ def configure_schema(conn: Connection, schema_name: str, migrator_username: str,
     logger.info("Creating schema: schema_name=%s", schema_name)
     conn.run(f"CREATE SCHEMA IF NOT EXISTS {identifier(schema_name)}")
 
-    # First change schema to the current user, which should be the postgres user
+    # Add migrator role to the current user, which should be the postgres user
     # This is needed in order to alter default privileges since you can only change
     # default privileges for objects that will be created by yourself or by roles
-    # that you are a member of. (see https://www.postgresql.org/docs/current/sql-alterdefaultprivileges.html)
-    #
-    # If the schema was newly created, this operation will be a no-op since the current
-    # user just created the schema. However, if the schema already existed from a prior
-    # run of the role_manager, then the owner of the schema will have been changed to be
-    # the migrator_user, so we need to change it back
+    # that you are a member of (See https://www.postgresql.org/docs/current/sql-alterdefaultprivileges.html).
     cur_user = os.environ["DB_USER"]
-    logger.info("Changing schema owner to current user: schema_name=%s owner=%s", schema_name, cur_user)
-    conn.run(f"ALTER SCHEMA {identifier(schema_name)} OWNER TO {identifier(cur_user)}")
+    conn.run(f"GRANT {identifier(migrator_username)} TO {identifier(cur_user)}")
 
-    logger.info("Granting all privileges on future tables: schema_name=%s role=%s", schema_name, app_username)
-    conn.run(f"ALTER DEFAULT PRIVILEGES IN SCHEMA {identifier(schema_name)} GRANT ALL ON TABLES TO {identifier(app_username)}")
-
-    logger.info("Granting all privileges on future sequences: schema_name=%s role=%s", schema_name, app_username)
-    conn.run(f"ALTER DEFAULT PRIVILEGES IN SCHEMA {identifier(schema_name)} GRANT ALL ON SEQUENCES TO {identifier(app_username)}")
-
-    logger.info("Granting all privileges on future routines: schema_name=%s role=%s", schema_name, app_username)
-    conn.run(f"ALTER DEFAULT PRIVILEGES IN SCHEMA {identifier(schema_name)} GRANT ALL ON ROUTINES TO {identifier(app_username)}")
-
-    logger.info("Granting all privileges on existing tables: schema_name=%s role=%s", schema_name, app_username)
-    conn.run(f"GRANT ALL ON ALL TABLES IN SCHEMA {identifier(schema_name)} TO {identifier(app_username)}")
-
-    logger.info("Granting all privileges on existing sequences: schema_name=%s role=%s", schema_name, app_username)
-    conn.run(f"GRANT ALL ON ALL SEQUENCES IN SCHEMA {identifier(schema_name)} TO {identifier(app_username)}")
-
-    logger.info("Granting all privileges on existing routines: schema_name=%s role=%s", schema_name, app_username)
-    conn.run(f"GRANT ALL ON ALL ROUTINES IN SCHEMA {identifier(schema_name)} TO {identifier(app_username)}")
+    logger.info("Granting all table privileges on future tables: schema_name=%s role=%s", schema_name, app_username)
+    conn.run(f"ALTER DEFAULT PRIVILEGES FOR {identifier(migrator_username)} IN SCHEMA {identifier(schema_name)} GRANT ALL ON TABLES TO {identifier(app_username)}")
 
     logger.info("Granting schema usage privileges: schema_name=%s role=%s", schema_name, app_username)
     conn.run(f"GRANT USAGE ON SCHEMA {identifier(schema_name)} TO {identifier(app_username)}")

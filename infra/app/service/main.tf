@@ -11,13 +11,16 @@ data "aws_subnets" "default" {
   }
 }
 
+data "aws_region" "current" {}
+
+data "aws_caller_identity" "current" {}
 
 locals {
   # The prefix key/value pair is used for Terraform Workspaces, which is useful for projects with multiple infrastructure developers.
   # By default, Terraform creates a workspace named “default.” If a non-default workspace is not created this prefix will equal “default”, 
   # if you choose not to use workspaces set this value to "dev" 
   prefix = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
-
+  db_user_arn_prefix = "arn:aws:rds-db:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:dbuser:${data.aws_rds_cluster.db_cluster[0].cluster_resource_id}"
   # Add environment specific tags
   tags = merge(module.project_config.default_tags, {
     environment = var.environment_name
@@ -84,7 +87,7 @@ data "aws_iam_policy_document" "db_app_access_policy" {
       "rds-db:connect"
     ]
     resources = [
-      "${local.db_user_arn_prefix}/${var.app_username}",
+      "${local.db_user_arn_prefix}/${local.database_config.app_username}",
     ]
   }
 }

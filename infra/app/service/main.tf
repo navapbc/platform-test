@@ -66,6 +66,7 @@ module "app_config" {
 
 data "aws_rds_cluster" "db_cluster" {
   count              = module.app_config.has_database ? 1 : 0
+  depends_on = [ module.database ]
   cluster_identifier = local.database_config.cluster_name
 }
 

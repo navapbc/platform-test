@@ -34,6 +34,10 @@ echo
 CLUSTER_NAME=$(terraform -chdir=infra/$APP_NAME/service output -raw service_cluster_name)
 SERVICE_NAME=$(terraform -chdir=infra/$APP_NAME/service output -raw service_name)
 
+# Get the log group and log stream prefix so that we can print out the ECS task's logs after running the task
+LOG_GROUP=$(terraform -chdir=infra/$APP_NAME/service output -raw application_log_group)
+LOG_STREAM_PREFIX=$(terraform -chdir=infra/$APP_NAME/service output -raw application_log_stream_prefix)
+
 SERVICE_TASK_DEFINITION_ARN=$(aws ecs describe-services --no-cli-pager --cluster $CLUSTER_NAME --services $SERVICE_NAME --query "services[0].taskDefinition" --output text)
 # For subsequent commands, use the task definition family rather than the service's task definition ARN
 # because in the case of migrations, we'll deploy a new task definition revision before updating the
@@ -86,17 +90,6 @@ echo "  TASK_ARN=$TASK_ARN"
 aws ecs wait tasks-stopped --region $CURRENT_REGION --cluster $CLUSTER_NAME --tasks $TASK_ARN
 echo
 
-# The log group name is defined in modules/service and is set to
-# "service/${var.service_name}"
-# TODO: DRY this up by getting it from the service module output
-LOG_GROUP="service/$SERVICE_NAME"
-
-# The log stream prefix is defined by the logConfiguration.options["awslogs-stream-prefix"]
-# parameter in the ECS task definition in the modules/service module and is set to be
-# the same as the service name
-# TODO: DRY this up by getting it from the service module output
-LOG_STREAM_PREFIX="$SERVICE_NAME"
-
 # Get the task id by extracting the substring after the last '/' since the task ARN is of
 # the form "arn:aws:ecs:<region>:<account id>:task/<cluster name>/<task id>"
 ECS_TASK_ID=$(basename $TASK_ARN)
@@ -106,6 +99,9 @@ ECS_TASK_ID=$(basename $TASK_ARN)
 LOG_STREAM="$LOG_STREAM_PREFIX/$CONTAINER_NAME/$ECS_TASK_ID"
 
 echo "::group::Task logs"
+echo "  LOG_GROUP=$LOG_GROUP"
+echo "  LOG_STREAM=$LOG_STREAM"
+echo "  START_TIME_MILLIS=$START_TIME_MILLIS"
 # The timestamps that aws logs get-log-events returns are Unix epoch timestamps.
 # Convert them to human-readable format by fetching the log events as JSON first
 # then transforming them afterwards

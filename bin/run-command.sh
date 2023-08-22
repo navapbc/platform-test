@@ -62,6 +62,9 @@ OVERRIDES=$(cat << EOF
 EOF
 )
 
+START_TIME=$(date +%s)
+START_TIME_MILLIS=$((START_TIME * 1000))
+
 AWS_ARGS=(
   ecs run-task
   --region=$CURRENT_REGION
@@ -73,15 +76,45 @@ AWS_ARGS=(
   --network-configuration "$NETWORK_CONFIG"
   --overrides "$OVERRIDES"
 )
-echo "Running AWS CLI command"
+echo "::group::Running AWS CLI command"
 printf " ... %s\n" "${AWS_ARGS[@]}"
-echo
 TASK_ARN=$(aws --no-cli-pager "${AWS_ARGS[@]}" --query "tasks[0].taskArn" --output text)
-
+echo "::endgroup::"
+echo
 echo "Waiting for task to stop"
 echo "  TASK_ARN=$TASK_ARN"
-echo
 aws ecs wait tasks-stopped --region $CURRENT_REGION --cluster $CLUSTER_NAME --tasks $TASK_ARN
+echo
+
+# The log group name is defined in modules/service and is set to
+# "service/${var.service_name}"
+# TODO: DRY this up by getting it from the service module output
+LOG_GROUP="service/$SERVICE_NAME"
+
+# The log stream prefix is defined by the logConfiguration.options["awslogs-stream-prefix"]
+# parameter in the ECS task definition in the modules/service module and is set to be
+# the same as the service name
+# TODO: DRY this up by getting it from the service module output
+LOG_STREAM_PREFIX="$SERVICE_NAME"
+
+# Get the task id by extracting the substring after the last '/' since the task ARN is of
+# the form "arn:aws:ecs:<region>:<account id>:task/<cluster name>/<task id>"
+ECS_TASK_ID=$(basename $TASK_ARN)
+
+# The log stream has the format "prefix-name/container-name/ecs-task-id"
+# See https://docs.aws.amazon.com/AmazonECS/latest/userguide/using_awslogs.html
+LOG_STREAM="$LOG_STREAM_PREFIX/$CONTAINER_NAME/$ECS_TASK_ID"
+
+echo "::group::Task logs"
+aws logs get-log-events \
+  --no-cli-pager \
+  --log-group-name $LOG_GROUP \
+  --log-stream-name $LOG_STREAM \
+  --start-time $START_TIME_MILLIS \
+  --start-from-head \
+  --no-paginate \
+  --output text
+echo "::endgroup::"
 
 CONTAINER_EXIT_CODE=$(aws ecs describe-tasks --cluster $CLUSTER_NAME --tasks $TASK_ARN --query "tasks[0].containers[?name=='$CONTAINER_NAME'].exitCode" --output text)
 

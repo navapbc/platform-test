@@ -78,8 +78,6 @@ resource "aws_kms_key" "db" {
   enable_key_rotation = true
 }
 
-
-
 # Query Logging
 # -------------
 

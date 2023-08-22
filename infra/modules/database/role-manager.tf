@@ -74,6 +74,7 @@ resource "aws_kms_key" "role_manager" {
   description         = "Key for Lambda function ${local.role_manager_name}"
   enable_key_rotation = true
 }
+
 # IAM for Role Manager lambda function
 resource "aws_iam_role" "role_manager" {
   name                = "${var.name}-manager"

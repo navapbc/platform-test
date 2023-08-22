@@ -106,14 +106,18 @@ ECS_TASK_ID=$(basename $TASK_ARN)
 LOG_STREAM="$LOG_STREAM_PREFIX/$CONTAINER_NAME/$ECS_TASK_ID"
 
 echo "::group::Task logs"
-aws logs get-log-events \
+# The timestamps that aws logs get-log-events returns are Unix epoch timestamps.
+# Convert them to human-readable format by fetching the log events as JSON first
+# then transforming them afterwards
+LOG_EVENTS=$(aws logs get-log-events \
   --no-cli-pager \
   --log-group-name $LOG_GROUP \
   --log-stream-name $LOG_STREAM \
   --start-time $START_TIME_MILLIS \
   --start-from-head \
   --no-paginate \
-  --output text
+  --output json)
+echo $LOG_EVENTS | jq -r '.events[] | ((.timestamp / 1000 | strftime("%Y-%m-%d %H:%M:%S")) + "\t" + .message)'
 echo "::endgroup::"
 
 CONTAINER_EXIT_CODE=$(aws ecs describe-tasks --cluster $CLUSTER_NAME --tasks $TASK_ARN --query "tasks[0].containers[?name=='$CONTAINER_NAME'].exitCode" --output text)

@@ -121,3 +121,11 @@ data "aws_iam_policy_document" "role_manager_assume_role" {
 data "aws_iam_policy" "lambda_vpc_access" {
   name = "AWSLambdaVPCAccessExecutionRole"
 }
+
+# Grant the role manager access to the DB as app and migrator users
+# so that it can performance database checks. This is needed by
+# the infra database tests
+resource "aws_iam_role_policy_attachment" "role_manager_db_access" {
+  name       = aws_iam_role.role_manager.name
+  policy_arn = aws_iam_policy.db_access.arn
+}

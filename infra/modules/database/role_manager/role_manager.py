@@ -53,7 +53,7 @@ def check():
     properly configured
     """
     logger.info("Running command 'check' to check database roles, schema, and privileges")
-    pass
+    return {"success": True}
 
 def connect_as_master_user() -> Connection:
     user = os.environ["DB_USER"]

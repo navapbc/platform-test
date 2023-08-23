@@ -129,10 +129,10 @@ infra-lint: ## Lint infra code
 infra-format: ## Format infra code
 	terraform fmt -recursive infra
 
-infra-test: ## Run end-to-end infra Terratest test suite
-	cd infra/test && go test -v -timeout 30m
+infra-test-service: ## Run service layer infra test suite
+	cd infra/test && go test -run TestService -v -timeout 30m
 
-infra-test-database: ## Run end-to-end infra Terratest test suite
+infra-test-database: ## Run database layer infra test suite
 	cd infra/test && go test -run TestDatabase -v -timeout 45m
 
 ########################

@@ -1,17 +1,18 @@
-name: CI Infra Checks
+name: CI Infra Service Checks
 
 on:
   push:
     branches:
       - main
     paths:
-      - infra/**
-      - .github/workflows/ci-infra.yml
+      - infra/*/service/**
+      - test/**
+      - .github/workflows/ci-infra-service.yml
   pull_request:
     paths:
-      - infra/**
+      - infra/*/service/**
       - test/**
-      - .github/workflows/ci-infra.yml
+      - .github/workflows/ci-infra-service.yml
 
 jobs:
   check-terraform-format:
@@ -74,11 +75,11 @@ jobs:
   infra-test-e2e:
     name: End-to-end tests
     runs-on: ubuntu-latest
-  
+
     permissions:
       contents: read
       id-token: write
-  
+
     steps:
       - uses: actions/checkout@v3
 
@@ -99,4 +100,4 @@ jobs:
           environment: dev
 
       - name: Run Terratest
-        run: make infra-test
+        run: make infra-test-service

@@ -132,6 +132,9 @@ infra-format: ## Format infra code
 infra-test: ## Run end-to-end infra Terratest test suite
 	cd infra/test && go test -v -timeout 30m
 
+infra-test-database: ## Run end-to-end infra Terratest test suite
+	cd infra/test && go test -run TestDatabase -v -timeout 45m
+
 ########################
 ## Release Management ##
 ########################

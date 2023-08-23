@@ -32,8 +32,8 @@ func TestService(t *testing.T) {
 		},
 	})
 
-	defer DestroyDevEnvironmentAndWorkspace(t, terraformOptions, workspaceName)
-	CreateDevEnvironmentInWorkspace(t, terraformOptions, workspaceName)
+	defer DestroyServiceAndWorkspace(t, terraformOptions, workspaceName)
+	CreateServiceInWorkspace(t, terraformOptions, workspaceName)
 	WaitForServiceToBeStable(t, workspaceName)
 	RunEndToEndTests(t, terraformOptions)
 }
@@ -62,7 +62,7 @@ func BuildAndPublish(t *testing.T) {
 	})
 }
 
-func CreateDevEnvironmentInWorkspace(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
+func CreateServiceInWorkspace(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
 	fmt.Printf("::group::Create dev environment in new workspace '%s\n'", workspaceName)
 
 	// terratest currently does not support passing a file as the -backend-config option
@@ -123,7 +123,7 @@ func EnableDestroy(t *testing.T, terraformOptions *terraform.Options, workspaceN
 	terraform.Apply(t, terraformOptions)
 }
 
-func DestroyDevEnvironmentAndWorkspace(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
+func DestroyServiceAndWorkspace(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
 	EnableDestroy(t, terraformOptions, workspaceName)
 	fmt.Println("::group::Destroy environment and workspace")
 	terraform.RunTerraformCommand(t, terraformOptions, "init", "-backend-config=dev.s3.tfbackend")

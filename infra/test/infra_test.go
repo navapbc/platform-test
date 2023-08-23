@@ -51,9 +51,9 @@ func BuildAndPublish(t *testing.T) {
 	// it looks like this PR would add functionality for this: https://github.com/gruntwork-io/terratest/pull/558
 	// after which we add BackendConfig: []string{"dev.s3.tfbackend": terraform.KeyOnly} to terraformOptions
 	// and replace the call to terraform.RunTerraformCommand with terraform.Init
-	terraform.RunTerraformCommand(t, &terraform.Options{
+	TerraformInit(t, &terraform.Options{
 		TerraformDir: "../app/build-repository/",
-	}, "init", "-backend-config=shared.s3.tfbackend")
+	}, "shared.s3.tfbackend")
 
 	shell.RunCommand(t, shell.Command{
 		Command:    "make",
@@ -110,7 +110,6 @@ func EnableDestroyService(t *testing.T, terraformOptions *terraform.Options) {
 		},
 		WorkingDir: "../../",
 	})
-	terraform.RunTerraformCommand(t, terraformOptions, "init", "-backend-config=dev.s3.tfbackend")
 	terraform.Apply(t, terraformOptions)
 }
 

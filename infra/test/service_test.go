@@ -2,18 +2,13 @@ package test
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 	"time"
 
 	http_helper "github.com/gruntwork-io/terratest/modules/http-helper"
-	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/shell"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 )
-
-var uniqueId = strings.ToLower(random.UniqueId())
-var workspaceName = fmt.Sprintf("t-%s", uniqueId)
 
 func TestService(t *testing.T) {
 	BuildAndPublish(t)
@@ -34,6 +29,7 @@ func TestService(t *testing.T) {
 
 	TerraformInit(t, terraformOptions, "dev.s3.tfbackend")
 
+	workspaceName := RandomWorkspaceName()
 	defer terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
 	terraform.WorkspaceSelectOrNew(t, terraformOptions, workspaceName)
 
@@ -66,23 +62,6 @@ func BuildAndPublish(t *testing.T) {
 		Args:       []string{"release-publish"},
 		WorkingDir: "../../",
 	})
-}
-
-func TestDatabase(t *testing.T) {
-	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
-		Reconfigure:  true,
-		TerraformDir: "../app/database/",
-		VarFiles:     []string{"dev.tfvars"},
-	})
-
-	TerraformInit(t, terraformOptions, "dev.s3.tfbackend")
-
-	// TODO: Uncomment
-	// defer terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
-	terraform.WorkspaceSelectOrNew(t, terraformOptions, workspaceName)
-
-	defer DestroyDatabase(t, terraformOptions)
-	terraform.Apply(t, terraformOptions)
 }
 
 func WaitForServiceToBeStable(t *testing.T, workspaceName string) {
@@ -132,9 +111,5 @@ func EnableDestroyService(t *testing.T, terraformOptions *terraform.Options) {
 
 func DestroyService(t *testing.T, terraformOptions *terraform.Options) {
 	EnableDestroyService(t, terraformOptions)
-	terraform.Destroy(t, terraformOptions)
-}
-
-func DestroyDatabase(t *testing.T, terraformOptions *terraform.Options) {
 	terraform.Destroy(t, terraformOptions)
 }

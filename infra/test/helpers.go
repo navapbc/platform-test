@@ -3,8 +3,10 @@ package test
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
+	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 )
 
@@ -17,4 +19,10 @@ import (
 // and replace the call to terraform.RunTerraformCommand with terraform.Init
 func TerraformInit(t *testing.T, terraformOptions *terraform.Options, backendConfig string) {
 	terraform.RunTerraformCommand(t, terraformOptions, "init", fmt.Sprintf("-backend-config=%s", backendConfig))
+}
+
+func RandomWorkspaceName() string {
+	var uniqueId = strings.ToLower(random.UniqueId())
+	var workspaceName = fmt.Sprintf("t-%s", uniqueId)
+	return workspaceName
 }

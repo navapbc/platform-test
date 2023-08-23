@@ -47,6 +47,8 @@ func TestDatabase(t *testing.T) {
 		VarFiles:     []string{"dev.tfvars"},
 	})
 
+	TerraformInit(t, terraformOptions, "dev.s3.tfbackend")
+
 	defer terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
 	terraform.WorkspaceSelectOrNew(t, terraformOptions, workspaceName)
 

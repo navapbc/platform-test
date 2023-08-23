@@ -12,11 +12,12 @@ import (
 	"github.com/gruntwork-io/terratest/modules/terraform"
 )
 
-func TestDev(t *testing.T) {
+var uniqueId = strings.ToLower(random.UniqueId())
+var workspaceName = fmt.Sprintf("t-%s", uniqueId)
+
+func TestService(t *testing.T) {
 	BuildAndPublish(t)
 
-	uniqueId := strings.ToLower(random.UniqueId())
-	workspaceName := fmt.Sprintf("t-%s", uniqueId)
 	imageTag := shell.RunCommandAndGetOutput(t, shell.Command{
 		Command:    "git",
 		Args:       []string{"rev-parse", "HEAD"},

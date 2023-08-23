@@ -113,9 +113,8 @@ echo "  TASK_START_TIME_MILLIS=$TASK_START_TIME_MILLIS"
 # Initialize the logs start time filter to the time we started the task
 LOGS_START_TIME_MILLIS=$TASK_START_TIME_MILLIS
 while true; do
-  # The timestamps that aws logs get-log-events returns are Unix epoch timestamps.
-  # Convert them to human-readable format by fetching the log events as JSON first
-  # then transforming them afterwards
+  # Print logs with human readable timestamps by fetching the log events as JSON
+  # then transforming them afterwards using jq
   LOG_EVENTS=$(aws logs get-log-events \
     --no-cli-pager \
     --log-group-name $LOG_GROUP \
@@ -124,8 +123,10 @@ while true; do
     --start-from-head \
     --no-paginate \
     --output json)
+  # Divide timestamp by 1000 since AWS timestamps are in milliseconds
   echo $LOG_EVENTS | jq -r '.events[] | ((.timestamp / 1000 | strftime("%Y-%m-%d %H:%M:%S")) + "\t" + .message)'
 
+  # If the task stopped, then stop tailing logs
   LAST_TASK_STATUS=$(aws ecs describe-tasks --cluster $CLUSTER_NAME --tasks $TASK_ARN --query "tasks[0].containers[?name=='$CONTAINER_NAME'].lastStatus" --output text)
   if [ "$LAST_TASK_STATUS" = "STOPPED" ]; then
     break
@@ -137,6 +138,9 @@ while true; do
   if [ "$LAST_LOG_TIMESTAMP" != "null" ]; then
     LOGS_START_TIME_MILLIS=$((LAST_LOG_TIMESTAMP + 1))
   fi
+
+  # Give the application a moment to generate more logs before fetching again
+  sleep 1
 done
 echo "::endgroup::"
 echo

@@ -53,6 +53,11 @@ def check():
     properly configured
     """
     logger.info("Running command 'check' to check database roles, schema, and privileges")
+    app_username = os.environ.get("APP_USER")
+    migrator_username = os.environ.get("MIGRATOR_USER")
+    app_conn = connect_using_iam(app_username)
+    migrator_conn = connect_using_iam(migrator_username)
+
     return {"success": True}
 
 def connect_as_master_user() -> Connection:
@@ -65,6 +70,17 @@ def connect_as_master_user() -> Connection:
     logger.info("Connecting to database: user=%s host=%s port=%s database=%s", user, host, port, database)
     return Connection(user=user, host=host, port=port, database=database, password=password)
 
+
+def connect_using_iam(user: str) -> str:
+    client = boto3.client("rds")
+    host = os.environ["DB_HOST"]
+    port = os.environ["DB_PORT"]
+    database = os.environ["DB_NAME"]
+    token = client.generate_db_auth_token(
+        DBHostname=host, Port=port, DBUsername=user
+    )
+    logger.info("Connecting to database: user=%s host=%s port=%s database=%s", user, host, port, database)
+    return Connection(user=user, host=host, port=port, database=database, password=token)
 
 def get_password() -> str:
     # Access SSM via the VPC endpoint URL

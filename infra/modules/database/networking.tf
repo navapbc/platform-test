@@ -51,7 +51,7 @@ resource "aws_vpc_endpoint" "ssm" {
   vpc_endpoint_type   = "Interface"
   security_group_ids  = [aws_security_group.vpc_endpoints.id]
   subnet_ids          = var.private_subnet_ids
-  private_dns_enabled = true
+  private_dns_enabled = false
 }
 
 resource "aws_vpc_endpoint" "kms" {
@@ -60,7 +60,7 @@ resource "aws_vpc_endpoint" "kms" {
   vpc_endpoint_type   = "Interface"
   security_group_ids  = [aws_security_group.vpc_endpoints.id]
   subnet_ids          = var.private_subnet_ids
-  private_dns_enabled = true
+  private_dns_enabled = false
 }
 
 resource "aws_security_group" "vpc_endpoints" {

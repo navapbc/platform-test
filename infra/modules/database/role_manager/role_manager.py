@@ -67,7 +67,10 @@ def connect_as_master_user() -> Connection:
 
 
 def get_password() -> str:
-    ssm = boto3.client("ssm")
+    # Access SSM via the VPC endpoint URL
+    # (see https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html#boto3.session.Session.client)
+    ssm_url = os.environ["AWS_SSM_URL"]
+    ssm = boto3.client("ssm", endpoint_url=ssm_url)
     param_name = os.environ["DB_PASSWORD_PARAM_NAME"]
     logger.info("Fetching password from parameter store")
     result = ssm.get_parameter(

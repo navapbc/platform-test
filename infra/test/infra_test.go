@@ -51,7 +51,7 @@ func TestDatabase(t *testing.T) {
 	// defer terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
 	terraform.WorkspaceSelectOrNew(t, terraformOptions, workspaceName)
 
-	defer DestroyDatabase(t, terraformOptions, workspaceName)
+	defer DestroyDatabase(t, terraformOptions)
 	terraform.Apply(t, terraformOptions)
 }
 
@@ -160,5 +160,6 @@ func DestroyServiceAndWorkspace(t *testing.T, terraformOptions *terraform.Option
 	fmt.Println("::endgroup::")
 }
 
-func DestroyDatabase(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
+func DestroyDatabase(t *testing.T, terraformOptions *terraform.Options) {
+	terraform.Destroy(t, terraformOptions)
 }

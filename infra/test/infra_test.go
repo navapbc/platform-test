@@ -52,8 +52,8 @@ func TestDatabase(t *testing.T) {
 	defer terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
 	terraform.WorkspaceSelectOrNew(t, terraformOptions, workspaceName)
 
-	defer DestroyDatabaseAndWorkspace(t, terraformOptions, workspaceName)
-	CreateDatabaseInWorkspace(t, terraformOptions, workspaceName)
+	defer DestroyDatabase(t, terraformOptions, workspaceName)
+	CreateDatabase(t, terraformOptions, workspaceName)
 }
 
 func BuildAndPublish(t *testing.T) {
@@ -90,7 +90,6 @@ func BuildAndPublish(t *testing.T) {
 func TerraformInit(t *testing.T, terraformOptions *terraform.Options, backendConfig string) {
 	terraform.RunTerraformCommand(t, terraformOptions, "init", fmt.Sprintf("-backend-config=%s", backendConfig))
 }
-
 
 func CreateServiceInWorkspace(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
 	fmt.Printf("::group::Create dev environment in new workspace '%s\n'", workspaceName)
@@ -162,8 +161,8 @@ func DestroyServiceAndWorkspace(t *testing.T, terraformOptions *terraform.Option
 	fmt.Println("::endgroup::")
 }
 
-func CreateDatabaseInWorkspace(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
+func CreateDatabase(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
 }
 
-func DestroyDatabaseAndWorkspace(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
+func DestroyDatabase(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
 }

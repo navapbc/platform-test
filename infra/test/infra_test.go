@@ -53,7 +53,7 @@ func TestDatabase(t *testing.T) {
 	terraform.WorkspaceSelectOrNew(t, terraformOptions, workspaceName)
 
 	defer DestroyDatabase(t, terraformOptions, workspaceName)
-	CreateDatabase(t, terraformOptions, workspaceName)
+	terraform.Apply(t, terraformOptions)
 }
 
 func BuildAndPublish(t *testing.T) {
@@ -159,9 +159,6 @@ func DestroyServiceAndWorkspace(t *testing.T, terraformOptions *terraform.Option
 	terraform.Destroy(t, terraformOptions)
 	terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
 	fmt.Println("::endgroup::")
-}
-
-func CreateDatabase(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
 }
 
 func DestroyDatabase(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {

@@ -21,9 +21,23 @@ func TestDatabase(t *testing.T) {
 	terraform.WorkspaceSelectOrNew(t, terraformOptions, workspaceName)
 
 	defer DestroyDatabase(t, terraformOptions)
+}
+
+func EnableDestroyDatabase(t *testing.T, terraformOptions *terraform.Options) {
+	fmt.Println("::group::Setting deletion_protection = false")
+	shell.RunCommand(t, shell.Command{
+		Command: "sed",
+		Args: []string{
+			"-i.bak",
+			"s/deletion_protection[ ]*= true/deletion_protection = false/g",
+			"infra/modules/database/main.tf",
+		},
+		WorkingDir: "../../",
+	})
 	terraform.Apply(t, terraformOptions)
 }
 
 func DestroyDatabase(t *testing.T, terraformOptions *terraform.Options) {
+	EnableDestroyDatabase(t, terraformOptions)
 	terraform.Destroy(t, terraformOptions)
 }

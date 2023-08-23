@@ -9,10 +9,18 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 def lambda_handler(event, context):
-    conn = connect()
+    if event["body"] == "check":
+        return check()
+    else:
+        return manage()
+
+def manage():
+    """Manage database roles, schema, and privileges"""
+
+    logger.info("Running command 'manage' to manage database roles, schema, and privileges")
+    conn = connect_as_master_user()
 
     logger.info("Current database configuration")
-
     prev_roles = get_roles(conn)
     print_roles(prev_roles)
 
@@ -40,7 +48,14 @@ def lambda_handler(event, context):
         },
     }
 
-def connect() -> Connection:
+def check():
+    """Check that database roles, schema, and privileges were
+    properly configured
+    """
+    logger.info("Running command 'check' to check database roles, schema, and privileges")
+    pass
+
+def connect_as_master_user() -> Connection:
     user = os.environ["DB_USER"]
     host = os.environ["DB_HOST"]
     port = os.environ["DB_PORT"]

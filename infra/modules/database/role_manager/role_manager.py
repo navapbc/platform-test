@@ -9,7 +9,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 def lambda_handler(event, context):
-    if event["body"] == "check":
+    if event == "check":
         return check()
     else:
         return manage()

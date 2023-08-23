@@ -68,6 +68,23 @@ func BuildAndPublish(t *testing.T) {
 	})
 }
 
+func TestDatabase(t *testing.T) {
+	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
+		Reconfigure:  true,
+		TerraformDir: "../app/database/",
+		VarFiles:     []string{"dev.tfvars"},
+	})
+
+	TerraformInit(t, terraformOptions, "dev.s3.tfbackend")
+
+	// TODO: Uncomment
+	// defer terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
+	terraform.WorkspaceSelectOrNew(t, terraformOptions, workspaceName)
+
+	defer DestroyDatabase(t, terraformOptions)
+	terraform.Apply(t, terraformOptions)
+}
+
 func WaitForServiceToBeStable(t *testing.T, workspaceName string) {
 	fmt.Println("::group::Wait for service to be stable")
 	appName := "app"
@@ -115,5 +132,9 @@ func EnableDestroyService(t *testing.T, terraformOptions *terraform.Options) {
 
 func DestroyService(t *testing.T, terraformOptions *terraform.Options) {
 	EnableDestroyService(t, terraformOptions)
+	terraform.Destroy(t, terraformOptions)
+}
+
+func DestroyDatabase(t *testing.T, terraformOptions *terraform.Options) {
 	terraform.Destroy(t, terraformOptions)
 }

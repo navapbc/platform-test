@@ -37,7 +37,7 @@ func TestService(t *testing.T) {
 	defer terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
 	terraform.WorkspaceSelectOrNew(t, terraformOptions, workspaceName)
 
-	defer DestroyService(t, terraformOptions, workspaceName)
+	defer DestroyService(t, terraformOptions)
 	terraform.Apply(t, terraformOptions)
 
 	WaitForServiceToBeStable(t, workspaceName)
@@ -90,7 +90,7 @@ func RunEndToEndTests(t *testing.T, terraformOptions *terraform.Options) {
 	fmt.Println("::endgroup::")
 }
 
-func EnableDestroyService(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
+func EnableDestroyService(t *testing.T, terraformOptions *terraform.Options) {
 	fmt.Println("::group::Setting force_destroy = true and prevent_destroy = false for s3 buckets")
 	shell.RunCommand(t, shell.Command{
 		Command: "sed",
@@ -114,7 +114,7 @@ func EnableDestroyService(t *testing.T, terraformOptions *terraform.Options, wor
 	terraform.Apply(t, terraformOptions)
 }
 
-func DestroyService(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
-	EnableDestroyService(t, terraformOptions, workspaceName)
+func DestroyService(t *testing.T, terraformOptions *terraform.Options) {
+	EnableDestroyService(t, terraformOptions)
 	terraform.Destroy(t, terraformOptions)
 }

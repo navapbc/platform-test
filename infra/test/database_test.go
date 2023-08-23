@@ -1,8 +1,10 @@
 package test
 
 import (
+	"fmt"
 	"testing"
 
+	"github.com/gruntwork-io/terratest/modules/shell"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 )
 
@@ -16,11 +18,11 @@ func TestDatabase(t *testing.T) {
 	TerraformInit(t, terraformOptions, "dev.s3.tfbackend")
 
 	workspaceName := RandomWorkspaceName()
-	// TODO: Uncomment
-	// defer terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
+	defer terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
 	terraform.WorkspaceSelectOrNew(t, terraformOptions, workspaceName)
 
 	defer DestroyDatabase(t, terraformOptions)
+	terraform.Apply(t, terraformOptions)
 }
 
 func EnableDestroyDatabase(t *testing.T, terraformOptions *terraform.Options) {

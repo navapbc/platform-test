@@ -32,27 +32,16 @@ func TestService(t *testing.T) {
 		},
 	})
 
-	defer DestroyServiceAndWorkspace(t, terraformOptions, workspaceName)
-	CreateServiceInWorkspace(t, terraformOptions, workspaceName)
-	WaitForServiceToBeStable(t, workspaceName)
-	RunEndToEndTests(t, terraformOptions)
-}
-
-func TestDatabase(t *testing.T) {
-	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
-		Reconfigure:  true,
-		TerraformDir: "../app/database/",
-		VarFiles:     []string{"dev.tfvars"},
-	})
-
 	TerraformInit(t, terraformOptions, "dev.s3.tfbackend")
 
-	// TODO: Uncomment
-	// defer terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
+	defer terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
 	terraform.WorkspaceSelectOrNew(t, terraformOptions, workspaceName)
 
-	defer DestroyDatabase(t, terraformOptions)
+	defer DestroyService(t, terraformOptions, workspaceName)
 	terraform.Apply(t, terraformOptions)
+
+	WaitForServiceToBeStable(t, workspaceName)
+	RunEndToEndTests(t, terraformOptions)
 }
 
 func BuildAndPublish(t *testing.T) {
@@ -79,32 +68,6 @@ func BuildAndPublish(t *testing.T) {
 	})
 }
 
-// Wrapper function for terraform init using a passed in backend config file. This is needed since
-// terratest currently does not support passing a file as the -backend-config option
-// so we need to manually call terraform rather than using terraform.Init
-// see https://github.com/gruntwork-io/terratest/issues/517
-// it looks like this PR would add functionality for this: https://github.com/gruntwork-io/terratest/pull/558
-// after which we add BackendConfig: []string{"dev.s3.tfbackend": terraform.KeyOnly} to terraformOptions
-// and replace the call to terraform.RunTerraformCommand with terraform.Init
-func TerraformInit(t *testing.T, terraformOptions *terraform.Options, backendConfig string) {
-	terraform.RunTerraformCommand(t, terraformOptions, "init", fmt.Sprintf("-backend-config=%s", backendConfig))
-}
-
-func CreateServiceInWorkspace(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
-	fmt.Printf("::group::Create dev environment in new workspace '%s\n'", workspaceName)
-
-	// terratest currently does not support passing a file as the -backend-config option
-	// so we need to manually call terraform rather than using terraform.Init
-	// see https://github.com/gruntwork-io/terratest/issues/517
-	// it looks like this PR would add functionality for this: https://github.com/gruntwork-io/terratest/pull/558
-	// after which we add BackendConfig: []string{"dev.s3.tfbackend": terraform.KeyOnly} to terraformOptions
-	// and replace the call to terraform.RunTerraformCommand with terraform.Init
-	terraform.RunTerraformCommand(t, terraformOptions, "init", "-backend-config=dev.s3.tfbackend")
-	terraform.WorkspaceSelectOrNew(t, terraformOptions, workspaceName)
-	terraform.Apply(t, terraformOptions)
-	fmt.Println("::endgroup::")
-}
-
 func WaitForServiceToBeStable(t *testing.T, workspaceName string) {
 	fmt.Println("::group::Wait for service to be stable")
 	appName := "app"
@@ -127,7 +90,7 @@ func RunEndToEndTests(t *testing.T, terraformOptions *terraform.Options) {
 	fmt.Println("::endgroup::")
 }
 
-func EnableDestroy(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
+func EnableDestroyService(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
 	fmt.Println("::group::Setting force_destroy = true and prevent_destroy = false for s3 buckets")
 	shell.RunCommand(t, shell.Command{
 		Command: "sed",
@@ -151,15 +114,7 @@ func EnableDestroy(t *testing.T, terraformOptions *terraform.Options, workspaceN
 	terraform.Apply(t, terraformOptions)
 }
 
-func DestroyServiceAndWorkspace(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
-	EnableDestroy(t, terraformOptions, workspaceName)
-	fmt.Println("::group::Destroy environment and workspace")
-	terraform.RunTerraformCommand(t, terraformOptions, "init", "-backend-config=dev.s3.tfbackend")
-	terraform.Destroy(t, terraformOptions)
-	terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
-	fmt.Println("::endgroup::")
-}
-
-func DestroyDatabase(t *testing.T, terraformOptions *terraform.Options) {
+func DestroyService(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
+	EnableDestroyService(t, terraformOptions, workspaceName)
 	terraform.Destroy(t, terraformOptions)
 }

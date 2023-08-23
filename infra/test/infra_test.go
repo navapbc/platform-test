@@ -47,6 +47,9 @@ func TestDatabase(t *testing.T) {
 		VarFiles:     []string{"dev.tfvars"},
 	})
 
+	defer terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
+	terraform.WorkspaceSelectOrNew(t, terraformOptions, workspaceName)
+
 	defer DestroyDatabaseAndWorkspace(t, terraformOptions, workspaceName)
 	CreateDatabaseInWorkspace(t, terraformOptions, workspaceName)
 }

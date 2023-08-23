@@ -132,6 +132,9 @@ infra-format: ## Format infra code
 infra-test-service: ## Run service layer infra test suite
 	cd infra/test && go test -run TestService -v -timeout 30m
 
+infra-test-database: ## Run database layer infra test suite
+	cd infra/test && go test -run TestDatabase -v -timeout 30m
+
 ########################
 ## Release Management ##
 ########################

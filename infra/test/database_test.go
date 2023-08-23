@@ -23,6 +23,13 @@ func TestDatabase(t *testing.T) {
 
 	defer DestroyDatabase(t, terraformOptions)
 	terraform.Apply(t, terraformOptions)
+
+	ValidateDatabase(t, terraformOptions)
+}
+
+func ValidateDatabase(t *testing.T, terraformOptions *terraform.Options) {
+	roleManagerFunctionName := terraform.Output(t, terraformOptions, "role_manager_function_name")
+	aws.InvokeFunction(t, "", roleManagerFunctionName, "check")
 }
 
 func EnableDestroyDatabase(t *testing.T, terraformOptions *terraform.Options) {

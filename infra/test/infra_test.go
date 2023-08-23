@@ -40,6 +40,17 @@ func TestService(t *testing.T) {
 	RunEndToEndTests(t, terraformOptions)
 }
 
+func TestDatabase(t *testing.T) {
+	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
+		Reconfigure:  true,
+		TerraformDir: "../app/database/",
+		VarFiles:     []string{"dev.tfvars"},
+	})
+
+	defer DestroyDatabaseAndWorkspace(t, terraformOptions, workspaceName)
+	CreateDatabaseInWorkspace(t, terraformOptions, workspaceName)
+}
+
 func BuildAndPublish(t *testing.T) {
 	// terratest currently does not support passing a file as the -backend-config option
 	// so we need to manually call terraform rather than using terraform.Init
@@ -132,4 +143,10 @@ func DestroyServiceAndWorkspace(t *testing.T, terraformOptions *terraform.Option
 	terraform.Destroy(t, terraformOptions)
 	terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
 	fmt.Println("::endgroup::")
+}
+
+func CreateDatabaseInWorkspace(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
+}
+
+func DestroyDatabaseAndWorkspace(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
 }

@@ -63,9 +63,12 @@ module "database" {
 
   name               = "${local.prefix}${local.database_config.cluster_name}"
   access_policy_name = "${local.prefix}${local.database_config.access_policy_name}"
-  app_username       = "${local.prefix}${local.database_config.app_username}"
-  migrator_username  = "${local.prefix}${local.database_config.migrator_username}"
-  schema_name        = "${local.prefix}${local.database_config.schema_name}"
+
+  # The following are not AWS infra resources and therefore do not need to be
+  # isolated via the terraform workspace prefix
+  app_username      = local.database_config.app_username
+  migrator_username = local.database_config.migrator_username
+  schema_name       = local.database_config.schema_name
 
   vpc_id             = data.aws_vpc.default.id
   private_subnet_ids = data.aws_subnets.default.ids

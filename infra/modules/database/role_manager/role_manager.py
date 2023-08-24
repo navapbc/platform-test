@@ -61,19 +61,32 @@ def check():
     
     check_search_path(migrator_conn, schema_name)
     check_migrator_create_table(migrator_conn, app_username)
+    check_app_use_table(app_conn)
+    cleanup_migrator_drop_table(migrator_conn)
 
     return {"success": True}
 
 
-def check_search_path(migrator_conn: Connection, schema_name: str) -> bool:
+def check_search_path(migrator_conn: Connection, schema_name: str):
     logger.info("Checking that search path is %s", schema_name)
     assert migrator_conn.run("SHOW search_path") == [[schema_name]]
 
 
-def check_migrator_create_table(migrator_conn: Connection, app_username: str) -> bool:
+def check_migrator_create_table(migrator_conn: Connection, app_username: str):
     logger.info("Checking that migrator is able to create tables and grant access to app user: %s", app_username)
     migrator_conn.run("CREATE TABLE IF NOT EXISTS temporary(created_at TIMESTAMP)")
     migrator_conn.run(f"GRANT ALL PRIVILEGES ON temporary TO {identifier(app_username)}")
+    
+
+def check_app_use_table(app_conn: Connection):
+    logger.info("Checking that app is able to read and write from the table")
+    app_conn.run("INSERT INTO temporary (created_at) VALUES (NOW())")
+    app_conn.run("SELECT * FROM temporary")
+    
+    
+def cleanup_migrator_drop_table(migrator_conn: Connection):
+    logger.info("Cleaning up the table that migrator created")
+    migrator_conn.run("DROP TABLE IF EXISTS temporary")
 
 
 def connect_as_master_user() -> Connection:

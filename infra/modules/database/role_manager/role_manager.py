@@ -68,7 +68,7 @@ def connect_as_master_user() -> Connection:
     password = get_password()
 
     logger.info("Connecting to database: user=%s host=%s port=%s database=%s", user, host, port, database)
-    return Connection(user=user, host=host, port=port, database=database, password=password)
+    return Connection(user=user, host=host, port=port, database=database, password=password, ssl_context=True)
 
 
 def connect_using_iam(user: str) -> str:
@@ -80,7 +80,7 @@ def connect_using_iam(user: str) -> str:
         DBHostname=host, Port=port, DBUsername=user
     )
     logger.info("Connecting to database: user=%s host=%s port=%s database=%s", user, host, port, database)
-    return Connection(user=user, host=host, port=port, database=database, password=token)
+    return Connection(user=user, host=host, port=port, database=database, password=token, ssl_context=True)
 
 def get_password() -> str:
     # Access SSM via the VPC endpoint URL

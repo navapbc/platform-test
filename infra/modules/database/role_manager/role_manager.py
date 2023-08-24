@@ -59,18 +59,21 @@ def check():
     app_conn = connect_using_iam(app_username)
     migrator_conn = connect_using_iam(migrator_username)
     
-    print_check("Checking search path", check_search_path(migrator_conn, schema_name))
+    check_search_path(migrator_conn, schema_name)
+    check_migrator_create_table(migrator_conn, app_username)
 
     return {"success": True}
 
 
-def print_check(msg: str, result: bool):
-    result_msg = "PASS" if result else "FAIL"
-    logger.info("%-40s %s", msg, result_msg)
+def check_search_path(migrator_conn: Connection, schema_name: str) -> bool:
+    logger.info("Checking that search path is %s", schema_name)
+    assert migrator_conn.run("SHOW search_path") == [[schema_name]]
 
 
-def check_search_path(migrator_conn: Connection, expected: str) -> bool:
-    return migrator_conn.run("SHOW search_path") == [[expected]]
+def check_migrator_create_table(migrator_conn: Connection, app_username: str) -> bool:
+    logger.info("Checking that migrator is able to create tables and grant access to app user: %s", app_username)
+    migrator_conn.run("CREATE TABLE IF NOT EXISTS temporary(created_at TIMESTAMP)")
+    migrator_conn.run(f"GRANT ALL PRIVILEGES ON temporary TO {identifier(app_username)}")
 
 
 def connect_as_master_user() -> Connection:

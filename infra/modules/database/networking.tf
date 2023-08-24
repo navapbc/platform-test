@@ -63,15 +63,6 @@ resource "aws_vpc_endpoint" "kms" {
   private_dns_enabled = false
 }
 
-resource "aws_vpc_endpoint" "rds" {
-  vpc_id              = var.vpc_id
-  service_name        = "com.amazonaws.${data.aws_region.current.name}.rds"
-  vpc_endpoint_type   = "Interface"
-  security_group_ids  = [aws_security_group.vpc_endpoints.id]
-  subnet_ids          = var.private_subnet_ids
-  private_dns_enabled = false
-}
-
 resource "aws_security_group" "vpc_endpoints" {
   name_prefix = "${var.name}-vpc-endpoints"
   description = "VPC endpoints to access SSM and KMS"

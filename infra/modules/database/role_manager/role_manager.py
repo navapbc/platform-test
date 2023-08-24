@@ -72,10 +72,7 @@ def connect_as_master_user() -> Connection:
 
 
 def connect_using_iam(user: str) -> str:
-    # Access RDS via the VPC endpoint URL
-    # (see https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html#boto3.session.Session.client)
-    rds_url = os.environ["AWS_RDS_URL"]
-    client = boto3.client("rds", endpoint_url=rds_url)
+    client = boto3.client("rds")
     host = os.environ["DB_HOST"]
     port = os.environ["DB_PORT"]
     database = os.environ["DB_NAME"]

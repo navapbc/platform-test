@@ -79,9 +79,16 @@ resource "aws_kms_key" "role_manager" {
 
 # IAM for Role Manager lambda function
 resource "aws_iam_role" "role_manager" {
-  name                = "${var.name}-manager"
-  assume_role_policy  = data.aws_iam_policy_document.role_manager_assume_role.json
-  managed_policy_arns = [data.aws_iam_policy.lambda_vpc_access.arn]
+  name               = "${var.name}-manager"
+  assume_role_policy = data.aws_iam_policy_document.role_manager_assume_role.json
+  managed_policy_arns = [
+    data.aws_iam_policy.lambda_vpc_access.arn,
+
+    # Grant the role manager access to the DB as app and migrator users
+    # so that it can performance database checks. This is needed by
+    # the infra database tests
+    aws_iam_policy.db_access.arn
+  ]
 }
 
 resource "aws_iam_role_policy" "ssm_access" {
@@ -122,12 +129,4 @@ data "aws_iam_policy_document" "role_manager_assume_role" {
 # see https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html
 data "aws_iam_policy" "lambda_vpc_access" {
   name = "AWSLambdaVPCAccessExecutionRole"
-}
-
-# Grant the role manager access to the DB as app and migrator users
-# so that it can performance database checks. This is needed by
-# the infra database tests
-resource "aws_iam_role_policy_attachment" "role_manager_db_access" {
-  role       = aws_iam_role.role_manager.name
-  policy_arn = aws_iam_policy.db_access.arn
 }

@@ -55,10 +55,23 @@ def check():
     logger.info("Running command 'check' to check database roles, schema, and privileges")
     app_username = os.environ.get("APP_USER")
     migrator_username = os.environ.get("MIGRATOR_USER")
+    schema_name = os.environ.get("DB_SCHEMA")
     app_conn = connect_using_iam(app_username)
     migrator_conn = connect_using_iam(migrator_username)
+    
+    print_check("Checking search path", check_search_path(migrator_conn, schema_name))
 
     return {"success": True}
+
+
+def print_check(msg: str, result: bool):
+    result_msg = "PASS" if result else "FAIL"
+    logger.info("%-40s %s", msg, result_msg)
+
+
+def check_search_path(migrator_conn: Connection, expected: str) -> bool:
+    return migrator_conn.run("SHOW search_path") == [[expected]]
+
 
 def connect_as_master_user() -> Connection:
     user = os.environ["DB_USER"]

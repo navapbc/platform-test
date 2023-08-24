@@ -85,8 +85,8 @@ module "service" {
   subnet_ids            = data.aws_subnets.default.ids
 
   db_vars = module.app_config.has_database ? {
-    security_group_ids = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
-    app_access_policy_arn  = aws_iam_policy.db_app_access_policy[0].arn
+    security_group_ids    = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
+    app_access_policy_arn = aws_iam_policy.db_app_access_policy[0].arn
     connection_info = {
       host        = data.aws_rds_cluster.db_cluster[0].endpoint
       port        = data.aws_rds_cluster.db_cluster[0].port
@@ -98,8 +98,8 @@ module "service" {
 }
 
 data "aws_iam_policy" "db_app_access_policy" {
-  count              = module.app_config.has_database ? 1 : 0
-  name = module.app_config.app_access_policy_name
+  count = module.app_config.has_database ? 1 : 0
+  name  = module.app_config.app_access_policy_name
 }
 
 module "monitoring" {

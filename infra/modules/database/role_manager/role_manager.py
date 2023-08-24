@@ -71,7 +71,7 @@ def connect_as_master_user() -> Connection:
     return Connection(user=user, host=host, port=port, database=database, password=password, ssl_context=True)
 
 
-def connect_using_iam(user: str) -> str:
+def connect_using_iam(user: str) -> Connection:
     client = boto3.client("rds")
     host = os.environ["DB_HOST"]
     port = os.environ["DB_PORT"]

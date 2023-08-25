@@ -18,7 +18,8 @@ set -euo pipefail
 APP_NAME="$1"
 ENVIRONMENT="$2"
 COMMAND="$3"
-ENVIRONMENT_VARIABLES=${4:-""}
+TASK_ROLE_ARN="$4"
+ENVIRONMENT_VARIABLES=${5:-""}
 
 echo "==============="
 echo "Running command"
@@ -27,6 +28,7 @@ echo "Input parameters"
 echo "  APP_NAME=$APP_NAME"
 echo "  ENVIRONMENT=$ENVIRONMENT"
 echo "  COMMAND=$COMMAND"
+echo "  TASK_ROLE_ARN=$TASK_ROLE_ARN"
 echo "  ENVIRONMENT_VARIABLES=$ENVIRONMENT_VARIABLES"
 echo
 
@@ -58,6 +60,9 @@ OVERRIDES=$(cat << EOF
       "command": $COMMAND
     }
   ]
+},
+{
+  "taskRoleArn": $TASK_ROLE_ARN
 }
 EOF
 )

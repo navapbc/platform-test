@@ -100,7 +100,7 @@ module "service" {
 
 data "aws_iam_policy" "db_app_access_policy" {
   count = module.app_config.has_database ? 1 : 0
-  name  =  "${local.prefix}${local.database_config.app_access_policy_name}"
+  name  = "${local.prefix}${local.database_config.app_access_policy_name}"
 }
 
 data "aws_iam_policy" "db_migrator_access_policy" {

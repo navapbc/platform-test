@@ -1,10 +1,10 @@
 package test
 
 import (
+	b64 "encoding/base64"
 	"fmt"
 	"testing"
 
-	"github.com/gruntwork-io/terratest/modules/aws"
 	"github.com/gruntwork-io/terratest/modules/shell"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 )
@@ -29,14 +29,12 @@ func TestDatabase(t *testing.T) {
 	ValidateDatabase(t, terraformOptions)
 }
 
-func WaitForRoleManagerUpdateToBeSuccessful(t *testing.T, workspaceName string) {
+func WaitForRoleManagerUpdateToBeSuccessful(t *testing.T, terraformOptions *terraform.Options) {
 	fmt.Println("::group::Wait for role manager lambda function to be stable")
-	appName := "app"
-	environmentName := "dev"
-	roleManagerName := fmt.Sprintf("%s-%s-%s-role-manager", workspaceName, appName, environmentName)
+	roleManagerFunctionName := terraform.Output(t, terraformOptions, "role_manager_function_name")
 	shell.RunCommand(t, shell.Command{
 		Command:    "aws",
-		Args:       []string{"lambda", "wait", "function-updated-v2", "--function-name", roleManagerName},
+		Args:       []string{"lambda", "wait", "function-updated-v2", "--function-name", roleManagerFunctionName},
 		WorkingDir: "../../",
 	})
 	fmt.Println("::endgroup::")
@@ -44,7 +42,21 @@ func WaitForRoleManagerUpdateToBeSuccessful(t *testing.T, workspaceName string) 
 
 func ValidateDatabase(t *testing.T, terraformOptions *terraform.Options) {
 	roleManagerFunctionName := terraform.Output(t, terraformOptions, "role_manager_function_name")
-	aws.InvokeFunction(t, "", roleManagerFunctionName, "check")
+	logOutputBase64 := shell.RunCommandAndGetOutput(t, shell.Command{
+		Command: "aws",
+		Args: []string{"lambda", "invoke",
+			"--function-name", roleManagerFunctionName,
+			"--log-type", "Tail",
+			"--payload", b64.StdEncoding.EncodeToString([]byte("\"check\"")),
+			"--no-cli-pager",
+			"--query", "LogResult",
+			"--output", "text",
+			"response.json",
+		},
+		WorkingDir: "../../",
+	})
+	logOutput, _ := b64.StdEncoding.DecodeString(logOutputBase64)
+	fmt.Println(string(logOutput))
 }
 
 func EnableDestroyDatabase(t *testing.T, terraformOptions *terraform.Options) {

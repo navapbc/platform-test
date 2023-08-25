@@ -72,6 +72,9 @@ infra-configure-app-service: ## Configure infra/$APP_NAME/service module's tfbac
 infra-update-current-account: ## Update infra resources for current AWS profile
 	./bin/terraform-init-and-apply.sh infra/accounts `./bin/current-account-config-name.sh`
 
+infra-update-network: ## Update default network
+	./bin/terraform-init-and-apply.sh infra/networks default
+
 infra-update-app-build-repository: ## Create or update $APP_NAME's build repository
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	./bin/terraform-init-and-apply.sh infra/$(APP_NAME)/build-repository shared

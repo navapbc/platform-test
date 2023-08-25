@@ -1,11 +1,25 @@
 # TODO: This file is is a temporary implementation of the network layer
 # that currently just adds resources to the default VPC
 # The full network implementation is part of https://github.com/navapbc/template-infra/issues/152
+
+data "aws_region" "current" {}
+
 locals {
   tags = merge(module.project_config.default_tags, {
     description = "VPC resources"
   })
   region = module.project_config.default_region
+
+  # List of AWS services used by this VPC
+  # This list is used to create VPC endpoints so that the AWS services can
+  # be accessed without network traffic ever leaving the VPC's private network
+  # For a list of AWS services that integrate with AWS PrivateLink
+  # see https://docs.aws.amazon.com/vpc/latest/privatelink/aws-services-privatelink-support.html
+  #
+  # The database module requires VPC access from private networks to SSM, KMS, and RDS
+  aws_service_integrations = toset(
+    module.app_config.has_database ? ["ssm", "kms", "rds"] : []
+  )
 }
 
 terraform {
@@ -34,8 +48,19 @@ module "project_config" {
   source = "../project-config"
 }
 
+module "app_config" {
+  source = "../app/app-config"
+}
+
 data "aws_vpc" "default" {
   default = true
+}
+
+data "aws_subnets" "default" {
+  filter {
+    name   = "default-for-az"
+    values = [true]
+  }
 }
 
 # VPC Endpoints for accessing AWS Services
@@ -50,37 +75,19 @@ data "aws_vpc" "default" {
 # See https://repost.aws/knowledge-center/lambda-vpc-parameter-store
 # See https://docs.aws.amazon.com/vpc/latest/privatelink/create-interface-endpoint.html#create-interface-endpoint
 
-aws_services = []
-
-resource "aws_vpc_endpoint" "ssm" {
-  vpc_id              = data.aws_vpc.default.id
-  service_name        = "com.amazonaws.${data.aws_region.current.name}.ssm"
-  vpc_endpoint_type   = "Interface"
-  security_group_ids  = [aws_security_group.vpc_endpoints.id]
-  subnet_ids          = var.private_subnet_ids
-  private_dns_enabled = true
-}
-
-resource "aws_vpc_endpoint" "kms" {
-  vpc_id              = data.aws_vpc.default.id
-  service_name        = "com.amazonaws.${data.aws_region.current.name}.kms"
-  vpc_endpoint_type   = "Interface"
-  security_group_ids  = [aws_security_group.vpc_endpoints.id]
-  subnet_ids          = var.private_subnet_ids
-  private_dns_enabled = true
-}
-
-resource "aws_vpc_endpoint" "rds" {
-  vpc_id              = data.aws_vpc.default.id
-  service_name        = "com.amazonaws.${data.aws_region.current.name}.rds"
-  vpc_endpoint_type   = "Interface"
-  security_group_ids  = [aws_security_group.vpc_endpoints.id]
-  subnet_ids          = var.private_subnet_ids
-  private_dns_enabled = true
-}
-
-resource "aws_security_group" "vpc_endpoints" {
-  name_prefix = "${var.name}-vpc-endpoints"
-  description = "VPC endpoints to access SSM and KMS"
+resource "aws_security_group" "aws_service_vpc_endpoints" {
+  name_prefix = "aws-service-vpc-endpoints"
+  description = "VPC endpoints to access AWS services from the VPC's private subnets"
   vpc_id      = data.aws_vpc.default.id
+}
+
+resource "aws_vpc_endpoint" "aws_service" {
+  for_each = local.aws_service_integrations
+
+  vpc_id              = data.aws_vpc.default.id
+  service_name        = "com.amazonaws.${data.aws_region.current.name}.${each.key}"
+  vpc_endpoint_type   = "Interface"
+  security_group_ids  = [aws_security_group.aws_service_vpc_endpoints.id]
+  subnet_ids          = data.aws_subnets.default.ids
+  private_dns_enabled = true
 }

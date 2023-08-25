@@ -46,6 +46,9 @@ infra-set-up-account: ## Configure and create resources for current AWS profile 
 	@:$(call check_defined, ACCOUNT_NAME, human readable name for account e.g. "prod" or the AWS account alias)
 	./bin/set-up-current-account.sh $(ACCOUNT_NAME)
 
+infra-configure-network: ## Configure default network
+	./bin/create-tfbackend.sh infra/networks default
+
 infra-configure-app-build-repository: ## Configure infra/$APP_NAME/build-repository tfbackend and tfvars files
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	./bin/configure-app-build-repository.sh $(APP_NAME)

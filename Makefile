@@ -10,6 +10,8 @@ CURRENT_ACCOUNT_ID = $(./bin/current-account-id.sh)
 # in infra/modules and then stripping out the "infra/modules/" prefix
 MODULES := $(notdir $(wildcard infra/modules/*))
 
+APP_NAME ?= "app"
+
 # Check that given variables are set and all have non-empty values,
 # die with an error otherwise.
 #

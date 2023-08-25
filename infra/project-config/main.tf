@@ -12,4 +12,6 @@ locals {
   default_region = "us-east-1"
 
   github_actions_role_name = "${local.project_name}-github-actions"
+
+  vpc_endpoints_security_group_name = "aws-service-vpc-endpoints"
 }

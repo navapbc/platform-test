@@ -13,5 +13,5 @@ locals {
 
   github_actions_role_name = "${local.project_name}-github-actions"
 
-  aws_service_vpc_endpoints_security_group_name_prefix = "aws-service-vpc-endpoints"
+  aws_services_security_group_name_prefix = "aws-service-vpc-endpoints"
 }

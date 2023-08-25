@@ -35,6 +35,6 @@ output "github_actions_role_name" {
   value = local.github_actions_role_name
 }
 
-output "aws_service_vpc_endpoints_security_group_name_prefix" {
-  value = local.aws_service_vpc_endpoints_security_group_name_prefix
+output "aws_services_security_group_name_prefix" {
+  value = local.aws_services_security_group_name_prefix
 }

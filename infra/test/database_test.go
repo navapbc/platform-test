@@ -25,7 +25,21 @@ func TestDatabase(t *testing.T) {
 	defer DestroyDatabase(t, terraformOptions)
 	terraform.Apply(t, terraformOptions)
 
+	WaitForRoleManagerUpdateToBeSuccessful(t, workspaceName)
 	ValidateDatabase(t, terraformOptions)
+}
+
+func WaitForRoleManagerUpdateToBeSuccessful(t *testing.T, workspaceName string) {
+	fmt.Println("::group::Wait for role manager lambda function to be stable")
+	appName := "app"
+	environmentName := "dev"
+	roleManagerName := fmt.Sprintf("%s-%s-%s-role-manager", workspaceName, appName, environmentName)
+	shell.RunCommand(t, shell.Command{
+		Command:    "aws",
+		Args:       []string{"lambda", "wait", "function-updated-v2", "--function-name", roleManagerName},
+		WorkingDir: "../../",
+	})
+	fmt.Println("::endgroup::")
 }
 
 func ValidateDatabase(t *testing.T, terraformOptions *terraform.Options) {

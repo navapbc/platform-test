@@ -81,5 +81,5 @@ module "database" {
 
   vpc_id                         = data.aws_vpc.default.id
   private_subnet_ids             = data.aws_subnets.default.ids
-  aws_services_security_group_id = data.aws_security_groups.aws_services[0].id
+  aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
 }

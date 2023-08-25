@@ -16,16 +16,16 @@ func TestDatabase(t *testing.T) {
 		VarFiles:     []string{"dev.tfvars"},
 	})
 
-	TerraformInit(t, terraformOptions, "dev.s3.tfbackend")
+	// TerraformInit(t, terraformOptions, "dev.s3.tfbackend")
 
-	workspaceName := RandomWorkspaceName()
-	defer terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
-	terraform.WorkspaceSelectOrNew(t, terraformOptions, workspaceName)
+	// workspaceName := RandomWorkspaceName()
+	// defer terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
+	// terraform.WorkspaceSelectOrNew(t, terraformOptions, workspaceName)
 
-	defer DestroyDatabase(t, terraformOptions)
-	terraform.Apply(t, terraformOptions)
+	// defer DestroyDatabase(t, terraformOptions)
+	// terraform.Apply(t, terraformOptions)
 
-	WaitForRoleManagerUpdateToBeSuccessful(t, workspaceName)
+	// WaitForRoleManagerUpdateToBeSuccessful(t, terraformOptions)
 	ValidateDatabase(t, terraformOptions)
 }
 

@@ -76,7 +76,7 @@ data "aws_subnets" "default" {
 # See https://docs.aws.amazon.com/vpc/latest/privatelink/create-interface-endpoint.html#create-interface-endpoint
 
 resource "aws_security_group" "aws_service_vpc_endpoints" {
-  name_prefix = module.project_config.vpc_endpoints_security_group_name
+  name_prefix = module.project_config.vpc_endpoints_security_group_name_prefix
   description = "VPC endpoints to access AWS services from the VPC's private subnets"
   vpc_id      = data.aws_vpc.default.id
 }

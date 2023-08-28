@@ -126,6 +126,11 @@ infra-check-compliance-checkov:
 infra-check-compliance-tfsec:
 	tfsec infra
 
+infra-check-app-database-roles: ## Check that app database roles have been configured properly
+	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
+	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "staging")
+	./bin/check-database-roles.sh $(APP_NAME) $(ENVIRONMENT)
+
 infra-lint: ## Lint infra code
 	terraform fmt -recursive -check infra
 

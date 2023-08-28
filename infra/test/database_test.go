@@ -1,7 +1,6 @@
 package test
 
 import (
-	b64 "encoding/base64"
 	"fmt"
 	"testing"
 
@@ -41,22 +40,11 @@ func WaitForRoleManagerUpdateToBeSuccessful(t *testing.T, terraformOptions *terr
 }
 
 func ValidateDatabase(t *testing.T, terraformOptions *terraform.Options) {
-	roleManagerFunctionName := terraform.Output(t, terraformOptions, "role_manager_function_name")
-	logOutputBase64 := shell.RunCommandAndGetOutput(t, shell.Command{
-		Command: "aws",
-		Args: []string{"lambda", "invoke",
-			"--function-name", roleManagerFunctionName,
-			"--log-type", "Tail",
-			"--payload", b64.StdEncoding.EncodeToString([]byte("\"check\"")),
-			"--no-cli-pager",
-			"--query", "LogResult",
-			"--output", "text",
-			"response.json",
-		},
+	shell.RunCommand(t, shell.Command{
+		Command:    "make",
+		Args:       []string{"infra-check-app-database-roles", "APP_NAME=app", "ENVIRONMENT=dev"},
 		WorkingDir: "../../",
 	})
-	logOutput, _ := b64.StdEncoding.DecodeString(logOutputBase64)
-	fmt.Println(string(logOutput))
 }
 
 func EnableDestroyDatabase(t *testing.T, terraformOptions *terraform.Options) {

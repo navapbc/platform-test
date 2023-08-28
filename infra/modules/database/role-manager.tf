@@ -25,7 +25,6 @@ resource "aws_lambda_function" "role_manager" {
 
   environment {
     variables = {
-      AWS_SSM_URL            = "https://${aws_vpc_endpoint.ssm.dns_entry[0].dns_name}"
       DB_HOST                = aws_rds_cluster.db.endpoint
       DB_PORT                = aws_rds_cluster.db.port
       DB_USER                = local.master_username

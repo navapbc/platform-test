@@ -76,6 +76,8 @@ data "aws_subnets" "default" {
 # See https://docs.aws.amazon.com/vpc/latest/privatelink/create-interface-endpoint.html#create-interface-endpoint
 
 resource "aws_security_group" "aws_services" {
+  count = length(local.aws_service_integrations) > 0 ? 1 : 0
+
   name_prefix = module.project_config.aws_services_security_group_name_prefix
   description = "VPC endpoints to access AWS services from the VPCs private subnets"
   vpc_id      = data.aws_vpc.default.id
@@ -87,7 +89,7 @@ resource "aws_vpc_endpoint" "aws_service" {
   vpc_id              = data.aws_vpc.default.id
   service_name        = "com.amazonaws.${data.aws_region.current.name}.${each.key}"
   vpc_endpoint_type   = "Interface"
-  security_group_ids  = [aws_security_group.aws_services.id]
+  security_group_ids  = [aws_security_group.aws_services[0].id]
   subnet_ids          = data.aws_subnets.default.ids
   private_dns_enabled = true
 }

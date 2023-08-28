@@ -20,17 +20,3 @@ resource "aws_iam_role_policy_attachment" "app_db_access" {
   role       = aws_iam_role.service.name
   policy_arn = var.db_vars.access_policy_arn
 }
-
-resource "aws_iam_role_policy_attachment" "app_service_db_access" {
-  count = var.db_vars != null ? 1 : 0
-
-  role       = aws_iam_role.app_service.name
-  policy_arn = var.db_vars.app_access_policy_arn
-}
-
-resource "aws_iam_role_policy_attachment" "migrator_service_db_access" {
-  count = var.db_vars != null ? 1 : 0
-
-  role       = aws_iam_role.migrator_service.name
-  policy_arn = var.db_vars.migrator_access_policy_arn
-}

@@ -14,6 +14,7 @@ resource "aws_vpc_security_group_ingress_rule" "db_ingress_from_service" {
   referenced_security_group_id = aws_security_group.app.id
 }
 
+# TODO: delete as part of multi-step deployment step 3 https://github.com/navapbc/template-infra/issues/354#issuecomment-1693973424
 resource "aws_iam_role_policy_attachment" "app_db_access" {
   count = var.db_vars != null ? 1 : 0
 

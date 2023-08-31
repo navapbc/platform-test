@@ -26,16 +26,22 @@ echo "  ENVIRONMENT=$ENVIRONMENT"
 echo
 echo "Invoking Lambda function: $DB_ROLE_MANAGER_FUNCTION_NAME"
 echo
-aws lambda invoke \
+CLI_RESPONSE=$(aws lambda invoke \
   --function-name $DB_ROLE_MANAGER_FUNCTION_NAME \
   --no-cli-pager \
   --log-type Tail \
   --payload $(echo -n '"check"' | base64) \
-  --query "LogResult" \
-  --output text \
-  response.json \
-  | base64 --decode
+  --output json \
+  response.json)
+
+# Print logs out (they are returned base64 encoded)
+echo $CLI_RESPONSE | jq -r '.LogResult' | base64 --decode
 echo
 echo "Lambda function response:"
 cat response.json
 rm response.json
+
+FUNCTION_ERROR=$(echo $CLI_RESPONSE | jq -r '.FunctionError')
+if [ $FUNCTION_ERROR != "null" ]; then
+  exit 1
+fi

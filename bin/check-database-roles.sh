@@ -41,6 +41,7 @@ echo "Lambda function response:"
 cat response.json
 rm response.json
 
+# Exit with nonzero status if function failed
 FUNCTION_ERROR=$(echo $CLI_RESPONSE | jq -r '.FunctionError')
 if [ $FUNCTION_ERROR != "null" ]; then
   exit 1

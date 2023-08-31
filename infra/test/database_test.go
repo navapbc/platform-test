@@ -46,6 +46,11 @@ func WaitForRoleManagerUpdateToBeSuccessful(t *testing.T, terraformOptions *terr
 func ValidateDatabase(t *testing.T, terraformOptions *terraform.Options) {
 	shell.RunCommand(t, shell.Command{
 		Command:    "make",
+		Args:       []string{"infra-update-app-database-roles", "APP_NAME=app", "ENVIRONMENT=dev"},
+		WorkingDir: "../../",
+	})
+	shell.RunCommand(t, shell.Command{
+		Command:    "make",
 		Args:       []string{"infra-check-app-database-roles", "APP_NAME=app", "ENVIRONMENT=dev"},
 		WorkingDir: "../../",
 	})

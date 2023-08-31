@@ -28,8 +28,23 @@ func TestDatabase(t *testing.T) {
 	// defer DestroyDatabase(t, terraformOptions)
 	terraform.Apply(t, terraformOptions)
 
+	WaitForDatabaseToBeAvailable(t, terraformOptions)
 	WaitForRoleManagerUpdateToBeSuccessful(t, terraformOptions)
 	ValidateDatabase(t, terraformOptions)
+}
+
+func WaitForDatabaseToBeAvailable(t *testing.T, terraformOptions *terraform.Options) {
+	fmt.Println("::group::Wait for database cluster to be available")
+	clusterId := terraform.Output(t, terraformOptions, "cluster_id")
+	shell.RunCommand(t, shell.Command{
+		Command: "aws",
+		Args: []string{
+			"rds", "wait", "db-cluster-available",
+			"--db-cluster-identifier", clusterId,
+		},
+		WorkingDir: "../../",
+	})
+	fmt.Println("::endgroup::")
 }
 
 func WaitForRoleManagerUpdateToBeSuccessful(t *testing.T, terraformOptions *terraform.Options) {
@@ -44,14 +59,14 @@ func WaitForRoleManagerUpdateToBeSuccessful(t *testing.T, terraformOptions *terr
 }
 
 func ValidateDatabase(t *testing.T, terraformOptions *terraform.Options) {
-	fmt.Println("::group::Configuring database roles")
+	fmt.Println("::group::Validating ability to configure database roles")
 	shell.RunCommand(t, shell.Command{
 		Command:    "make",
 		Args:       []string{"infra-update-app-database-roles", "APP_NAME=app", "ENVIRONMENT=dev"},
 		WorkingDir: "../../",
 	})
 	fmt.Println("::endgroup::")
-	fmt.Println("::group::Checking database roles")
+	fmt.Println("::group::Validating ability to log into database using configured roles and perform database queries")
 	shell.RunCommand(t, shell.Command{
 		Command:    "make",
 		Args:       []string{"infra-check-app-database-roles", "APP_NAME=app", "ENVIRONMENT=dev"},

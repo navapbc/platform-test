@@ -19,9 +19,7 @@ func TestDatabase(t *testing.T) {
 	TerraformInit(t, terraformOptions, "dev.s3.tfbackend")
 	fmt.Println("::endgroup::")
 
-	workspaceName := BranchWorkspaceName(t)
-	fmt.Println(workspaceName)
-
+	workspaceName := RandomWorkspaceName()
 	defer terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
 	fmt.Println("::group::Creating new workspace")
 	terraform.WorkspaceSelectOrNew(t, terraformOptions, workspaceName)

@@ -2,10 +2,13 @@
 package test
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"strings"
 	"testing"
 
+	"github.com/gruntwork-io/terratest/modules/git"
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 )
@@ -25,4 +28,13 @@ func RandomWorkspaceName() string {
 	var uniqueId = strings.ToLower(random.UniqueId())
 	var workspaceName = fmt.Sprintf("t-%s", uniqueId)
 	return workspaceName
+}
+
+// Generate a workspace name based on the current branch by taking the last 6
+// characters of the md5 hash of the branch name
+func BranchWorkspaceName(t *testing.T) string {
+	branchName := git.GetCurrentBranchName(t)
+	hash := md5.Sum([]byte(branchName))
+	stringHash := hex.EncodeToString(hash[:])
+	return stringHash[len(stringHash)-6:]
 }

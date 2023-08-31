@@ -20,12 +20,12 @@ func TestDatabase(t *testing.T) {
 	fmt.Println("::endgroup::")
 
 	workspaceName := RandomWorkspaceName()
-	defer terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
+	// defer terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
 	fmt.Println("::group::Creating new workspace")
 	terraform.WorkspaceSelectOrNew(t, terraformOptions, workspaceName)
 	fmt.Println("::endgroup::")
 
-	defer DestroyDatabase(t, terraformOptions)
+	// defer DestroyDatabase(t, terraformOptions)
 	terraform.Apply(t, terraformOptions)
 
 	WaitForRoleManagerUpdateToBeSuccessful(t, terraformOptions)

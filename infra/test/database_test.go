@@ -44,16 +44,20 @@ func WaitForRoleManagerUpdateToBeSuccessful(t *testing.T, terraformOptions *terr
 }
 
 func ValidateDatabase(t *testing.T, terraformOptions *terraform.Options) {
+	fmt.Println("::group::Configuring database roles")
 	shell.RunCommand(t, shell.Command{
 		Command:    "make",
 		Args:       []string{"infra-update-app-database-roles", "APP_NAME=app", "ENVIRONMENT=dev"},
 		WorkingDir: "../../",
 	})
+	fmt.Println("::endgroup::")
+	fmt.Println("::group::Checking database roles")
 	shell.RunCommand(t, shell.Command{
 		Command:    "make",
 		Args:       []string{"infra-check-app-database-roles", "APP_NAME=app", "ENVIRONMENT=dev"},
 		WorkingDir: "../../",
 	})
+	fmt.Println("::endgroup::")
 }
 
 func EnableDestroyDatabase(t *testing.T, terraformOptions *terraform.Options) {

@@ -38,7 +38,7 @@ locals {
   #   }
   account_names_by_environment = {
     shared  = "dev"
-    dev     = "dev"
+    dev     = "foobar"
     staging = "staging"
     prod    = "prod"
   }

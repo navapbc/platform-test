@@ -27,7 +27,7 @@ terraform {
 }
 
 provider "aws" {
-  region = var.region
+  region = module.app_config.build_repository_config.region
   default_tags {
     tags = local.tags
   }
@@ -41,9 +41,13 @@ module "app_config" {
   source = "../app-config"
 }
 
+data "external" "account_ids" {
+  program = concat(["../../../bin/get-account-ids.sh"], values(module.app_config.account_names_by_environment))
+}
+
 module "container_image_repository" {
   source               = "../../modules/container-image-repository"
   name                 = module.app_config.image_repository_name
   push_access_role_arn = data.aws_iam_role.github_actions.arn
-  app_account_ids      = var.app_environment_account_ids
+  app_account_ids      = toset(split(" ", data.external.account_ids.result.account_ids))
 }

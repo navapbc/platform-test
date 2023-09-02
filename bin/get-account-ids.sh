@@ -1,8 +1,12 @@
 #!/bin/bash
-# Given a list of account names print out the accoutn ids for each
+# Given a list of account names, print out the account ids for each as a JSON
+# map in the form {"account_ids": "XXXX YYYY ZZZZ"]}
+# This script is used as an external data source for the infra/<APP_NAME>/build-repository
+# modules.
+#
 # For each account name, searches for a file in infra/accounts/ with the name
 # <ACCOUNT_NAME>.<ACCOUNT_ID>.s3.tfbackend
-# If an account name isn't found, it is ignored
+# If an account name isn't found, it is ignored.
 set -euo pipefail
 ACCOUNT_NAMES=$*
 

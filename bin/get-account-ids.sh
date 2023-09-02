@@ -21,8 +21,8 @@ for ACCOUNT_NAME in $ACCOUNT_NAMES; do
   BACKEND_CONFIG_FILE=$(basename "$BACKEND_CONFIG_FILE_PATH")
   BACKEND_CONFIG_NAME="${BACKEND_CONFIG_FILE/.s3.tfbackend/}"
   ACCOUNT_ID="${BACKEND_CONFIG_NAME/$ACCOUNT_NAME./}"
-  ACCOUNT_IDS+=("\"$ACCOUNT_ID\"")
+  ACCOUNT_IDS+=("$ACCOUNT_ID")
 done
 
-# Print ACCOUNT_IDS as JSON array
-echo "[$(IFS=,; echo "${ACCOUNT_IDS[*]}")]"
+# Print result as a JSON map that looks like {"account_ids": "XXXX YYYY ZZZZ"]}
+echo "{\"account_ids\": \"${ACCOUNT_IDS[*]}\"}"

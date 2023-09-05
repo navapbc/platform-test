@@ -27,7 +27,8 @@ func TestService(t *testing.T) {
 		Reconfigure:  true,
 		TerraformDir: "../app/service/",
 		Vars: map[string]interface{}{
-			"image_tag": imageTag,
+			"environment_name": "dev",
+			"image_tag":        imageTag,
 		},
 	})
 

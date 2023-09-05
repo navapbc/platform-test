@@ -10,8 +10,16 @@
 locals {
   backend_config_file_path = "${path.module}/${var.environment_name}.s3.tfbackend"
   backend_config_file      = file("${path.module}/${var.environment_name}.s3.tfbackend")
-  backend_config_regex     = "(\\w+)\\s*=\\s*\\\"(\\w+)\\\""
-  backend_config           = { for match in regexall("(\\w+)\\s*=\\s*\\\"(.+)\\\"", local.backend_config_file) : match[0] => match[1] }
+
+  # Parse tfbackend file to get a map of variables to their defined values.
+  # The tfbackend file consists of lines that look like
+  # <variable_name>        = "<variable_value"
+  # so our regex is (\w+)\s+= "(.+)"
+  # Note that backslashes in the regex need to be escaped in Terraform
+  # so they will appear as \\ instead of \
+  # (see https://developer.hashicorp.com/terraform/language/functions/regex)
+  backend_config_regex     = "(\\w+)\\s+= \"(.+)\""
+  backend_config           = { for match in regexall(local.backend_config_regex, local.backend_config_file) : match[0] => match[1] }
   tfstate_bucket           = local.backend_config["bucket"]
   tfstate_key              = local.backend_config["key"]
 }

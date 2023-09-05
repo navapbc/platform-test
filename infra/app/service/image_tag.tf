@@ -14,9 +14,9 @@ data "terraform_remote_state" "current_image_tag" {
   backend = "s3"
 
   config = {
-    bucket = var.tfstate_bucket
-    key    = var.tfstate_key
-    region = var.region
+    bucket = local.tfstate_bucket
+    key    = local.tfstate_key
+    region = local.service_config.region
   }
 
   defaults = {
@@ -26,6 +26,12 @@ data "terraform_remote_state" "current_image_tag" {
 
 #  3. Prefer the given variable if provided, otherwise default to the value from last time.
 locals {
+  backend_config_file_path = "${path.module}/${var.environment_name}.s3.tfbackend"
+  backend_config_file      = file("${path.module}/${var.environment_name}.s3.tfbackend")
+  backend_config_regex     = "(\\w+)\\s*=\\s*\\\"(\\w+)\\\""
+  backend_config           = { for match in regexall("(\\w+)\\s*=\\s*\\\"(.+)\\\"", local.backend_config_file) : match[0] => match[1] }
+  tfstate_bucket           = local.backend_config["bucket"]
+  tfstate_key              = local.backend_config["key"]
   image_tag = (var.image_tag == null
     ? data.terraform_remote_state.current_image_tag[0].outputs.image_tag
   : var.image_tag)

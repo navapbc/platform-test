@@ -11,8 +11,10 @@ locals {
   backend_config_file_path = "${path.module}/${var.environment_name}.s3.tfbackend"
   backend_config_file      = file("${path.module}/${var.environment_name}.s3.tfbackend")
 
-  # Parse tfbackend file to get a map of variables to their defined values.
-  # The tfbackend file consists of lines that look like
+  # Use regex to parse backend config file to get a map of variables to their
+  # defined values since there is no built-in terraform function that does that
+  #
+  # The backend config file consists of lines that look like
   # <variable_name>        = "<variable_value"
   # so our regex is (\w+)\s+= "(.+)"
   # Note that backslashes in the regex need to be escaped in Terraform

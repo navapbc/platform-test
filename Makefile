@@ -73,7 +73,7 @@ infra-configure-app-build-repository: ## Configure infra/$APP_NAME/build-reposit
 infra-configure-app-database: ## Configure infra/$APP_NAME/database module's tfbackend and tfvars files for $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "staging")
-	./bin/configure-app-database.sh $(APP_NAME) $(ENVIRONMENT)
+	./bin/create-tfbackend.sh "infra/$(APP_NAME)/database" "$(ENVIRONMENT)"
 
 infra-configure-monitoring-secrets: ## Set $APP_NAME's incident management service integration URL for $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
@@ -97,10 +97,10 @@ infra-update-app-build-repository: ## Create or update $APP_NAME's build reposit
 	./bin/terraform-init-and-apply.sh infra/$(APP_NAME)/build-repository shared
 
 infra-update-app-database: ## Create or update $APP_NAME's database module for $ENVIRONMENT
-	# APP_NAME has a default value defined above, but check anyways in case the default is ever removed
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "staging")
-	./bin/terraform-init-and-apply.sh infra/$(APP_NAME)/database $(ENVIRONMENT)
+	terraform -chdir="infra/$(APP_NAME)/database" init -backend-config="$(ENVIRONMENT).s3.tfbackend"
+	terraform -chdir="infra/$(APP_NAME)/database" apply -var="environment_name=$(ENVIRONMENT)"
 
 infra-update-app-database-roles: ## Create or update database roles and schemas for $APP_NAME's database in $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)

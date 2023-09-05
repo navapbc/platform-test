@@ -26,7 +26,6 @@ func TestService(t *testing.T) {
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 		Reconfigure:  true,
 		TerraformDir: "../app/service/",
-		VarFiles:     []string{"dev.tfvars"},
 		Vars: map[string]interface{}{
 			"image_tag": imageTag,
 		},

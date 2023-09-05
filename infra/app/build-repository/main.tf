@@ -9,6 +9,12 @@ locals {
     application_role = "build-repository"
     description      = "Backend resources required for storing built release candidate artifacts to be used for deploying to environments."
   })
+
+  # Get list of AWS account ids for the application environments that
+  # will need access to the build repository
+  app_account_names   = values(module.app_config.account_names_by_environment)
+  account_ids_by_name = data.external.account_ids_by_name.result
+  app_account_ids     = [for account_name in local.app_account_names : local.account_ids_by_name[account_name] if contains(keys(local.account_ids_by_name), account_name)]
 }
 
 terraform {
@@ -41,13 +47,13 @@ module "app_config" {
   source = "../app-config"
 }
 
-data "external" "account_ids" {
-  program = concat(["../../../bin/get-account-ids.sh"], values(module.app_config.account_names_by_environment))
+data "external" "account_ids_by_name" {
+  program = ["../../../bin/account-ids-by-name.sh"]
 }
 
 module "container_image_repository" {
   source               = "../../modules/container-image-repository"
   name                 = module.app_config.image_repository_name
   push_access_role_arn = data.aws_iam_role.github_actions.arn
-  app_account_ids      = toset(split(" ", data.external.account_ids.result.account_ids))
+  app_account_ids      = local.app_account_ids
 }

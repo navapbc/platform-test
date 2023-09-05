@@ -20,10 +20,10 @@ locals {
   # Note that backslashes in the regex need to be escaped in Terraform
   # so they will appear as \\ instead of \
   # (see https://developer.hashicorp.com/terraform/language/functions/regex)
-  backend_config_regex     = "(\\w+)\\s+= \"(.+)\""
-  backend_config           = { for match in regexall(local.backend_config_regex, local.backend_config_file) : match[0] => match[1] }
-  tfstate_bucket           = local.backend_config["bucket"]
-  tfstate_key              = local.backend_config["key"]
+  backend_config_regex = "(\\w+)\\s+= \"(.+)\""
+  backend_config       = { for match in regexall(local.backend_config_regex, local.backend_config_file) : match[0] => match[1] }
+  tfstate_bucket       = local.backend_config["bucket"]
+  tfstate_key          = local.backend_config["key"]
 }
 data "terraform_remote_state" "current_image_tag" {
   # Don't do a lookup if image_tag is provided explicitly.

@@ -36,7 +36,7 @@ func TestService(t *testing.T) {
 	TerraformInit(t, terraformOptions, "dev.s3.tfbackend")
 	fmt.Println("::endgroup::")
 
-	defer terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
+	defer DeleteWorkspace(t, terraformOptions, workspaceName)
 	fmt.Println("::group::Select new terraform workspace")
 	terraform.WorkspaceSelectOrNew(t, terraformOptions, workspaceName)
 	fmt.Println("::endgroup::")
@@ -130,5 +130,11 @@ func DestroyService(t *testing.T, terraformOptions *terraform.Options) {
 	EnableDestroyService(t, terraformOptions)
 	fmt.Println("::group::Destroy service layer")
 	terraform.Destroy(t, terraformOptions)
+	fmt.Println("::endgroup::")
+}
+
+func DeleteWorkspace(t *testing.T, terraformOptions *terraform.Options, workspaceName string) {
+	fmt.Println("::group::Delete test workspace")
+	terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
 	fmt.Println("::endgroup::")
 }

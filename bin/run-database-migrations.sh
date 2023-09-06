@@ -12,6 +12,9 @@
 #   ENVIRONMENT (required) – the name of the application environment (e.g. dev,
 #     staging, prod)
 # -----------------------------------------------------------------------------
+
+# TODO: Use migrator role instead of general role. Part 3 of multipart update https://github.com/navapbc/template-infra/issues/354#issuecomment-1693973424
+
 set -euo pipefail
 
 APP_NAME="$1"
@@ -28,15 +31,15 @@ echo "  ENVIRONMENT=$ENVIRONMENT"
 echo
 echo "Step 0. Check if app has a database"
 
-terraform -chdir=infra/$APP_NAME/app-config init > /dev/null
-terraform -chdir=infra/$APP_NAME/app-config refresh > /dev/null
-HAS_DATABASE=$(terraform -chdir=infra/$APP_NAME/app-config output -raw has_database)
-if [ $HAS_DATABASE = "false" ]; then
+terraform -chdir="infra/$APP_NAME/app-config" init > /dev/null
+terraform -chdir="infra/$APP_NAME/app-config" refresh > /dev/null
+HAS_DATABASE=$(terraform -chdir="infra/$APP_NAME/app-config" output -raw has_database)
+if [ "$HAS_DATABASE" = "false" ]; then
   echo "Application does not have a database, no migrations to run"
   exit 0
 fi
 
-DB_MIGRATOR_USER=$(terraform -chdir=infra/$APP_NAME/app-config output -json migrator_role_arn | jq -r ".$ENVIRONMENT.database_config.migrator_username")
+DB_MIGRATOR_USER=$(terraform -chdir="infra/$APP_NAME/app-config" output -json environment_configs | jq -r ".$ENVIRONMENT.database_config.migrator_username")
 
 echo
 echo "::group::Step 1. Update task definition without updating service"
@@ -48,7 +51,7 @@ TASK_ROLE_ARN=$(terraform -chdir=infra/$APP_NAME/service output migrator_role_ar
 
 echo "::endgroup::"
 echo
-echo '::group::Step 2. Run "db-migrate" command'
+echo 'Step 2. Run "db-migrate" command'
 
 COMMAND='["db-migrate"]'
 

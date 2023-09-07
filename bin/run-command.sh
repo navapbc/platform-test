@@ -18,6 +18,8 @@ set -euo pipefail
 # TODO: Add ability to change task IAM Role. Part 3 of multipart update https://github.com/navapbc/template-infra/issues/354#issuecomment-1693973424
 # TODO: Change to keyword arguments. Part 3 of multipart update https://github.com/navapbc/template-infra/issues/354#issuecomment-1693973424
 
+ACCOUNT_ID="$(./bin/current-account-id.sh)"
+
 while :; do
   case $1 in
     -a|--app|--app-name)
@@ -52,6 +54,34 @@ while :; do
         shift
       else
         echo "$1 flag present without Environment Variables"
+        exit 1
+      fi
+      ;;
+    -rn|--role-name)
+      if [ -z ${ROLE_ARN+x} ]; then
+        if [ "$2" ]; then
+          ROLE_ARN="arn:aws:iam::$ACCOUNT_ID:role/$2"
+          shift
+        else
+          echo "$1 flag present without role name"
+          exit 1
+        fi
+      else
+        printf "Conflicting attempts to define role\n%s\n%s" "$ROLE_ARN" "$1"
+        exit 1
+      fi
+      ;;
+    -r|--role-arn|--role)
+      if [ -z ${ROLE_ARN+x} ]; then
+        if [ "$2" ]; then
+          ROLE_ARN=$2
+          shift
+        else
+          echo "$1 flag present without role arn"
+          exit 1
+        fi
+      else
+        printf "Conflicting attempts to define role\n%s\n%s" "$ROLE_ARN" "$1"
         exit 1
       fi
       ;;

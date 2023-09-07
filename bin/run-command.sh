@@ -22,7 +22,7 @@ ACCOUNT_ID="$(./bin/current-account-id.sh)"
 
 while :; do
   case $1 in
-    -a|--app|--app-name)
+    --app-name)
       if [ "$2" ]; then
         APP_NAME=$2
         shift
@@ -30,7 +30,7 @@ while :; do
         die "$1 flag present without app name"
       fi
       ;;
-    -e|--env|--env-name|--environment)
+    --environment-name)
       if [ "$2" ]; then
         ENVIRONMENT=$2
         shift
@@ -39,7 +39,7 @@ while :; do
         exit 1
       fi
       ;;
-    -c|--command)
+    --command)
       if [ "$2" ]; then
         COMMAND=$2
         shift
@@ -48,7 +48,7 @@ while :; do
         exit 1
       fi
       ;;
-    -ev|--env-vars|--environment-variables)
+    --environment-variables)
       if [ "$2" ]; then
         ENVIRONMENT_VARIABLES=$2
         shift
@@ -57,7 +57,7 @@ while :; do
         exit 1
       fi
       ;;
-    -rn|--role-name)
+    --role-name)
       if [ -z ${ROLE_ARN+x} ]; then
         if [ "$2" ]; then
           ROLE_ARN="arn:aws:iam::$ACCOUNT_ID:role/$2"
@@ -71,7 +71,7 @@ while :; do
         exit 1
       fi
       ;;
-    -r|--role-arn|--role)
+    --role-arn)
       if [ -z ${ROLE_ARN+x} ]; then
         if [ "$2" ]; then
           ROLE_ARN=$2

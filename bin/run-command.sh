@@ -18,10 +18,56 @@ set -euo pipefail
 # TODO: Add ability to change task IAM Role. Part 3 of multipart update https://github.com/navapbc/template-infra/issues/354#issuecomment-1693973424
 # TODO: Change to keyword arguments. Part 3 of multipart update https://github.com/navapbc/template-infra/issues/354#issuecomment-1693973424
 
-APP_NAME="$1"
-ENVIRONMENT="$2"
-COMMAND="$3"
-ENVIRONMENT_VARIABLES=${4:-""}
+while :; do
+  case $1 in
+    -a|--app|--app-name)
+      if [ "$2" ]; then
+        APP_NAME=$2
+        shift
+      else
+        die "$1 flag present without app name"
+      fi
+      ;;
+    -e|--env|--env-name|--environment)
+      if [ "$2" ]; then
+        ENVIRONMENT=$2
+        shift
+      else
+        echo "$1 flag present without environment name"
+        exit 1
+      fi
+      ;;
+    -c|--command)
+      if [ "$2" ]; then
+        COMMAND=$2
+        shift
+      else
+        echo "$1 flag present without command"
+        exit 1
+      fi
+      ;;
+    -ev|--env-vars|--environment-variables)
+      if [ "$2" ]; then
+        ENVIRONMENT_VARIABLES=$2
+        shift
+      else
+        echo "$1 flag present without Environment Variables"
+        exit 1
+      fi
+      ;;
+    "")
+      break
+      ;;
+    *)
+      if [ -z ${COMMAND+x} ]; then
+        COMMAND=$1
+      else
+        printf "Conflicting attempts to define command\n%s\n%s" "$COMMAND" "$1"
+        exit 1
+      fi
+      ;;
+  esac
+done
 
 echo "==============="
 echo "Running command"

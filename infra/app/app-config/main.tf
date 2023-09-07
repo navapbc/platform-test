@@ -12,10 +12,6 @@ locals {
     region = module.project_config.default_region
   }
 
-  build_repository_config = {
-    region = module.project_config.default_region
-  }
-
   # Map from environment name to the account name for the AWS account that
   # contains the resources for that environment. Resources that are shared
   # across environments use the key "shared".

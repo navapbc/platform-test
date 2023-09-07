@@ -21,11 +21,15 @@ set -euo pipefail
 ACCOUNT_ID="$(./bin/current-account-id.sh)"
 
 while :; do
+  # echo "$1 $2"
+  if [ -z ${1+x} ]; then
+    break
+  fi
   case $1 in
     --app-name)
       if [ "$2" ]; then
         APP_NAME=$2
-        shift
+        shift 2
       else
         die "$1 flag present without app name"
       fi
@@ -33,7 +37,7 @@ while :; do
     --environment-name)
       if [ "$2" ]; then
         ENVIRONMENT=$2
-        shift
+        shift 2
       else
         echo "$1 flag present without environment name"
         exit 1
@@ -42,7 +46,8 @@ while :; do
     --command)
       if [ "$2" ]; then
         COMMAND=$2
-        shift
+        echo "COMMAND is $COMMAND"
+        shift 2
       else
         echo "$1 flag present without command"
         exit 1
@@ -51,7 +56,7 @@ while :; do
     --environment-variables)
       if [ "$2" ]; then
         ENVIRONMENT_VARIABLES=$2
-        shift
+        shift 2
       else
         echo "$1 flag present without Environment Variables"
         exit 1
@@ -61,7 +66,7 @@ while :; do
       if [ -z ${ROLE_ARN+x} ]; then
         if [ "$2" ]; then
           ROLE_ARN="arn:aws:iam::$ACCOUNT_ID:role/$2"
-          shift
+          shift 2
         else
           echo "$1 flag present without role name"
           exit 1
@@ -75,7 +80,7 @@ while :; do
       if [ -z ${ROLE_ARN+x} ]; then
         if [ "$2" ]; then
           ROLE_ARN=$2
-          shift
+          shift 2
         else
           echo "$1 flag present without role arn"
           exit 1
@@ -85,19 +90,32 @@ while :; do
         exit 1
       fi
       ;;
-    "")
-      break
+    -?*)
+      echo "Unknown flag $1"
       ;;
     *)
-      if [ -z ${COMMAND+x} ]; then
-        COMMAND=$1
-      else
-        printf "Conflicting attempts to define command\n%s\n%s" "$COMMAND" "$1"
-        exit 1
-      fi
+      break
       ;;
+    # *)
+    #   if [ -z ${COMMAND+x} ]; then
+    #     COMMAND=$1
+    #   else
+    #     printf "Conflicting attempts to define command\n%s\n%s" "$COMMAND" "$1"
+    #     exit 1
+    #   fi
+    #   ;;
   esac
 done
+
+echo "==============="
+echo "Running command"
+echo "==============="
+echo "Input parameters"
+echo "  APP_NAME=$APP_NAME"
+echo "  ENVIRONMENT=$ENVIRONMENT"
+echo "  COMMAND=$COMMAND"
+echo "  ENVIRONMENT_VARIABLES=$ENVIRONMENT_VARIABLES"
+echo
 
 if [ -z "${APP_NAME}" ]; then
   echo "Using default APP_NAME of 'app'"
@@ -113,16 +131,6 @@ if [ -z "${COMMAND}" ]; then
   echo "No defined command"
   exit 1
 fi
-
-echo "==============="
-echo "Running command"
-echo "==============="
-echo "Input parameters"
-echo "  APP_NAME=$APP_NAME"
-echo "  ENVIRONMENT=$ENVIRONMENT"
-echo "  COMMAND=$COMMAND"
-echo "  ENVIRONMENT_VARIABLES=$ENVIRONMENT_VARIABLES"
-echo
 
 # Use the same cluster, task definition, and network configuration that the application service uses
 CLUSTER_NAME=$(terraform -chdir="infra/$APP_NAME/service" output -raw service_cluster_name)

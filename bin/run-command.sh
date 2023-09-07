@@ -99,6 +99,21 @@ while :; do
   esac
 done
 
+if [ -z "${APP_NAME}" ]; then
+  echo "Using default APP_NAME of 'app'"
+  APP_NAME="app"
+fi
+
+if [ -z "${ENVIRONMENT}" ]; then
+  echo "Using default ENVIRONMENT of 'dev'"
+  ENVIRONMENT="dev"
+fi
+
+if [ -z "${COMMAND}" ]; then
+  echo "No defined command"
+  exit 1
+fi
+
 echo "==============="
 echo "Running command"
 echo "==============="

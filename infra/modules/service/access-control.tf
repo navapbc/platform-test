@@ -7,19 +7,20 @@ resource "aws_iam_role" "task_executor" {
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role_policy.json
 }
 
-resource "aws_iam_role" "service" {
-  name               = var.service_name
-  assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role_policy.json
-}
-
 resource "aws_iam_role" "app_service" {
   name               = "${var.service_name}-app"
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role_policy.json
 }
 
-resource "aws_iam_role" "migrator_service" {
+resource "aws_iam_role" "migrator_task" {
+  count = var.db_vars != null ? 1 : 0
+
   name               = "${var.service_name}-migrator"
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role_policy.json
+
+  managed_policy_arns = [
+
+  ]
 }
 
 data "aws_iam_policy_document" "ecs_tasks_assume_role_policy" {

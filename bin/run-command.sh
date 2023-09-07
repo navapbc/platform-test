@@ -132,7 +132,9 @@ if [ -n "$ENVIRONMENT_VARIABLES" ]; then
   ENVIRONMENT_OVERRIDES="\"environment\": $ENVIRONMENT_VARIABLES,"
 fi
 CONTAINER_NAME=$(aws ecs describe-task-definition --task-definition "$TASK_DEFINITION_FAMILY" --query "taskDefinition.containerDefinitions[0].name" --output text)
-OVERRIDES=$(cat << EOF
+
+if [ -z ${ROLE_ARN+x} ]; then
+  OVERRIDES=$(cat << EOF
 {
   "containerOverrides": [
     {
@@ -143,7 +145,23 @@ OVERRIDES=$(cat << EOF
   ]
 }
 EOF
-)
+  )
+else
+  OVERRIDES=$(cat << EOF
+{
+  "containerOverrides": [
+    {
+      $ENVIRONMENT_OVERRIDES
+      "name": "$CONTAINER_NAME",
+      "command": $COMMAND
+    }
+  ],
+  "executionRoleArn": "$ROLE_ARN"
+}
+EOF
+  )
+fi
+
 
 TASK_START_TIME=$(date +%s)
 TASK_START_TIME_MILLIS=$((TASK_START_TIME * 1000))
@@ -237,7 +255,13 @@ done
 echo "::endgroup::"
 echo
 
-CONTAINER_EXIT_CODE=$(aws ecs describe-tasks --cluster "$CLUSTER_NAME" --tasks "$TASK_ARN" --query "tasks[0].containers[?name=='$CONTAINER_NAME'].exitCode" --output text)
+CONTAINER_EXIT_CODE=$(
+  aws ecs describe-tasks \
+  --cluster "$CLUSTER_NAME" \
+  --tasks "$TASK_ARN" \
+  --query "tasks[0].containers[?name=='$CONTAINER_NAME'].exitCode" \
+  --output text
+)
 
 if [[ "$CONTAINER_EXIT_CODE" == "null" || "$CONTAINER_EXIT_CODE" != "0" ]]; then
   echo "Task failed" >&2

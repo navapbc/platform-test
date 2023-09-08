@@ -222,7 +222,14 @@ LOG_STREAM="$LOG_STREAM_PREFIX/$CONTAINER_NAME/$ECS_TASK_ID"
 # command to error out.
 echo "Waiting for log stream to be created"
 echo "  LOG_STREAM=$LOG_STREAM"
+
+counter=0
 while true; do
+  counter=$((counter+1))
+  if [ $counter -eq 20 ]; then
+    echo "Timing out task $ECS_TASK_ID waiting for logs"
+    exit 1
+  fi
   IS_LOG_STREAM_CREATED=$(aws logs describe-log-streams --no-cli-pager --log-group-name "$LOG_GROUP" --query "length(logStreams[?logStreamName==\`$LOG_STREAM\`])")
   if [ "$IS_LOG_STREAM_CREATED" == "1" ]; then
     break

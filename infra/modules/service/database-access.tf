@@ -28,6 +28,20 @@ resource "aws_iam_role_policy_attachment" "migrator_db_access" {
   policy_arn = var.db_vars.migrator_access_policy_arn
 }
 
+resource "aws_iam_role_policy_attachment" "app_service_ecs_access" {
+  count = var.db_vars != null ? 1 : 0
+
+  role       = aws_iam_role.app_service.name
+  policy_arn = var.task_executor_policy_arn
+}
+
+resource "aws_iam_role_policy_attachment" "migrator_ecs_access" {
+  count = var.db_vars != null ? 1 : 0
+
+  role       = aws_iam_role.migrator_task[0].name
+  policy_arn = var.task_executor_policy_arn
+}
+
 # TODO: Delete as part 3 of multipart update https://github.com/navapbc/template-infra/issues/354#issuecomment-1693973424
 resource "aws_iam_role_policy_attachment" "temp_app_migrator_db_access" {
   count = var.db_vars != null ? 1 : 0

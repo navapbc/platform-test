@@ -36,30 +36,20 @@ while :; do
       fi
       ;;
     --role-name)
-      if [ -z ${ROLE_ARN+x} ]; then
-        if [ "$2" ]; then
-          ROLE_ARN="arn:aws:iam::$ACCOUNT_ID:role/$2"
-          shift 2
-        else
-          echo "$1 flag present without role name"
-          exit 1
-        fi
+      if [ "$2" ]; then
+        ROLE_ARN="arn:aws:iam::$ACCOUNT_ID:role/$2"
+        shift 2
       else
-        printf "Conflicting attempts to define role\n%s\n%s" "$ROLE_ARN" "$1"
+        echo "$1 flag present without role name"
         exit 1
       fi
       ;;
     --role-arn)
-      if [ -z ${ROLE_ARN+x} ]; then
-        if [ "$2" ]; then
-          ROLE_ARN=$2
-          shift 2
-        else
-          echo "$1 flag present without role arn"
-          exit 1
-        fi
+      if [ "$2" ]; then
+        ROLE_ARN=$2
+        shift 2
       else
-        printf "Conflicting attempts to define role\n%s\n%s" "$ROLE_ARN" "$1"
+        echo "$1 flag present without role arn"
         exit 1
       fi
       ;;
@@ -73,14 +63,6 @@ while :; do
       COMMAND="$3"
       break
       ;;
-    # *)
-    #   if [ -z ${COMMAND+x} ]; then
-    #     COMMAND=$1
-    #   else
-    #     printf "Conflicting attempts to define command\n%s\n%s" "$COMMAND" "$1"
-    #     exit 1
-    #   fi
-    #   ;;
   esac
 done
 

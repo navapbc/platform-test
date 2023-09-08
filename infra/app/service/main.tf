@@ -81,11 +81,6 @@ data "aws_iam_policy" "migrator_db_access_policy" {
   name  = local.database_config.migrator_access_policy_name
 }
 
-data "aws_iam_policy" "task_executor_policy_arn" {
-  count = module.app_config.has_database ? 1 : 0
-  name  = "${local.service_name}-task-executor"
-}
-
 # Retrieve url for external incident management tool (e.g. Pagerduty, Splunk-On-Call)
 
 data "aws_ssm_parameter" "incident_management_service_integration_url" {

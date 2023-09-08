@@ -61,7 +61,5 @@ EOF
 )
 
 ./bin/run-command.sh \
-  --app "$APP_NAME" \
-  --environment-name "$ENVIRONMENT" \
-  --command "$COMMAND" \
-  --environment-variables "$ENVIRONMENT_VARIABLES"
+  --environment-variables "$ENVIRONMENT_VARIABLES" \
+  "$APP_NAME" "$ENVIRONMENT" "$COMMAND"

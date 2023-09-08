@@ -18,43 +18,16 @@ set -euo pipefail
 # TODO: Add ability to change task IAM Role. Part 3 of multipart update https://github.com/navapbc/template-infra/issues/354#issuecomment-1693973424
 # TODO: Change to keyword arguments. Part 3 of multipart update https://github.com/navapbc/template-infra/issues/354#issuecomment-1693973424
 
-ACCOUNT_ID="$(./bin/current-account-id.sh)"
-
+ENVIRONMENT_VARIABLES=""
+TASK_ROLE_ARN=""
 while :; do
-  # echo "$1 $2"
-  if [ -z ${1+x} ]; then
-    break
-  fi
   case $1 in
     --environment-variables)
-      if [ "$2" ]; then
-        ENVIRONMENT_VARIABLES=$2
-        shift 2
-      else
-        echo "$1 flag present without Environment Variables"
-        exit 1
-      fi
+      ENVIRONMENT_VARIABLES=$2
+      shift 2
       ;;
-    --role-name)
-      if [ "$2" ]; then
-        ROLE_ARN="arn:aws:iam::$ACCOUNT_ID:role/$2"
-        shift 2
-      else
-        echo "$1 flag present without role name"
-        exit 1
-      fi
-      ;;
-    --role-arn)
-      if [ "$2" ]; then
-        ROLE_ARN=$2
-        shift 2
-      else
-        echo "$1 flag present without role arn"
-        exit 1
-      fi
-      ;;
-    -?*)
-      echo "Unknown flag $1"
+    --task-role-arn)
+      TASK_ROLE_ARN=$2
       shift 2
       ;;
     *)
@@ -73,7 +46,8 @@ echo "Input parameters"
 echo "  APP_NAME=$APP_NAME"
 echo "  ENVIRONMENT=$ENVIRONMENT"
 echo "  COMMAND=$COMMAND"
-echo "  ENVIRONMENT_VARIABLES=$ENVIRONMENT_VARIABLES"
+echo "  ENVIRONMENT_VARIABLES=${ENVIRONMENT_VARIABLES:-}"
+echo "  TASK_ROLE_ARN=${TASK_ROLE_ARN:-}"
 echo
 
 # Use the same cluster, task definition, and network configuration that the application service uses
@@ -94,41 +68,30 @@ NETWORK_CONFIG=$(aws ecs describe-services --no-cli-pager --cluster "$CLUSTER_NA
 CURRENT_REGION=$(./bin/current-region.sh)
 AWS_USER_ID=$(aws sts get-caller-identity --no-cli-pager --query UserId --output text)
 
-ENVIRONMENT_OVERRIDES=""
+ENVIRONMENT_OVERRIDE=""
 if [ -n "$ENVIRONMENT_VARIABLES" ]; then
-  ENVIRONMENT_OVERRIDES="\"environment\": $ENVIRONMENT_VARIABLES,"
+  ENVIRONMENT_OVERRIDE="\"environment\": $ENVIRONMENT_VARIABLES,"
 fi
 CONTAINER_NAME=$(aws ecs describe-task-definition --task-definition "$TASK_DEFINITION_FAMILY" --query "taskDefinition.containerDefinitions[0].name" --output text)
 
-if [ -z ${ROLE_ARN+x} ]; then
-  OVERRIDES=$(cat << EOF
-{
+OVERRIDES=()
+OVERRIDES+=$(cat << EOF
   "containerOverrides": [
     {
-      $ENVIRONMENT_OVERRIDES
+      $ENVIRONMENT_OVERRIDE
       "name": "$CONTAINER_NAME",
       "command": $COMMAND
     }
   ]
-}
 EOF
-  )
-else
-  OVERRIDES=$(cat << EOF
-{
-  "containerOverrides": [
-    {
-      $ENVIRONMENT_OVERRIDES
-      "name": "$CONTAINER_NAME",
-      "command": $COMMAND
-    }
-  ],
-  "taskRoleArn": "$ROLE_ARN"
-}
-EOF
-  )
+)
+
+if [ -n "$TASK_ROLE_ARN" ]; then
+  OVERRIDES+=("\"taskRoleArn\": \"$TASK_ROLE_ARN\"")
 fi
 
+IFS=,
+OVERRIDE_STR="{${OVERRIDES[*]}}"
 
 TASK_START_TIME=$(date +%s)
 TASK_START_TIME_MILLIS=$((TASK_START_TIME * 1000))
@@ -142,10 +105,11 @@ AWS_ARGS=(
   --launch-type=FARGATE
   --platform-version=1.4.0
   --network-configuration "$NETWORK_CONFIG"
-  --overrides "$OVERRIDES"
+  --overrides "$OVERRIDE_STR"
 )
 echo "::group::Running AWS CLI command"
 printf " ... %s\n" "${AWS_ARGS[@]}"
+exit
 TASK_ARN=$(aws --no-cli-pager "${AWS_ARGS[@]}" --query "tasks[0].taskArn" --output text)
 echo "::endgroup::"
 echo

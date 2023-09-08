@@ -15,19 +15,15 @@
 # -----------------------------------------------------------------------------
 set -euo pipefail
 
-# TODO: Add ability to change task IAM Role. Part 3 of multipart update https://github.com/navapbc/template-infra/issues/354#issuecomment-1693973424
-# TODO: Change to keyword arguments. Part 3 of multipart update https://github.com/navapbc/template-infra/issues/354#issuecomment-1693973424
-
 ACCOUNT_ID="$(./bin/current-account-id.sh)"
 
 while :; do
-  # echo "$1 $2"
   if [ -z ${1+x} ]; then
     break
   fi
   case $1 in
     --environment-variables)
-      if [ "$2" ]; then
+      if [[ -n "$2" ]] && [[ "${2:0:1}" != "-" ]]; then
         ENVIRONMENT_VARIABLES=$2
         shift 2
       else
@@ -36,7 +32,7 @@ while :; do
       fi
       ;;
     --role-name)
-      if [ "$2" ]; then
+      if [[ -n "$2" ]] && [[ "${2:0:1}" != "-" ]]; then
         ROLE_ARN="arn:aws:iam::$ACCOUNT_ID:role/$2"
         shift 2
       else
@@ -45,7 +41,7 @@ while :; do
       fi
       ;;
     --role-arn)
-      if [ "$2" ]; then
+      if [[ -n "$2" ]] && [[ "${2:0:1}" != "-" ]]; then
         ROLE_ARN=$2
         shift 2
       else
@@ -53,18 +49,19 @@ while :; do
         exit 1
       fi
       ;;
-    -?*)
-      echo "Unknown flag $1"
-      shift 2
+    --)
+      shift
+      break
       ;;
     *)
-      APP_NAME="$1"
-      ENVIRONMENT="$2"
-      COMMAND="$3"
       break
       ;;
   esac
 done
+
+APP_NAME="$1"
+ENVIRONMENT="$2"
+COMMAND="$3"
 
 echo "==============="
 echo "Running command"

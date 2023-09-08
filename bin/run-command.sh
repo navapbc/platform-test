@@ -26,33 +26,6 @@ while :; do
     break
   fi
   case $1 in
-    --app-name)
-      if [ "$2" ]; then
-        APP_NAME=$2
-        shift 2
-      else
-        die "$1 flag present without app name"
-      fi
-      ;;
-    --environment-name)
-      if [ "$2" ]; then
-        ENVIRONMENT=$2
-        shift 2
-      else
-        echo "$1 flag present without environment name"
-        exit 1
-      fi
-      ;;
-    --command)
-      if [ "$2" ]; then
-        COMMAND=$2
-        echo "COMMAND is $COMMAND"
-        shift 2
-      else
-        echo "$1 flag present without command"
-        exit 1
-      fi
-      ;;
     --environment-variables)
       if [ "$2" ]; then
         ENVIRONMENT_VARIABLES=$2
@@ -92,8 +65,12 @@ while :; do
       ;;
     -?*)
       echo "Unknown flag $1"
+      shift 2
       ;;
     *)
+      APP_NAME="$1"
+      ENVIRONMENT="$2"
+      COMMAND="$3"
       break
       ;;
     # *)
@@ -116,21 +93,6 @@ echo "  ENVIRONMENT=$ENVIRONMENT"
 echo "  COMMAND=$COMMAND"
 echo "  ENVIRONMENT_VARIABLES=$ENVIRONMENT_VARIABLES"
 echo
-
-if [ -z "${APP_NAME}" ]; then
-  echo "Using default APP_NAME of 'app'"
-  APP_NAME="app"
-fi
-
-if [ -z "${ENVIRONMENT}" ]; then
-  echo "Using default ENVIRONMENT of 'dev'"
-  ENVIRONMENT="dev"
-fi
-
-if [ -z "${COMMAND}" ]; then
-  echo "No defined command"
-  exit 1
-fi
 
 # Use the same cluster, task definition, and network configuration that the application service uses
 CLUSTER_NAME=$(terraform -chdir="infra/$APP_NAME/service" output -raw service_cluster_name)
@@ -179,7 +141,7 @@ else
       "command": $COMMAND
     }
   ],
-  "executionRoleArn": "$ROLE_ARN"
+  "taskRoleArn": "$ROLE_ARN"
 }
 EOF
   )

@@ -6,10 +6,6 @@ variable "service_name" {
   }
 }
 
-variable "task_executor_policy_arn" {
-  description = "Pass in task role arn to allow migrator and app role to use ecr"
-}
-
 variable "image_tag" {
   type        = string
   description = "The tag of the image to deploy"

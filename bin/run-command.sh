@@ -15,8 +15,6 @@
 # -----------------------------------------------------------------------------
 set -euo pipefail
 
-ACCOUNT_ID="$(./bin/current-account-id.sh)"
-
 while :; do
   if [ -z ${1+x} ]; then
     break
@@ -28,15 +26,6 @@ while :; do
         shift 2
       else
         echo "$1 flag present without Environment Variables"
-        exit 1
-      fi
-      ;;
-    --role-name)
-      if [[ -n "$2" ]] && [[ "${2:0:1}" != "-" ]]; then
-        ROLE_ARN="arn:aws:iam::$ACCOUNT_ID:role/$2"
-        shift 2
-      else
-        echo "$1 flag present without role name"
         exit 1
       fi
       ;;

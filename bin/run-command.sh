@@ -69,30 +69,27 @@ NETWORK_CONFIG=$(aws ecs describe-services --no-cli-pager --cluster "$CLUSTER_NA
 CURRENT_REGION=$(./bin/current-region.sh)
 AWS_USER_ID=$(aws sts get-caller-identity --no-cli-pager --query UserId --output text)
 
-ENVIRONMENT_OVERRIDE=""
-if [ -n "$ENVIRONMENT_VARIABLES" ]; then
-  ENVIRONMENT_OVERRIDE="\"environment\": $ENVIRONMENT_VARIABLES,"
-fi
 CONTAINER_NAME=$(aws ecs describe-task-definition --task-definition "$TASK_DEFINITION_FAMILY" --query "taskDefinition.containerDefinitions[0].name" --output text)
 
-OVERRIDES=()
-OVERRIDES+=$(cat << EOF
+OVERRIDES=$(cat << EOF
+{
   "containerOverrides": [
     {
-      $ENVIRONMENT_OVERRIDE
       "name": "$CONTAINER_NAME",
       "command": $COMMAND
     }
   ]
+}
 EOF
 )
 
-if [ -n "$TASK_ROLE_ARN" ]; then
-  OVERRIDES+=("\"taskRoleArn\": \"$TASK_ROLE_ARN\"")
+if [ -n "$ENVIRONMENT_VARIABLES" ]; then
+  OVERRIDES=$(echo "$OVERRIDES" | jq ".containerOverrides[0].environment |= $ENVIRONMENT_VARIABLES")
 fi
 
-IFS=,
-OVERRIDE_STR="{${OVERRIDES[*]}}"
+if [ -n "$TASK_ROLE_ARN" ]; then
+  OVERRIDES=$(echo "$OVERRIDES" | jq ".taskRoleArn |= \"$TASK_ROLE_ARN\"")
+fi
 
 TASK_START_TIME=$(date +%s)
 TASK_START_TIME_MILLIS=$((TASK_START_TIME * 1000))
@@ -106,7 +103,7 @@ AWS_ARGS=(
   --launch-type=FARGATE
   --platform-version=1.4.0
   --network-configuration "$NETWORK_CONFIG"
-  --overrides "$OVERRIDE_STR"
+  --overrides "$OVERRIDES"
 )
 echo "::group::Running AWS CLI command"
 printf " ... %s\n" "${AWS_ARGS[@]}"

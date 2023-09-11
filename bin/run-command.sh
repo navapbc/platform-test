@@ -31,13 +31,14 @@ while :; do
       shift 2
       ;;
     *)
-      APP_NAME="$1"
-      ENVIRONMENT="$2"
-      COMMAND="$3"
       break
       ;;
   esac
 done
+
+APP_NAME="$1"
+ENVIRONMENT="$2"
+COMMAND="$3"
 
 echo "==============="
 echo "Running command"

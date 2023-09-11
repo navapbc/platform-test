@@ -128,10 +128,10 @@ LOG_STREAM="$LOG_STREAM_PREFIX/$CONTAINER_NAME/$ECS_TASK_ID"
 echo "Waiting for log stream to be created"
 echo "  LOG_STREAM=$LOG_STREAM"
 
-counter=0
+NUM_RETRIES_WAITIN_FOR_LOGS=0
 while true; do
-  counter=$((counter+1))
-  if [ $counter -eq 20 ]; then
+  NUM_RETRIES_WAITIN_FOR_LOGS=$((NUM_RETRIES_WAITIN_FOR_LOGS+1))
+  if [ $NUM_RETRIES_WAITIN_FOR_LOGS -eq 20 ]; then
     echo "Timing out task $ECS_TASK_ID waiting for logs"
     exit 1
   fi

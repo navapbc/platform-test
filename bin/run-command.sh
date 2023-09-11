@@ -107,7 +107,6 @@ AWS_ARGS=(
 )
 echo "::group::Running AWS CLI command"
 printf " ... %s\n" "${AWS_ARGS[@]}"
-exit
 TASK_ARN=$(aws --no-cli-pager "${AWS_ARGS[@]}" --query "tasks[0].taskArn" --output text)
 echo "::endgroup::"
 echo

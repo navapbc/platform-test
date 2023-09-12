@@ -24,9 +24,6 @@
 # -----------------------------------------------------------------------------
 set -euo pipefail
 
-# TODO: Add ability to change task IAM Role. Part 3 of multipart update https://github.com/navapbc/template-infra/issues/354#issuecomment-1693973424
-# TODO: Change to keyword arguments. Part 3 of multipart update https://github.com/navapbc/template-infra/issues/354#issuecomment-1693973424
-
 # Parse optional parameters
 ENVIRONMENT_VARIABLES=""
 TASK_ROLE_ARN=""

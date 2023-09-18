@@ -48,6 +48,8 @@ resource "aws_rds_cluster" "db" {
   vpc_security_group_ids = [aws_security_group.db.id]
 
   enabled_cloudwatch_logs_exports = ["postgresql"]
+
+  db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.rds_query_logging.name
 }
 
 resource "aws_rds_cluster_instance" "primary" {

@@ -102,6 +102,11 @@ resource "aws_iam_role_policy" "ssm_access" {
     Version = "2012-10-17"
     Statement = [
       {
+        "Effect"   = "Allow",
+        "Action"   = "secretsmanager:GetSecretValue",
+        "Resource" = "${aws_rds_cluster.db.master_user_secret[0].secret_arn}"
+      },
+      {
         Effect   = "Allow"
         Action   = ["ssm:GetParameter*"]
         Resource = "${aws_ssm_parameter.random_db_password.arn}"

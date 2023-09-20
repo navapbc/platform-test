@@ -1,5 +1,4 @@
-FROM python:3-alpine as release
-
+FROM python:3-slim as release
 
 RUN adduser --system --disabled-password --no-create-home app
 

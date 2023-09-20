@@ -1,5 +1,6 @@
 FROM python:3-alpine as release
 
+
 RUN adduser --system --disabled-password --no-create-home app
 
 WORKDIR /app

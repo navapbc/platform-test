@@ -66,6 +66,7 @@ resource "aws_rds_cluster_instance" "primary" {
   auto_minor_version_upgrade = true
   monitoring_role_arn        = aws_iam_role.rds_enhanced_monitoring.arn
   monitoring_interval        = 30
+  db_parameter_group_name    = aws_db_parameter_group.rds_query_logging.name
 }
 
 resource "random_password" "random_db_password" {
@@ -89,6 +90,24 @@ resource "aws_kms_key" "db" {
 # -------------
 
 resource "aws_rds_cluster_parameter_group" "rds_query_logging" {
+  name        = var.name
+  family      = data.aws_rds_engine_version.db_version.parameter_group_family
+  description = "Default cluster parameter group"
+
+  parameter {
+    name = "log_statement"
+    # Logs data definition statements (e.g. DROP, ALTER, CREATE)
+    value = "ddl"
+  }
+
+  parameter {
+    name = "log_min_duration_statement"
+    # Logs all statements that run 100ms or longer
+    value = "100"
+  }
+}
+
+resource "aws_db_parameter_group" "rds_query_logging" {
   name        = var.name
   family      = data.aws_rds_engine_version.db_version.parameter_group_family
   description = "Default cluster parameter group"

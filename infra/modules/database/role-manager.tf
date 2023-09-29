@@ -106,8 +106,8 @@ resource "aws_iam_role_policy" "ssm_access" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect   = "Allow"
-        Action   = ["ssm:GetParameter*"]
+        Effect = "Allow"
+        Action = ["ssm:GetParameter*"]
         Resource = [
           aws_ssm_parameter.random_db_password.arn,
           "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.id}:parameter/aws/reference/secretsmanager/${data.aws_secretsmanager_secret.db_pass.name}"

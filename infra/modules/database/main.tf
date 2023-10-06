@@ -55,6 +55,9 @@ resource "aws_rds_cluster" "db" {
   enabled_cloudwatch_logs_exports = ["postgresql"]
 
   db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.rds_query_logging.name
+  depends_on = [
+    aws_cloudwatch_log_group.postgres
+  ]
 }
 
 resource "aws_rds_cluster_instance" "primary" {
@@ -88,6 +91,11 @@ resource "aws_kms_key" "db" {
 
 # Query Logging
 # -------------
+
+resource "aws_cloudwatch_log_group" "postgres" {
+  name              = "/aws/rds/instance/${local.primary_instance_name}"
+  retention_in_days = 7 # TODO update this based on platform decision
+}
 
 resource "aws_rds_cluster_parameter_group" "rds_query_logging" {
   name        = var.name

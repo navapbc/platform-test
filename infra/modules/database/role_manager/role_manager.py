@@ -2,6 +2,7 @@ import boto3
 import itertools
 from operator import itemgetter
 import os
+import json
 import logging
 from pg8000.native import Connection, identifier
 

@@ -52,7 +52,13 @@ resource "aws_rds_cluster" "db" {
 
   vpc_security_group_ids = [aws_security_group.db.id]
 
-  enabled_cloudwatch_logs_exports = ["postgresql"]
+  enabled_cloudwatch_logs_exports = [
+    "postgresql",
+    # "audit", 
+    # "error", 
+    # "general", 
+    # "slowquery"
+  ]
 
   db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.rds_query_logging.name
   depends_on = [
@@ -105,13 +111,15 @@ resource "aws_rds_cluster_parameter_group" "rds_query_logging" {
   parameter {
     name = "log_statement"
     # Logs data definition statements (e.g. DROP, ALTER, CREATE)
-    value = "ddl"
+    value = "all"
   }
 
   parameter {
     name = "log_min_duration_statement"
     # Logs all statements that run 100ms or longer
-    value = "100"
+    # value = "100"
+    # Log all statements
+    value = "1"
   }
 }
 
@@ -123,12 +131,14 @@ resource "aws_db_parameter_group" "rds_query_logging" {
   parameter {
     name = "log_statement"
     # Logs data definition statements (e.g. DROP, ALTER, CREATE)
-    value = "ddl"
+    value = "all"
   }
 
   parameter {
     name = "log_min_duration_statement"
     # Logs all statements that run 100ms or longer
-    value = "100"
+
+    # value = "100"
+    value = "1"
   }
 }

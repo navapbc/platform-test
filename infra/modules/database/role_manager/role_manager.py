@@ -3,6 +3,7 @@ import itertools
 from operator import itemgetter
 import os
 import logging
+import json
 from pg8000.native import Connection, identifier
 
 logger = logging.getLogger()

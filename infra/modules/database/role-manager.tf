@@ -5,6 +5,10 @@
 # This includes creating and granting permissions to roles
 # as well as viewing existing roles
 
+locals {
+  ssm_password_name = length(aws_rds_cluster.db.master_user_secret) == 1 ? "/aws/reference/secretsmanager/${split(":", aws_rds_cluster.db.master_user_secret[0].secret_arn)[6]}" : ""
+}
+
 resource "aws_lambda_function" "role_manager" {
   function_name = local.role_manager_name
 
@@ -25,15 +29,15 @@ resource "aws_lambda_function" "role_manager" {
 
   environment {
     variables = {
-      DB_HOST                = aws_rds_cluster.db.endpoint
-      DB_PORT                = aws_rds_cluster.db.port
-      DB_USER                = local.master_username
-      DB_NAME                = aws_rds_cluster.db.database_name
-      DB_PASSWORD_PARAM_NAME = "/aws/reference/secretsmanager/${data.aws_secretsmanager_secret.db_pass.name}"
-      DB_SCHEMA              = var.schema_name
-      APP_USER               = var.app_username
-      MIGRATOR_USER          = var.migrator_username
-      PYTHONPATH             = "vendor"
+      DB_HOST          = aws_rds_cluster.db.endpoint
+      DB_PORT          = aws_rds_cluster.db.port
+      DB_USER          = local.master_username
+      DB_NAME          = aws_rds_cluster.db.database_name
+      DB_PASSWORD_NAME = local.ssm_password_name
+      DB_SCHEMA        = var.schema_name
+      APP_USER         = var.app_username
+      MIGRATOR_USER    = var.migrator_username
+      PYTHONPATH       = "vendor"
     }
   }
 
@@ -79,6 +83,11 @@ resource "aws_kms_key" "role_manager" {
   enable_key_rotation = true
 }
 
+data "aws_secretsmanager_secret" "db_pass" {
+  count = length(aws_rds_cluster.db.master_user_secret)
+  arn   = aws_rds_cluster.db.master_user_secret[0].secret_arn
+}
+
 # IAM for Role Manager lambda function
 resource "aws_iam_role" "role_manager" {
   name               = "${var.name}-manager"
@@ -94,9 +103,7 @@ resource "aws_iam_role" "role_manager" {
   ]
 }
 
-data "aws_secretsmanager_secret" "db_pass" {
-  arn = aws_rds_cluster.db.master_user_secret[0].secret_arn
-}
+
 
 resource "aws_iam_role_policy" "ssm_access" {
   name = "${var.name}-role-manager-ssm-access"
@@ -105,15 +112,34 @@ resource "aws_iam_role_policy" "ssm_access" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-      {
-        Effect   = "Allow"
-        Action   = ["secretsmanager:GetSecretValue"]
-        Resource = [data.aws_secretsmanager_secret.db_pass.arn]
-      },
+      # {
+      #   Effect   = "Allow"
+      #   Action   = ["secretsmanager:GetSecretValue"]
+      #   Resource = [data.aws_secretsmanager_secret.db_pass.arn]
+      # },
       {
         Effect   = "Allow"
         Action   = ["kms:Decrypt"]
         Resource = [data.aws_kms_key.default_ssm_key.arn]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "database_credential_tool" {
+  count = length(aws_rds_cluster.db.master_user_secret)
+  name  = "${var.name}-role-manager-rds-ssm-access"
+  role  = aws_iam_role.role_manager.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = ["ssm:GetParameter"]
+        Resource = [
+          "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.id}:parameter${local.ssm_password_name}"
+        ]
       }
     ]
   })

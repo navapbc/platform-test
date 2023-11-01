@@ -116,8 +116,8 @@ def connect_using_iam(user: str) -> Connection:
     return Connection(user=user, host=host, port=port, database=database, password=token, ssl_context=True)
 
 def get_password() -> str:
-    ssm = boto3.client("ssm")
-    param_name = os.environ["DB_PASSWORD_PARAM_NAME"]
+    ssm = boto3.client("ssm",region_name=os.environ["AWS_REGION"])
+    param_name = os.environ["DB_PASSWORD_NAME"]
     logger.info("Fetching password from parameter store")
     result = json.loads(ssm.get_parameter(
         Name=param_name,

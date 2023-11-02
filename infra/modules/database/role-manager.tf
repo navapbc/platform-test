@@ -6,7 +6,7 @@
 # as well as viewing existing roles
 
 locals {
-  ssm_password_name = length(aws_rds_cluster.db.master_user_secret) == 1 ? "/aws/reference/secretsmanager/${split(":", aws_rds_cluster.db.master_user_secret[0].secret_arn)[6]}" : ""
+  ssm_password_name = length(aws_rds_cluster.db.master_user_secret) == 1 ? "/aws/reference/secretsmanager/${data.aws_secretsmanager_secret.db_pass[0].name}" : ""
 }
 
 resource "aws_lambda_function" "role_manager" {
@@ -29,15 +29,16 @@ resource "aws_lambda_function" "role_manager" {
 
   environment {
     variables = {
-      DB_HOST          = aws_rds_cluster.db.endpoint
-      DB_PORT          = aws_rds_cluster.db.port
-      DB_USER          = local.master_username
-      DB_NAME          = aws_rds_cluster.db.database_name
-      DB_PASSWORD_NAME = local.ssm_password_name
-      DB_SCHEMA        = var.schema_name
-      APP_USER         = var.app_username
-      MIGRATOR_USER    = var.migrator_username
-      PYTHONPATH       = "vendor"
+      DB_HOST                = aws_rds_cluster.db.endpoint
+      DB_PORT                = aws_rds_cluster.db.port
+      DB_USER                = local.master_username
+      DB_NAME                = aws_rds_cluster.db.database_name
+      DB_PASSWORD_PARAM_NAME = local.ssm_password_name
+      DB_PASSWORD_SECRET_ARN = aws_rds_cluster.db.master_user_secret[0].secret_arn
+      DB_SCHEMA              = var.schema_name
+      APP_USER               = var.app_username
+      MIGRATOR_USER          = var.migrator_username
+      PYTHONPATH             = "vendor"
     }
   }
 
@@ -46,7 +47,7 @@ resource "aws_lambda_function" "role_manager" {
   tracing_config {
     mode = "Active"
   }
-
+  timeout = 30
   # checkov:skip=CKV_AWS_272:TODO(https://github.com/navapbc/template-infra/issues/283)
 
   # checkov:skip=CKV_AWS_116:Dead letter queue (DLQ) configuration is only relevant for asynchronous invocations
@@ -112,11 +113,6 @@ resource "aws_iam_role_policy" "ssm_access" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-      # {
-      #   Effect   = "Allow"
-      #   Action   = ["secretsmanager:GetSecretValue"]
-      #   Resource = [data.aws_secretsmanager_secret.db_pass.arn]
-      # },
       {
         Effect   = "Allow"
         Action   = ["kms:Decrypt"]
@@ -134,6 +130,11 @@ resource "aws_iam_role_policy" "database_credential_tool" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["secretsmanager:GetSecretValue"]
+        Resource = [data.aws_secretsmanager_secret.db_pass[0].arn]
+      },
       {
         Effect = "Allow"
         Action = ["ssm:GetParameter"]

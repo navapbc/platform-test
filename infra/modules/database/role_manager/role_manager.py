@@ -122,23 +122,23 @@ def connect_using_iam(user: str) -> Connection:
 import requests
 
 def get_password() -> str:
-    # ssm = boto3.client("ssm",region_name=os.environ["AWS_REGION"])
-    # param_name = os.environ["DB_PASSWORD_PARAM_NAME"]
-    # logger.info("Fetching password from parameter store:\n%s"%param_name)
-    # result = json.loads(ssm.get_parameter(
-    #     Name=param_name,
-    #     WithDecryption=True,
-    # )["Parameter"]["Value"])
-    # return result["password"]
-    # print(requests.get("https://example.com"))
-    secretsmanager = boto3.client("secretsmanager",region_name=os.environ["AWS_REGION"])
-    secret_arn = os.environ["DB_PASSWORD_SECRET_ARN"]
-    logger.info("Fetching password from Secrets Manager:\n%s"%secret_arn)
+    ssm = boto3.client("ssm",region_name=os.environ["AWS_REGION"])
+    param_name = os.environ["DB_PASSWORD_PARAM_NAME"]
+    logger.info("Fetching password from parameter store:\n%s"%param_name)
+    result = json.loads(ssm.get_parameter(
+        Name=param_name,
+        WithDecryption=True,
+    )["Parameter"]["Value"])
+    return result["password"]
 
-    result = secretsmanager.get_secret_value(SecretId=secret_arn)
-    secret_data = json.loads(result["SecretString"])
+    # secretsmanager = boto3.client("secretsmanager",region_name=os.environ["AWS_REGION"])
+    # secret_arn = os.environ["DB_PASSWORD_SECRET_ARN"]
+    # logger.info("Fetching password from Secrets Manager:\n%s"%secret_arn)
 
-    return secret_data["password"]
+    # result = secretsmanager.get_secret_value(SecretId=secret_arn)
+    # secret_data = json.loads(result["SecretString"])
+
+    # return secret_data["password"]
 
 
 def get_roles(conn: Connection) -> list[str]:

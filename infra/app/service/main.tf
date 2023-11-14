@@ -62,6 +62,19 @@ module "app_config" {
   source = "../app-config"
 }
 
+data "aws_security_groups" "aws_services" {
+  filter {
+    name   = "group-name"
+    values = ["${module.project_config.aws_services_security_group_name_prefix}*"]
+  }
+
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+}
+
+
 data "aws_rds_cluster" "db_cluster" {
   count              = module.app_config.has_database ? 1 : 0
   cluster_identifier = local.database_config.cluster_name
@@ -84,13 +97,25 @@ data "aws_ssm_parameter" "incident_management_service_integration_url" {
   name  = local.incident_management_service_integration_config.integration_url_param_name
 }
 
+# Customizations: Retrieve passwords created elsewhere (by other modules, manually)
+
+data "aws_ssm_parameter" "custom_secret" {
+  name = "/custom_secret"
+}
+
 module "service" {
-  source                = "../../modules/service"
-  service_name          = local.service_name
-  image_repository_name = module.app_config.image_repository_name
-  image_tag             = local.image_tag
-  vpc_id                = data.aws_vpc.default.id
-  subnet_ids            = data.aws_subnets.default.ids
+  source                   = "../../modules/service"
+  service_name             = local.service_name
+  image_repository_name    = module.app_config.image_repository_name
+  image_tag                = "latest"
+  external_image_url       = "docker.io/rocketnovadockerhub/tiny-env-test"
+  container_read_only      = false
+  container_port           = 8000
+  healthcheck_start_period = 0
+  healthcheck_path         = "customhealth"
+  healthcheck_matcher      = "200-302"
+  vpc_id                   = data.aws_vpc.default.id
+  subnet_ids               = data.aws_subnets.default.ids
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
@@ -104,6 +129,15 @@ module "service" {
       schema_name = local.database_config.schema_name
     }
   } : null
+
+  container_env_vars = [
+    { name : "CUSTOM_ENV_VAR", value : "100" },
+  ]
+  container_secrets = [
+    { name : "CUSTOM_SECRET", valueFrom : data.aws_ssm_parameter.custom_secret.arn },
+  ]
+  aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
+
 }
 
 module "monitoring" {

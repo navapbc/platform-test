@@ -14,8 +14,8 @@ data "aws_subnets" "default" {
 
 locals {
   # The prefix key/value pair is used for Terraform Workspaces, which is useful for projects with multiple infrastructure developers.
-  # By default, Terraform creates a workspace named “default.” If a non-default workspace is not created this prefix will equal “default”, 
-  # if you choose not to use workspaces set this value to "dev" 
+  # By default, Terraform creates a workspace named “default.” If a non-default workspace is not created this prefix will equal “default”,
+  # if you choose not to use workspaces set this value to "dev"
   prefix = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
 
   # Add environment specific tags
@@ -99,8 +99,10 @@ data "aws_ssm_parameter" "incident_management_service_integration_url" {
 
 # Customizations: Retrieve passwords created elsewhere (by other modules, manually)
 
-data "aws_ssm_parameter" "custom_secret" {
-  name = "/custom_secret"
+resource "aws_ssm_parameter" "custom_secret" {
+  name  = "/custom_secret"
+  type  = "SecureString"
+  value = "200"
 }
 
 module "service" {
@@ -134,7 +136,7 @@ module "service" {
     { name : "CUSTOM_ENV_VAR", value : "100" },
   ]
   container_secrets = [
-    { name : "CUSTOM_SECRET", valueFrom : data.aws_ssm_parameter.custom_secret.arn },
+    { name : "CUSTOM_SECRET", valueFrom : aws_ssm_parameter.custom_secret.arn },
   ]
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
 

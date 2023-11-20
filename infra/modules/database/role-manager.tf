@@ -6,7 +6,7 @@
 # as well as viewing existing roles
 
 locals {
-  ssm_password_name = length(aws_rds_cluster.db.master_user_secret) == 1 ? "/aws/reference/secretsmanager/${data.aws_secretsmanager_secret.db_pass[0].name}" : ""
+  db_password_param_name = "/aws/reference/secretsmanager/${data.aws_secretsmanager_secret.db_password.name}"
 }
 
 resource "aws_lambda_function" "role_manager" {
@@ -33,7 +33,7 @@ resource "aws_lambda_function" "role_manager" {
       DB_PORT                = aws_rds_cluster.db.port
       DB_USER                = local.master_username
       DB_NAME                = aws_rds_cluster.db.database_name
-      DB_PASSWORD_PARAM_NAME = local.ssm_password_name
+      DB_PASSWORD_PARAM_NAME = local.db_password_param_name
       DB_PASSWORD_SECRET_ARN = aws_rds_cluster.db.master_user_secret[0].secret_arn
       DB_SCHEMA              = var.schema_name
       APP_USER               = var.app_username
@@ -84,9 +84,10 @@ resource "aws_kms_key" "role_manager" {
   enable_key_rotation = true
 }
 
-data "aws_secretsmanager_secret" "db_pass" {
-  count = length(aws_rds_cluster.db.master_user_secret)
-  arn   = aws_rds_cluster.db.master_user_secret[0].secret_arn
+data "aws_secretsmanager_secret" "db_password" {
+  # master_user_secret is available when aws_rds_cluster.db.manage_master_user_password
+  # is true (see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster#master_user_secret)
+  arn = aws_rds_cluster.db.master_user_secret[0].secret_arn
 }
 
 # IAM for Role Manager lambda function
@@ -121,13 +122,13 @@ resource "aws_iam_role_policy" "ssm_access" {
       {
         Effect   = "Allow"
         Action   = ["secretsmanager:GetSecretValue"]
-        Resource = [data.aws_secretsmanager_secret.db_pass[0].arn]
+        Resource = [data.aws_secretsmanager_secret.db_password.arn]
       },
       {
         Effect = "Allow"
         Action = ["ssm:GetParameter"]
         Resource = [
-          "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.id}:parameter${local.ssm_password_name}"
+          "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.id}:parameter${local.db_password_param_name}"
         ]
       }
     ]

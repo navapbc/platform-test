@@ -16,9 +16,13 @@ UPGRADE_REF ?= $(shell git rev-parse --abbrev-ref HEAD)
 
 clean: clean-app clean-infra
 
+# The git branch to checkout
+# Set to `main` by default
+BRANCH ?= main
+
 install-infra:
 	# fetch latest version of template-infra
-	git clone --single-branch --branch main --depth 1 git@github.com:navapbc/template-infra.git
+	git clone --single-branch --branch $(BRANCH) --depth 1 git@github.com:navapbc/template-infra.git
 
 	# copy over template files
 	cp -r \
@@ -36,7 +40,7 @@ install-infra:
 
 install-application-nextjs:
 	# fetch latest version of template-application-nextjs
-	git clone --single-branch --branch main --depth 1 git@github.com:navapbc/template-application-nextjs.git
+	git clone --single-branch --branch $(BRANCH) --depth 1 git@github.com:navapbc/template-application-nextjs.git
 
 	# copy app decision records
 	mkdir -p docs/
@@ -50,7 +54,7 @@ install-application-nextjs:
 
 install-application-flask:
 	# fetch latest version of template-application-flask
-	git clone --single-branch --branch main --depth 1 git@github.com:navapbc/template-application-flask.git
+	git clone --single-branch --branch $(BRANCH) --depth 1 git@github.com:navapbc/template-application-flask.git
 
 	# copy app decision records
 	mkdir -p docs/

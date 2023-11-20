@@ -107,7 +107,7 @@ resource "aws_iam_role" "role_manager" {
 
 
 
-resource "aws_iam_role_policy" "ssm_access" {
+resource "aws_iam_role_policy" "role_manager_access_to_db_password" {
   name = "${var.name}-role-manager-ssm-access"
   role = aws_iam_role.role_manager.id
 

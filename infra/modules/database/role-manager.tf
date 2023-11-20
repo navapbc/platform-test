@@ -117,19 +117,7 @@ resource "aws_iam_role_policy" "ssm_access" {
         Effect   = "Allow"
         Action   = ["kms:Decrypt"]
         Resource = [data.aws_kms_key.default_ssm_key.arn]
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy" "database_credential_tool" {
-  count = length(aws_rds_cluster.db.master_user_secret)
-  name  = "${var.name}-role-manager-rds-ssm-access"
-  role  = aws_iam_role.role_manager.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
+      },
       {
         Effect   = "Allow"
         Action   = ["secretsmanager:GetSecretValue"]

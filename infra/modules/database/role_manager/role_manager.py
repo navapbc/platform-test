@@ -6,10 +6,6 @@ import json
 import logging
 from pg8000.native import Connection, identifier
 
-logging.basicConfig()
-logging.getLogger('botocore').setLevel(logging.INFO)
-logging.getLogger('boto3').setLevel(logging.INFO)
-
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 

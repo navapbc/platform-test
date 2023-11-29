@@ -23,7 +23,11 @@ locals {
     { name : "DB_NAME", value : var.db_vars.connection_info.db_name },
     { name : "DB_SCHEMA", value : var.db_vars.connection_info.schema_name },
   ]
-  environment_variables = concat(local.base_environment_variables, local.db_environment_variables)
+  environment_variables = concat(
+    local.base_environment_variables,
+    local.db_environment_variables,
+    [for name, value in var.extra_environment_variables : { name : name, value : value }]
+  )
 }
 
 #-------------------

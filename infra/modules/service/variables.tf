@@ -51,6 +51,12 @@ variable "subnet_ids" {
   description = "Private subnet id from vpc module"
 }
 
+variable "extra_environment_variables" {
+  type        = map(string)
+  description = "Additional environment variables to pass to the service container"
+  default     = {}
+}
+
 variable "db_vars" {
   description = "Variables for integrating the app service with a database"
   type = object({

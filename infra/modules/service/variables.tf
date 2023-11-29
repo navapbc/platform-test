@@ -67,3 +67,9 @@ variable "db_vars" {
   })
   default = null
 }
+
+variable "extra_policies" {
+  description = "Set of ARNs for additional IAM policies to attach to the service's task role"
+  type        = set(string)
+  default     = []
+}

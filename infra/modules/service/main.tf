@@ -14,6 +14,7 @@ locals {
 
   base_environment_variables = [
     { name : "PORT", value : tostring(var.container_port) },
+    { name : "AWS_DEFAULT_REGION", value : data.aws_region.current.name },
     { name : "AWS_REGION", value : data.aws_region.current.name },
   ]
   db_environment_variables = var.db_vars == null ? [] : [

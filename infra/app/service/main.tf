@@ -104,6 +104,8 @@ module "service" {
       schema_name = local.database_config.schema_name
     }
   } : null
+
+  extra_policies = [module.feature_flagging.access_policy_arn]
 }
 
 module "monitoring" {

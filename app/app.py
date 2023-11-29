@@ -42,14 +42,12 @@ def migrations():
         return f"Last migration on {last_migration_date}"
 
 def get_db_token(host, port, user):
-    region = os.environ.get("AWS_REGION")
-
     # gets the credentials from .aws/credentials
-    logger.info("Getting RDS client for region %s", region)
-    client = boto3.client("rds", region_name=region)
+    logger.info("Getting RDS client")
+    client = boto3.client("rds")
 
     logger.info("Generating auth token for user %s", user)
-    token = client.generate_db_auth_token(DBHostname=host, Port=port, DBUsername=user, Region=region)
+    token = client.generate_db_auth_token(DBHostname=host, Port=port, DBUsername=user)
     return token
 
 
@@ -69,6 +67,10 @@ def get_db_connection():
     conn = psycopg.connect(conninfo)
     return conn
 
+
+@app.route("/feature-flags")
+def feature_flags():
+    client = boto3.client("evidently", )
 
 if __name__ == "__main__":
     main()

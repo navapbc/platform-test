@@ -1,4 +1,4 @@
-output "name" {
+output "evidently_project_name" {
   description = "Name of feature flag manager"
   value       = local.evidently_project_name
 }

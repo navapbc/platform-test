@@ -1,5 +1,5 @@
 resource "aws_cloudwatch_log_group" "logs" {
-  name = "${var.service_name}-feature-flags"
+  name = local.evidently_project_name
 
   # Conservatively retain logs for 5 years.
   # Looser requirements may allow shorter retention periods

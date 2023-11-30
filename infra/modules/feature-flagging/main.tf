@@ -2,7 +2,7 @@ locals {
   evidently_project_name = "${var.service_name}-feature-flags"
 }
 
-resource "aws_evidently_project" "feature_flagging" {
+resource "aws_evidently_project" "feature_flags" {
   name        = local.evidently_project_name
   description = "Feature flags for ${var.service_name}"
   data_delivery {
@@ -16,7 +16,7 @@ resource "aws_evidently_feature" "feature_flag" {
   for_each = var.feature_flags
 
   name        = each.key
-  project     = aws_evidently_project.feature_flagging.name
+  project     = aws_evidently_project.feature_flags.name
   description = "Enables the ${each.key} feature"
   variations {
     name = "FeatureOff"

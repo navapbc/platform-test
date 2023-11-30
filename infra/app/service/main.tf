@@ -108,7 +108,9 @@ module "service" {
   extra_environment_variables = {
     FEATURE_FLAGS_PROJECT = module.feature_flagging.evidently_project_name
   }
-  extra_policies = [module.feature_flagging.access_policy_arn]
+  extra_policies = {
+    "1" = module.feature_flagging.access_policy_arn
+  }
 }
 
 module "monitoring" {

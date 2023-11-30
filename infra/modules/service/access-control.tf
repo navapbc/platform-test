@@ -74,5 +74,5 @@ resource "aws_iam_role_policy_attachment" "extra_policies" {
   for_each = var.extra_policies
 
   role       = aws_iam_role.app_service.name
-  policy_arn = each.key
+  policy_arn = each.value
 }

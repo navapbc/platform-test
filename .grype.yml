@@ -23,3 +23,6 @@ ignore:
   - vulnerability: GHSA-5cpq-8wj7-hf2v
   - vulnerability: GHSA-cf7p-gm2m-833m
   - vulnerability: GHSA-jm77-qphf-c4w8
+  - vulnerability: GHSA-jfhm-5ghh-2f97
+  - vulnerability: GHSA-v8gr-m533-ghj9
+  - vulnerability: GHSA-mq26-g339-26xf

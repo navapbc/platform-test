@@ -70,7 +70,25 @@ def get_db_connection():
 
 @app.route("/feature-flags")
 def feature_flags():
-    client = boto3.client("evidently", )
+    foo_status = "enabled" if is_feature_enabled("foo") else "disabled"
+    bar_status = "enabled" if is_feature_enabled("bar") else "disabled"
+
+    return f"<p>Feature foo is {foo_status}</p><p>Feature bar is {bar_status}</p>"
+
+
+def is_feature_enabled(feature_name: str) -> bool:
+    feature_flags_project_name = os.environ.get("FEATURE_FLAGS_PROJECT")
+
+    logger.info("Getting Evidently client")
+    client = boto3.client("evidently")
+
+    response = client.evaluate_feature(
+        entityId="anonymous",
+        feature=feature_name,
+        project=feature_flags_project_name,
+    )
+    return response["value"]["boolValue"]
+
 
 if __name__ == "__main__":
     main()

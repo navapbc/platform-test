@@ -106,7 +106,7 @@ module "service" {
   } : null
 
   extra_environment_variables = {
-    AWS_EVIDENTLY_FEATURE_FLAGS_PROJECT = module.feature_flagging.evidently_project_name
+    FEATURE_FLAGS_PROJECT = module.feature_flagging.evidently_project_name
   }
   extra_policies = [module.feature_flagging.access_policy_arn]
 }

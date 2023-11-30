@@ -109,7 +109,7 @@ module "service" {
     FEATURE_FLAGS_PROJECT = module.feature_flagging.evidently_project_name
   }
   extra_policies = {
-    "1" = module.feature_flagging.access_policy_arn
+    "feature_flags_access" = module.feature_flagging.access_policy_arn
   }
 }
 

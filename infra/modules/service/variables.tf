@@ -75,13 +75,7 @@ variable "db_vars" {
 }
 
 variable "extra_policies" {
-  description = "Map where the values of the map are ARNs for additional IAM policies to attach to the service's task role. The keys of the map are not used."
-  # Use map(string) instead of a set(string) due to limitations of Terraform's for_each,
-  # which requires that all the keys of for_each are known in advance. Strangely,
-  # when a set or list is passed to for_each, each.key and each.value both refer to the
-  # value. If we use a map of indices ("1", "2", "3") to values, then the keys are known
-  # statically and we can get around this limitation.
-  # See https://developer.hashicorp.com/terraform/language/meta-arguments/for_each#limitations-on-values-used-in-for_each
-  type    = map(string)
-  default = {}
+  description = "Map of extra IAM policies to attach to the service's task role. The map's keys define the resource name in terraform."
+  type        = map(string)
+  default     = {}
 }

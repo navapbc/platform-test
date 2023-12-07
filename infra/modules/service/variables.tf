@@ -56,6 +56,11 @@ variable "private_subnet_ids" {
   description = "Private subnet ids in VPC"
 }
 
+variable "aws_services_security_group_id" {
+  type        = string
+  description = "Security group ID for VPC endpoints that access AWS Services"
+}
+
 variable "extra_environment_variables" {
   type        = list(object({ name = string, value = string }))
   description = "Additional environment variables to pass to the service container"

@@ -91,8 +91,10 @@ infra-configure-app-service: ## Configure infra/$APP_NAME/service module's tfbac
 infra-update-current-account: ## Update infra resources for current AWS profile
 	./bin/terraform-init-and-apply.sh infra/accounts `./bin/current-account-config-name.sh`
 
-infra-update-network: ## Update default network
-	./bin/terraform-init-and-apply.sh infra/networks default
+infra-update-network: ## Update network
+	@:$(call check_defined, NETWORK_NAME, the name of the network in /infra/networks)
+	terraform -chdir="infra/networks" init -input=false -reconfigure -backend-config="$(NETWORK_NAME).s3.tfbackend"
+	terraform -chdir="infra/networks" apply -var="network_name=$(NETWORK_NAME)"
 
 infra-update-app-build-repository: ## Create or update $APP_NAME's build repository
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)

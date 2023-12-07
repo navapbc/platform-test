@@ -26,8 +26,4 @@ module "aws_vpc" {
 
   enable_dns_hostnames = true
   enable_dns_support   = true
-
-  tags = {
-    network_name = var.name
-  }
 }

@@ -1,16 +1,22 @@
-# TODO(https://github.com/navapbc/template-infra/issues/152) use non-default VPC
-data "aws_vpc" "default" {
-  default = true
-}
-
-# TODO(https://github.com/navapbc/template-infra/issues/152) use private subnets
-data "aws_subnets" "default" {
-  filter {
-    name   = "default-for-az"
-    values = [true]
+data "aws_vpc" "network" {
+  tags = {
+    network_name = local.network_config.network_name
   }
 }
 
+data "aws_subnets" "public" {
+  tags = {
+    network_name = local.network_config.network_name
+    network_type = "public"
+  }
+}
+
+data "aws_subnets" "private" {
+  tags = {
+    network_name = local.network_config.network_name
+    network_type = "private"
+  }
+}
 
 locals {
   # The prefix key/value pair is used for Terraform Workspaces, which is useful for projects with multiple infrastructure developers.
@@ -29,6 +35,7 @@ locals {
   environment_config                             = module.app_config.environment_configs[var.environment_name]
   service_config                                 = local.environment_config.service_config
   database_config                                = local.environment_config.database_config
+  network_config                                 = local.environment_config.network_config
   incident_management_service_integration_config = local.environment_config.incident_management_service_integration
 }
 
@@ -89,8 +96,9 @@ module "service" {
   service_name          = local.service_name
   image_repository_name = module.app_config.image_repository_name
   image_tag             = local.image_tag
-  vpc_id                = data.aws_vpc.default.id
-  subnet_ids            = data.aws_subnets.default.ids
+  vpc_id                = data.aws_vpc.network.id
+  public_subnet_ids     = data.aws_subnets.public.ids
+  private_subnet_ids    = data.aws_subnets.private.ids
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids

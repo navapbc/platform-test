@@ -4,17 +4,10 @@ data "aws_vpc" "network" {
   }
 }
 
-data "aws_subnets" "public" {
-  tags = {
-    network_name = local.network_config.network_name
-    network_type = "public"
-  }
-}
-
 data "aws_subnets" "database" {
   tags = {
     network_name = local.network_config.network_name
-    network_type = "database"
+    subnet_type  = "database"
   }
 }
 

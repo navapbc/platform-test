@@ -11,10 +11,8 @@ output "database_config" {
   } : null
 }
 
-output "network_config" {
-  value = {
-    network_name = var.network_name
-  }
+output "network_name" {
+  value = var.network_name
 }
 
 output "service_config" {

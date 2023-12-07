@@ -1,19 +1,19 @@
 data "aws_vpc" "network" {
   tags = {
-    network_name = local.network_config.network_name
+    network_name = local.environment_config.network_name
   }
 }
 
 data "aws_subnets" "public" {
   tags = {
-    network_name = local.network_config.network_name
+    network_name = local.environment_config.network_name
     subnet_type  = "public"
   }
 }
 
 data "aws_subnets" "private" {
   tags = {
-    network_name = local.network_config.network_name
+    network_name = local.environment_config.network_name
     subnet_type  = "private"
   }
 }
@@ -35,7 +35,6 @@ locals {
   environment_config                             = module.app_config.environment_configs[var.environment_name]
   service_config                                 = local.environment_config.service_config
   database_config                                = local.environment_config.database_config
-  network_config                                 = module.project_config.network_configs[local.environment_config.network_name]
   incident_management_service_integration_config = local.environment_config.incident_management_service_integration
 }
 

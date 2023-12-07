@@ -1,12 +1,12 @@
 data "aws_vpc" "network" {
   tags = {
-    network_name = local.network_config.network_name
+    network_name = local.environment_config.network_name
   }
 }
 
 data "aws_subnets" "database" {
   tags = {
-    network_name = local.network_config.network_name
+    network_name = local.environment_config.network_name
     subnet_type  = "database"
   }
 }

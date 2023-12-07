@@ -18,8 +18,12 @@ locals {
   # see https://docs.aws.amazon.com/vpc/latest/privatelink/aws-services-privatelink-support.html
   #
   # The database module requires VPC access from private networks to SSM, KMS, and RDS
-  aws_service_integrations = toset(
-    module.app_config.has_database ? ["ssm", "kms", "secretsmanager"] : []
+  aws_service_integrations = setunion(
+    # AWS services used by ECS Fargate: ECR to fetch images, S3 for image layers, and CloudWatch for logs
+    ["ecr.api", "ecr.dkr", "s3", "logs"],
+
+    # AWS services used by the database's role manager
+    module.app_config.has_database ? ["ssm", "kms", "secretsmanager"] : [],
   )
 
   network_config = module.project_config.network_configs[var.network_name]
@@ -87,8 +91,8 @@ resource "aws_vpc_endpoint" "aws_service" {
 
   vpc_id              = module.network.vpc_id
   service_name        = "com.amazonaws.${data.aws_region.current.name}.${each.key}"
-  vpc_endpoint_type   = "Interface"
-  security_group_ids  = [aws_security_group.aws_services[0].id]
-  subnet_ids          = module.network.private_subnet_ids
-  private_dns_enabled = true
+  vpc_endpoint_type   = each.key == "s3" ? "Gateway" : "Interface"
+  security_group_ids  = each.key == "s3" ? null : [aws_security_group.aws_services[0].id]
+  subnet_ids          = each.key == "s3" ? null : module.network.private_subnet_ids
+  private_dns_enabled = each.key == "s3" ? null : true
 }

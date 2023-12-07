@@ -6,7 +6,8 @@ data "aws_region" "current" {}
 
 locals {
   tags = merge(module.project_config.default_tags, {
-    description = "VPC resources"
+    network_name = var.network_name
+    description  = "VPC resources"
   })
   region = module.project_config.default_region
 
@@ -20,6 +21,8 @@ locals {
   aws_service_integrations = toset(
     module.app_config.has_database ? ["ssm", "kms", "secretsmanager"] : []
   )
+
+  network_config = module.project_config.network_configs[var.network_name]
 }
 
 terraform {
@@ -52,15 +55,10 @@ module "app_config" {
   source = "../app/app-config"
 }
 
-data "aws_vpc" "default" {
-  default = true
-}
-
-data "aws_subnets" "default" {
-  filter {
-    name   = "default-for-az"
-    values = [true]
-  }
+module "network" {
+  source             = "../modules/network"
+  name               = var.network_name
+  nat_gateway_config = "none"
 }
 
 # VPC Endpoints for accessing AWS Services
@@ -80,16 +78,16 @@ resource "aws_security_group" "aws_services" {
 
   name_prefix = module.project_config.aws_services_security_group_name_prefix
   description = "VPC endpoints to access AWS services from the VPCs private subnets"
-  vpc_id      = data.aws_vpc.default.id
+  vpc_id      = module.network.vpc_id
 }
 
 resource "aws_vpc_endpoint" "aws_service" {
   for_each = local.aws_service_integrations
 
-  vpc_id              = data.aws_vpc.default.id
+  vpc_id              = module.network.vpc_id
   service_name        = "com.amazonaws.${data.aws_region.current.name}.${each.key}"
   vpc_endpoint_type   = "Interface"
   security_group_ids  = [aws_security_group.aws_services[0].id]
-  subnet_ids          = data.aws_subnets.default.ids
+  subnet_ids          = module.network.private_subnet_ids
   private_dns_enabled = true
 }

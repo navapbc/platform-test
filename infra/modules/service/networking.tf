@@ -69,16 +69,6 @@ resource "aws_vpc_security_group_ingress_rule" "service_ingress_from_load_balanc
   referenced_security_group_id = aws_security_group.alb.id
 }
 
-resource "aws_vpc_security_group_egress_rule" "service_egress_to_vpc_endpoints" {
-  security_group_id = aws_security_group.app.id
-  description       = "Allow outbound requests from role manager to VPC endpoints"
-
-  from_port                    = 443
-  to_port                      = 443
-  ip_protocol                  = "tcp"
-  referenced_security_group_id = var.aws_services_security_group_id
-}
-
 resource "aws_vpc_security_group_ingress_rule" "vpc_endpoints_ingress_from_service" {
   security_group_id = var.aws_services_security_group_id
   description       = "Allow inbound requests to VPC endpoints from role manager"

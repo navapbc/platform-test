@@ -3,6 +3,11 @@ variable "name" {
   description = "Name to give the VPC. Will be added to the VPC under the 'network_name' tag."
 }
 
+variable "database_subnet_group_name" {
+  type        = string
+  description = "Name of the database subnet group"
+}
+
 variable "nat_gateway_config" {
   # nat gateways are pricey, unless outgoing traffic
   # is part of your service, one should be enough

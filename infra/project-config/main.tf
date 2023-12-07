@@ -16,8 +16,8 @@ locals {
   aws_services_security_group_name_prefix = "aws-service-vpc-endpoints"
 
   network_configs = {
-    dev     = { network_name = "dev" }
-    staging = { network_name = "staging" }
-    prod    = { network_name = "prod" }
+    dev     = { network_name = "dev", database_subnet_group_name = "dev" }
+    staging = { network_name = "staging", database_subnet_group_name = "staging" }
+    prod    = { network_name = "prod", database_subnet_group_name = "prod" }
   }
 }

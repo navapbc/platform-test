@@ -56,9 +56,10 @@ module "app_config" {
 }
 
 module "network" {
-  source             = "../modules/network"
-  name               = var.network_name
-  nat_gateway_config = "none"
+  source                     = "../modules/network"
+  name                       = var.network_name
+  database_subnet_group_name = local.network_config.database_subnet_group_name
+  nat_gateway_config         = "none"
 }
 
 # VPC Endpoints for accessing AWS Services

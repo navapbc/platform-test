@@ -13,12 +13,13 @@ module "aws_vpc" {
   azs  = local.availability_zones
   cidr = local.vpc_cidr
 
-  public_subnets       = ["10.0.10.0/24", "10.0.11.0/24", "10.0.12.0/24"]
-  private_subnets      = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24"]
-  database_subnets     = ["10.0.5.0/24", "10.0.6.0/24", "10.0.7.0/24"]
-  public_subnet_tags   = { subnet_type = "public" }
-  private_subnet_tags  = { subnet_type = "private" }
-  database_subnet_tags = { subnet_type = "database" }
+  public_subnets             = ["10.0.10.0/24", "10.0.11.0/24", "10.0.12.0/24"]
+  private_subnets            = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24"]
+  database_subnets           = ["10.0.5.0/24", "10.0.6.0/24", "10.0.7.0/24"]
+  public_subnet_tags         = { subnet_type = "public" }
+  private_subnet_tags        = { subnet_type = "private" }
+  database_subnet_tags       = { subnet_type = "database" }
+  database_subnet_group_name = var.database_subnet_group_name
 
   enable_nat_gateway     = var.nat_gateway_config != "none" ? true : false
   single_nat_gateway     = var.nat_gateway_config == "shared" ? true : false

@@ -2,8 +2,6 @@
 # that currently just adds resources to the default VPC
 # The full network implementation is part of https://github.com/navapbc/template-infra/issues/152
 
-data "aws_region" "current" {}
-
 locals {
   tags = merge(module.project_config.default_tags, {
     network_name = var.network_name
@@ -11,22 +9,18 @@ locals {
   })
   region = module.project_config.default_region
 
-  # List of AWS services used by this VPC
-  # This list is used to create VPC endpoints so that the AWS services can
-  # be accessed without network traffic ever leaving the VPC's private network
-  # For a list of AWS services that integrate with AWS PrivateLink
-  # see https://docs.aws.amazon.com/vpc/latest/privatelink/aws-services-privatelink-support.html
-  #
-  # The database module requires VPC access from private networks to SSM, KMS, and RDS
-  aws_service_integrations = setunion(
-    # AWS services used by ECS Fargate: ECR to fetch images, S3 for image layers, and CloudWatch for logs
-    ["ecr.api", "ecr.dkr", "s3", "logs"],
-
-    # AWS services used by the database's role manager
-    module.app_config.has_database ? ["ssm", "kms", "secretsmanager"] : [],
-  )
-
   network_config = module.project_config.network_configs[var.network_name]
+
+  # If project has multiple apps, add other app configs to this list
+  app_configs = [module.app_config]
+  apps_using_network = [
+    for app_config in local.app_configs :
+    app_config
+    if anytrue([
+      for environment_config in app_config.environment_configs : true if environment_config.network_name == var.network_name
+    ])
+  ]
+  has_database = anytrue([for app_config in local.apps_using_network : app_config.has_database])
 }
 
 terraform {
@@ -60,45 +54,9 @@ module "app_config" {
 }
 
 module "network" {
-  source                     = "../modules/network"
-  name                       = var.network_name
-  database_subnet_group_name = local.network_config.database_subnet_group_name
-  nat_gateway_config         = "none"
-}
-
-data "aws_route_table" "private" {
-  count     = length(module.network.private_subnet_ids)
-  subnet_id = module.network.private_subnet_ids[count.index]
-}
-
-# VPC Endpoints for accessing AWS Services
-# ----------------------------------------
-#
-# Since the role manager Lambda function is in the VPC (which is needed to be
-# able to access the database) we need to allow the Lambda function to access
-# AWS Systems Manager Parameter Store (to fetch the database password) and
-# KMS (to decrypt SecureString parameters from Parameter Store). We can do
-# this by either allowing internet access to the Lambda, or by using a VPC
-# endpoint. The latter is more secure.
-# See https://repost.aws/knowledge-center/lambda-vpc-parameter-store
-# See https://docs.aws.amazon.com/vpc/latest/privatelink/create-interface-endpoint.html#create-interface-endpoint
-
-resource "aws_security_group" "aws_services" {
-  count = length(local.aws_service_integrations) > 0 ? 1 : 0
-
-  name_prefix = module.project_config.aws_services_security_group_name_prefix
-  description = "VPC endpoints to access AWS services from the VPCs private subnets"
-  vpc_id      = module.network.vpc_id
-}
-
-resource "aws_vpc_endpoint" "aws_service" {
-  for_each = local.aws_service_integrations
-
-  vpc_id              = module.network.vpc_id
-  service_name        = "com.amazonaws.${data.aws_region.current.name}.${each.key}"
-  vpc_endpoint_type   = each.key == "s3" ? "Gateway" : "Interface"
-  security_group_ids  = each.key == "s3" ? null : [aws_security_group.aws_services[0].id]
-  subnet_ids          = each.key == "s3" ? null : module.network.private_subnet_ids
-  private_dns_enabled = each.key == "s3" ? null : true
-  route_table_ids     = each.key == "s3" ? data.aws_route_table.private[*].id : null
+  source                                  = "../modules/network"
+  name                                    = var.network_name
+  aws_services_security_group_name_prefix = module.project_config.aws_services_security_group_name_prefix
+  database_subnet_group_name              = local.network_config.database_subnet_group_name
+  nat_gateway_config                      = "none"
 }

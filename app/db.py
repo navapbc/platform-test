@@ -1,7 +1,11 @@
+import logging
 import os
 
+import boto3
 import psycopg
 import psycopg.conninfo
+
+logger = logging.getLogger()
 
 
 def get_db_connection():

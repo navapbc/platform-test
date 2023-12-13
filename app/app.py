@@ -1,10 +1,12 @@
 import logging
 import os
+from datetime import datetime
 
 from flask import Flask
 
 from db import get_db_connection
 from feature_flags import is_feature_enabled
+from storage import create_upload_url
 
 logging.basicConfig()
 logger = logging.getLogger()
@@ -50,6 +52,13 @@ def feature_flags():
     bar_status = "enabled" if is_feature_enabled("bar") else "disabled"
 
     return f"<p>Feature foo is {foo_status}</p><p>Feature bar is {bar_status}</p>"
+
+
+@app.route("/document-upload")
+def document_upload():
+    path = f'test-document-{datetime.now().strftime("%Y-%m-%d_%H%M%S")}'
+    upload_url = create_upload_url(path)
+    return f'<form method="post" action="{upload_url}"><input type="file"><input type="submit"></form>'
 
 
 if __name__ == "__main__":

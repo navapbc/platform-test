@@ -7,7 +7,7 @@ logger = logging.getLogger()
 
 
 def create_upload_url(path):
-    bucket_name = os.environ.get("BUCKET")
+    bucket_name = os.environ.get("BUCKET_NAME")
 
     s3_client = boto3.client("s3")
     logger.info("Generating presigned POST URL")

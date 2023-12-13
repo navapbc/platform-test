@@ -136,7 +136,8 @@ module "service" {
     { name : "BUCKET_NAME", value : local.bucket_name }
   ]
   extra_policies = {
-    "feature_flags_access" = module.feature_flags.access_policy_arn
+    feature_flags_access = module.feature_flags.access_policy_arn,
+    storage_access       = module.storage.access_policy_arn
   }
 }
 

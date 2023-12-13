@@ -61,7 +61,7 @@ def document_upload():
     additional_fields = "".join(
         [
             f'<input type="hidden" name="{name}" value="{value}">'
-            for name, value in enumerate(fields)
+            for name, value in fields.items()
         ]
     )
     return f'<form method="post" action="{upload_url}"><input type="file"><input type="submit">{additional_fields}</form>'

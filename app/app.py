@@ -57,8 +57,14 @@ def feature_flags():
 @app.route("/document-upload")
 def document_upload():
     path = f'test-document-{datetime.now().strftime("%Y-%m-%d_%H%M%S")}'
-    upload_url = create_upload_url(path)
-    return f'<form method="post" action="{upload_url}"><input type="file"><input type="submit"></form>'
+    upload_url, fields = create_upload_url(path)
+    additional_fields = "".join(
+        [
+            f'<input type="hidden" name="{name}" value="{value}">'
+            for name, value in enumerate(fields)
+        ]
+    )
+    return f'<form method="post" action="{upload_url}"><input type="file"><input type="submit">{additional_fields}</form>'
 
 
 if __name__ == "__main__":

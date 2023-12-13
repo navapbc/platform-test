@@ -12,4 +12,4 @@ def create_upload_url(path):
     s3_client = boto3.client("s3")
     logger.info("Generating presigned POST URL")
     response = s3_client.generate_presigned_post(bucket_name, path)
-    return response["url"]
+    return response["url"], response["fields"]

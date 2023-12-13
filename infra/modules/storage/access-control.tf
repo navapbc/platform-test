@@ -16,7 +16,6 @@ resource "aws_iam_policy" "storage_access" {
     Version = "2012-10-17",
     Statement = [
       {
-        Sid = "${var.name}Access",
         Action = [
           "s3:DeleteObject",
           "s3:GetObject",

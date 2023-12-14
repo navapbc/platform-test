@@ -24,3 +24,7 @@ output "migrator_role_arn" {
   description = "ARN for role to use for migration"
   value       = length(aws_iam_role.migrator_task) > 0 ? aws_iam_role.migrator_task[0].arn : null
 }
+
+output "run_task_policy_arn" {
+  value = aws_iam_policy.run_task.arn
+}

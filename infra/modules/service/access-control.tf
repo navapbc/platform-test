@@ -76,3 +76,41 @@ resource "aws_iam_role_policy_attachment" "extra_policies" {
   role       = aws_iam_role.app_service.name
   policy_arn = each.value
 }
+
+# Create policy that allows running tasks on the ECS cluster
+resource "aws_iam_policy" "run_task" {
+  name = "${var.service_name}-run-access"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "ecs:RunTask"
+        ],
+        Resource = [
+          "${aws_ecs_task_definition.app.arn}:*",
+          "${aws_ecs_task_definition.app.arn}"
+        ],
+        Condition = {
+          ArnLike = {
+            "ecs:cluster" : "${aws_ecs_cluster.cluster.arn}"
+          }
+        }
+      },
+      {
+        Effect = "Allow",
+        Action = "iam:PassRole",
+        Resource = [
+          "*"
+        ],
+        Condition = {
+          StringLike = {
+            "iam:PassedToService" : "ecs-tasks.amazonaws.com"
+          }
+        }
+      }
+    ]
+  })
+}

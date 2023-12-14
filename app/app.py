@@ -56,7 +56,7 @@ def feature_flags():
 
 @app.route("/document-upload")
 def document_upload():
-    path = f'test-document-{datetime.now().strftime("%Y-%m-%d_%H%M%S")}'
+    path = f"uploads/{datetime.now().date()}/${{filename}}"
     upload_url, fields = create_upload_url(path)
     additional_fields = "".join(
         [
@@ -64,7 +64,8 @@ def document_upload():
             for name, value in fields.items()
         ]
     )
-    return f'<form method="post" action="{upload_url}"><input type="file"><input type="submit">{additional_fields}</form>'
+    # Note: Additional fields should come first before the file and submit button
+    return f'<form method="post" action="{upload_url}" enctype="multipart/form-data">{additional_fields}<input type="file" name="file"><input type="submit"></form>'
 
 
 if __name__ == "__main__":

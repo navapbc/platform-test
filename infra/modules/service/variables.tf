@@ -90,14 +90,16 @@ variable "extra_policies" {
   default     = {}
 }
 
-variable "jobs" {
+variable "job_configs" {
   type = object({
     file_upload_jobs = map(object({
-      source_bucket = string
-      path_prefix   = string
-      task_command  = list(string)
+      path_prefix  = string
+      task_command = list(string)
     }))
   })
 
   description = "event_name = document_upload, event_source = <BUCKET_NAME>, command gets parameters <BUCKET_NAME>, <OBJECT_KEY>"
+  default = {
+    file_upload_jobs = {}
+  }
 }

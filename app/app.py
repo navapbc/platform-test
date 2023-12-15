@@ -71,8 +71,10 @@ def document_upload():
 
 @app.cli.command("etl", help="Run ETL job")
 @click.argument("input")
-@click.argument("output")
-def etl(input, output):
+def etl(input):
+    # input should be something like "etl/input/somefile.ext"
+    assert input.startswith("etl/input/")
+    output = input.replace("/input/", "/output/")
     data = storage.download_file(input)
     storage.upload_file(output, data)
 

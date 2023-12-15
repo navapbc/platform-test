@@ -87,16 +87,25 @@ resource "aws_cloudwatch_event_target" "document_upload_jobs" {
   role_arn  = aws_iam_role.events.arn
 
   ecs_target {
-    task_count          = 1
     task_definition_arn = aws_ecs_task_definition.app.arn
   }
 
-  input = jsonencode({
-    containerOverrides = [
-      {
-        name    = local.container_name,
-        command = each.value.task_command
-      }
-    ]
-  })
+  input_transformer {
+    input_paths = {
+      bucket_name = "$.detail.bucket.name",
+      object_key  = "$.detail.object.key",
+    }
+
+    # Shape the input event to match the match the Amazon ECS RunTask TaskOverride structure
+    # see https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-targets.html#targets-specifics-ecs-task
+    # and https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_TaskOverride.html
+    input_template = jsonencode({
+      containerOverrides = [
+        {
+          name    = local.container_name,
+          command = each.value.task_command
+        }
+      ]
+    })
+  }
 }

@@ -35,7 +35,8 @@ locals {
 
   service_name = "${local.prefix}${module.app_config.app_name}-${var.environment_name}"
 
-  bucket_name = "${local.prefix}${module.project_config.project_name}-${local.service_name}-storage"
+  # Include project name in bucket name since buckets need to be globally unique across AWS
+  bucket_name = "${local.prefix}${module.project_config.project_name}-${module.app_config.app_name}-${var.environment_name}"
 
   environment_config                             = module.app_config.environment_configs[var.environment_name]
   service_config                                 = local.environment_config.service_config
@@ -115,6 +116,10 @@ module "service" {
   vpc_id                = data.aws_vpc.network.id
   public_subnet_ids     = data.aws_subnets.public.ids
   private_subnet_ids    = data.aws_subnets.private.ids
+
+  cpu                    = local.service_config.cpu
+  memory                 = local.service_config.memory
+  desired_instance_count = local.service_config.desired_instance_count
 
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
 

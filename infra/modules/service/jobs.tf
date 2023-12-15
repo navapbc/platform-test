@@ -2,7 +2,7 @@
 # The role allows EventBridge to run tasks on the ECS cluster
 resource "aws_iam_role" "events" {
   name                = "${var.service_name}-events"
-  managed_policy_arns = [var.var.run_task_policy_arn]
+  managed_policy_arns = [aws_iam_policy.run_task.arn]
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -57,7 +57,7 @@ resource "aws_iam_policy" "run_task" {
 }
 
 resource "aws_cloudwatch_event_rule" "file_upload_jobs" {
-  for_each = var.jobs.file_upload_jobs
+  for_each = var.job_configs.file_upload_jobs
 
   name        = "${var.service_name}-${each.key}"
   description = "File uploaded to bucket ${each.value.source_bucket} with path prefix ${each.value.path_prefix}"
@@ -79,7 +79,7 @@ resource "aws_cloudwatch_event_rule" "file_upload_jobs" {
 }
 
 resource "aws_cloudwatch_event_target" "document_upload_jobs" {
-  for_each = var.jobs.file_upload_jobs
+  for_each = var.job_configs.file_upload_jobs
 
   target_id = "${var.service_name}-${each.key}"
   rule      = aws_cloudwatch_event_rule.file_upload_jobs[each.key].name

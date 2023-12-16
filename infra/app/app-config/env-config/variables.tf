@@ -1,3 +1,7 @@
+variable "project_name" {
+  type = string
+}
+
 variable "app_name" {
   type = string
 }
@@ -38,4 +42,25 @@ variable "service_memory" {
 variable "service_desired_instance_count" {
   type    = number
   default = 1
+}
+
+variable "file_upload_job_overrides" {
+  type = map(optional(object({
+    source_bucket = optional(string)
+    path_prefix   = string
+    task_command  = list(string)
+  })))
+
+  description = <<EOT
+    Override default job configurations for the environment.
+    Default job configs are defined in job-configs.tf.
+    Add a new job by passing in job configs with new keys,
+    modify an existing job by passing in job config with an existing key,
+    or remove jobs by passing in null with an existing key
+
+    Note that the source_bucket gets added to the job
+    config
+  EOT
+
+  default = {}
 }

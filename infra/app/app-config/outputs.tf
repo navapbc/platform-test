@@ -37,7 +37,3 @@ output "build_repository_config" {
 output "environment_configs" {
   value = local.environment_configs
 }
-
-output "job_configs" {
-  value = local.job_configs
-}

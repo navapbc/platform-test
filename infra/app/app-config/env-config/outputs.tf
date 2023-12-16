@@ -17,6 +17,7 @@ output "network_name" {
 
 output "service_config" {
   value = {
+    name                   = "${local.prefix}${var.app_name}-${var.environment}"
     region                 = var.default_region
     cpu                    = var.service_cpu
     memory                 = var.service_memory
@@ -24,8 +25,23 @@ output "service_config" {
   }
 }
 
+output "storage_config" {
+  value = {
+    # Include project name in bucket name since buckets need to be globally unique across AWS
+    bucket_name = local.bucket_name
+  }
+}
+
 output "incident_management_service_integration" {
   value = var.has_incident_management_service ? {
     integration_url_param_name = "/monitoring/${var.app_name}/${var.environment}/incident-management-integration-url"
   } : null
+}
+
+output "file_upload_jobs" {
+  value = {
+    for job_name, job_config in merge(local.default_file_upload_jobs, var.file_upload_job_overrides) :
+    # For job configs that don't define a source_bucket, add the source_bucket config property
+    job_name => merge({ source_bucket = local.bucket_name }, job_config)
+  }
 }

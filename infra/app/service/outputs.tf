@@ -8,7 +8,7 @@ output "service_cluster_name" {
 }
 
 output "service_name" {
-  value = local.service_name
+  value = local.service_config.name
 }
 
 output "application_log_group" {

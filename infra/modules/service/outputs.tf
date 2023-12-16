@@ -28,3 +28,11 @@ output "migrator_role_arn" {
 output "run_task_policy_arn" {
   value = aws_iam_policy.run_task.arn
 }
+
+output "task_definition_arn" {
+  value = aws_ecs_task_definition.app.arn
+}
+
+output "container_name" {
+  value = local.container_name
+}

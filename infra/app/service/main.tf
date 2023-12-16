@@ -158,3 +158,13 @@ module "storage" {
   source = "../../modules/storage"
   name   = local.storage_config.bucket_name
 }
+
+module "jobs" {
+  source              = "../../modules/jobs"
+  id                  = module.service.cluster_name
+  cluster_name        = module.service.cluster_name
+  task_definition_arn = module.service.task_definition_arn
+  container_name      = module.service.container_name
+  run_task_policy_arn = module.service.run_task_policy_arn
+  file_upload_jobs    = local.environment_config.file_upload_jobs
+}

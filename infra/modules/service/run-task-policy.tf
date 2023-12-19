@@ -11,8 +11,7 @@ resource "aws_iam_policy" "run_task" {
           "ecs:RunTask"
         ],
         Resource = [
-          "${aws_ecs_task_definition.app.arn}:*",
-          "${aws_ecs_task_definition.app.arn}"
+          "${aws_ecs_task_definition.app.arn_without_revision}:*"
         ],
         Condition = {
           ArnLike = {

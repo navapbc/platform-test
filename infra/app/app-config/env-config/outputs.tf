@@ -16,7 +16,7 @@ output "network_name" {
 
 output "service_config" {
   value = {
-    name                   = "${local.prefix}${var.app_name}-${var.environment}"
+    service_name           = "${local.prefix}${var.app_name}-${var.environment}"
     region                 = var.default_region
     cpu                    = var.service_cpu
     memory                 = var.service_memory

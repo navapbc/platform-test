@@ -45,11 +45,11 @@ variable "service_desired_instance_count" {
 }
 
 variable "file_upload_job_overrides" {
-  type = map(optional(object({
+  type = map(object({
     source_bucket = optional(string)
     path_prefix   = string
     task_command  = list(string)
-  })))
+  }))
 
   description = <<EOT
     Override default job configurations for the environment.

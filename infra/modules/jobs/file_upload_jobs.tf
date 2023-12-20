@@ -34,6 +34,7 @@ resource "aws_cloudwatch_event_target" "document_upload_jobs" {
 
   ecs_target {
     task_definition_arn = var.task_definition_arn
+    launch_type         = "FARGATE"
 
     # Configuring Network Configuration is required when the task definition uses the awsvpc network mode.
     network_configuration {

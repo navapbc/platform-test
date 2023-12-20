@@ -1,3 +1,9 @@
+#---------------------
+# Task Scheduler Role
+#---------------------
+# Role and policy used by AWS EventBridge to trigger jobs from events
+#
+
 # Role that EventBridge will assume
 # The role allows EventBridge to run tasks on the ECS cluster
 resource "aws_iam_role" "events" {
@@ -18,7 +24,7 @@ resource "aws_iam_role" "events" {
   })
 }
 
-# Create policy that allows running tasks on the ECS cluster
+# Policy that allows running tasks on the ECS cluster
 resource "aws_iam_policy" "run_task" {
   name = "${var.service_name}-run-access"
 

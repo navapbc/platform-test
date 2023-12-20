@@ -7,6 +7,7 @@
 #
 # For each job configuration, there is a single event rule and an associated
 # event target
+#
 
 # Event rules that trigger whenever an object is created in S3
 # for a particular source bucket and object key prefix

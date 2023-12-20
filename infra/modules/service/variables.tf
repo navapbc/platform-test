@@ -104,6 +104,17 @@ variable "file_upload_jobs" {
     path prefix filter (only files that match the path prefix will trigger
     the job), and the task command to run (this overrides the CMD entrypoint
     in the container).
+
+    To reference the file path and bucket that triggered the event, the task
+    command can optionally include the placeholder values `<object_key>`
+    and `<bucket_name>`. For example if task_command is:
+
+      ["python", "etl.py", "<object_key>"]
+
+    Then if an object was uploaded to s3://somebucket/path/to/file.txt, the
+    task will execute the command:
+
+      python etl.py path/to/file.txt
   EOT
   default     = {}
 }

@@ -97,6 +97,13 @@ variable "file_upload_jobs" {
     task_command  = list(string)
   }))
 
-  description = "File upload jobs"
+  description = <<EOT
+    Configurations for jobs that trigger on a file upload event.
+    Each configuration is a map from the job name to an object defining the
+    event's source bucket (the bucket the file was uploaded to), a
+    path prefix filter (only files that match the path prefix will trigger
+    the job), and the task command to run (this overrides the CMD entrypoint
+    in the container).
+  EOT
   default     = {}
 }

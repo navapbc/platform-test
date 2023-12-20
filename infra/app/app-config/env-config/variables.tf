@@ -54,9 +54,10 @@ variable "file_upload_job_overrides" {
   description = <<EOT
     Override default job configurations for the environment.
     Default job configs are defined in job-configs.tf.
-    Add a new job by passing in job configs with new keys,
-    modify an existing job by passing in job config with an existing key,
-    or remove jobs by passing in null with an existing key
+    To change job configuration for a given environment:
+    - Add a new job by passing in job configs with new keys
+    - Modify an existing job by passing in job config with an existing key
+    - Remove a job by passing in null with an existing key
 
     If source_bucket is not specified, it will be set to
     the storage bucket.

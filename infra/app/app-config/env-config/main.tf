@@ -6,7 +6,9 @@ locals {
 
   bucket_name = "${local.prefix}${var.project_name}-${var.app_name}-${var.environment}"
 
-  # Default jobs for every environment
+  # Configuration for default jobs to run in every environment
+  # See description of the file_upload_job_overrides variable
+  # for more info
   default_file_upload_jobs = {
     etl = {
       path_prefix  = "etl/input",

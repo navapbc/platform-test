@@ -24,19 +24,3 @@ output "migrator_role_arn" {
   description = "ARN for role to use for migration"
   value       = length(aws_iam_role.migrator_task) > 0 ? aws_iam_role.migrator_task[0].arn : null
 }
-
-output "run_task_policy_arn" {
-  value = aws_iam_policy.run_task.arn
-}
-
-output "task_definition_arn" {
-  value = aws_ecs_task_definition.app.arn
-}
-
-output "container_name" {
-  value = local.container_name
-}
-
-output "service_security_group" {
-  value = aws_security_group.app.id
-}

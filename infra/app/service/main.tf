@@ -167,4 +167,6 @@ module "jobs" {
   container_name      = module.service.container_name
   run_task_policy_arn = module.service.run_task_policy_arn
   file_upload_jobs    = local.environment_config.file_upload_jobs
+  app_subnet_ids      = data.aws_subnets.private.ids
+  app_security_group  = module.service.service_security_group
 }

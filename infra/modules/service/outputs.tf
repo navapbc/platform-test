@@ -36,3 +36,7 @@ output "task_definition_arn" {
 output "container_name" {
   value = local.container_name
 }
+
+output "service_security_group" {
+  value = aws_ecs_service.app.id
+}

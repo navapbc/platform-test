@@ -23,6 +23,15 @@ variable "run_task_policy_arn" {
   description = "ARN of IAM policy that allows running tasks in the cluster"
 }
 
+variable "app_security_group" {
+  type        = string
+  description = "Security group for the application"
+}
+
+variable "app_subnet_ids" {
+  type        = list(string)
+  description = "List of subnets that the application sits in"
+}
 
 variable "file_upload_jobs" {
   type = map(object({

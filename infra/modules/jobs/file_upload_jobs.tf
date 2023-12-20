@@ -34,6 +34,12 @@ resource "aws_cloudwatch_event_target" "document_upload_jobs" {
 
   ecs_target {
     task_definition_arn = var.task_definition_arn
+
+    # Configuring Network Configuration is required when the task definition uses the awsvpc network mode.
+    network_configuration {
+      subnets         = var.app_subnet_ids
+      security_groups = [var.app_security_group]
+    }
   }
 
   input_transformer {

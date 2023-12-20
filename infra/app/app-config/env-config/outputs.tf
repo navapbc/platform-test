@@ -21,6 +21,12 @@ output "service_config" {
     cpu                    = var.service_cpu
     memory                 = var.service_memory
     desired_instance_count = var.service_desired_instance_count
+
+    file_upload_jobs = {
+      for job_name, job_config in merge(local.default_file_upload_jobs, var.file_upload_job_overrides) :
+      # For job configs that don't define a source_bucket, add the source_bucket config property
+      job_name => merge({ source_bucket = local.bucket_name }, job_config)
+    }
   }
 }
 
@@ -35,12 +41,4 @@ output "incident_management_service_integration" {
   value = var.has_incident_management_service ? {
     integration_url_param_name = "/monitoring/${var.app_name}/${var.environment}/incident-management-integration-url"
   } : null
-}
-
-output "file_upload_jobs" {
-  value = {
-    for job_name, job_config in merge(local.default_file_upload_jobs, var.file_upload_job_overrides) :
-    # For job configs that don't define a source_bucket, add the source_bucket config property
-    job_name => merge({ source_bucket = local.bucket_name }, job_config)
-  }
 }

@@ -58,8 +58,8 @@ variable "file_upload_job_overrides" {
     modify an existing job by passing in job config with an existing key,
     or remove jobs by passing in null with an existing key
 
-    Note that the source_bucket gets added to the job
-    config
+    If source_bucket is not specified, it will be set to
+    the storage bucket.
   EOT
 
   default = {}

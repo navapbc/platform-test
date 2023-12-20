@@ -1,3 +1,15 @@
+#-----------------
+# Background Jobs
+#-----------------
+# CloudWatch Event Rules and CloudWatch Event Targets that define event-based
+# triggers for background jobs, such as jobs that trigger when a file is
+# uploaded to an S3 bucket or jobs that trigger on a specified "cron" schedule.
+#
+# For each job configuration, there is a single event rule and an associated
+# event target
+
+# Event rules that trigger whenever an object is created in S3
+# for a particular source bucket and object key prefix
 resource "aws_cloudwatch_event_rule" "file_upload_jobs" {
   for_each = var.file_upload_jobs
 
@@ -19,6 +31,8 @@ resource "aws_cloudwatch_event_rule" "file_upload_jobs" {
     }
   })
 }
+
+# Event target for each event rule that specifies what task command to run
 
 resource "aws_cloudwatch_event_target" "document_upload_jobs" {
   for_each = var.file_upload_jobs

@@ -23,7 +23,7 @@ output "service_config" {
     desired_instance_count = var.service_desired_instance_count
 
     file_upload_jobs = {
-      for job_name, job_config in merge(local.default_file_upload_jobs, var.file_upload_job_overrides) :
+      for job_name, job_config in local.file_upload_jobs :
       # For job configs that don't define a source_bucket, add the source_bucket config property
       job_name => merge({ source_bucket = local.bucket_name }, job_config)
     }

@@ -38,5 +38,5 @@ output "container_name" {
 }
 
 output "service_security_group" {
-  value = aws_ecs_service.app.id
+  value = aws_security_group.app.id
 }

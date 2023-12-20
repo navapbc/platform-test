@@ -52,13 +52,18 @@ resource "aws_cloudwatch_event_target" "document_upload_jobs" {
     # Shape the input event to match the match the Amazon ECS RunTask TaskOverride structure
     # see https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-targets.html#targets-specifics-ecs-task
     # and https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_TaskOverride.html
-    input_template = jsonencode({
+    #
+    # We need to replace the unicode characters U+003C and U+003E with < and >, respectively since
+    # jsonencode has encodes those special characters, which are needed for EventBridge input variables
+    # see https://developer.hashicorp.com/terraform/language/functions/jsonencode and
+    # https://github.com/hashicorp/terraform/pull/18871, 
+    input_template = replace(replace(jsonencode({
       containerOverrides = [
         {
           name    = var.container_name,
           command = each.value.task_command
         }
       ]
-    })
+    }), "\\u003c", "<"), "\\u003e", ">")
   }
 }

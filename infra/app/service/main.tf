@@ -114,6 +114,8 @@ module "service" {
 
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
 
+  file_upload_jobs = local.environment_config.file_upload_jobs
+
   db_vars = module.app_config.has_database ? {
     security_group_ids         = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
     app_access_policy_arn      = data.aws_iam_policy.app_db_access_policy[0].arn
@@ -157,16 +159,4 @@ module "feature_flags" {
 module "storage" {
   source = "../../modules/storage"
   name   = local.storage_config.bucket_name
-}
-
-module "jobs" {
-  source              = "../../modules/jobs"
-  id                  = module.service.cluster_name
-  cluster_name        = module.service.cluster_name
-  task_definition_arn = module.service.task_definition_arn
-  container_name      = module.service.container_name
-  run_task_policy_arn = module.service.run_task_policy_arn
-  file_upload_jobs    = local.environment_config.file_upload_jobs
-  app_subnet_ids      = data.aws_subnets.private.ids
-  app_security_group  = module.service.service_security_group
 }

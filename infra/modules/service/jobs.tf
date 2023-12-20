@@ -1,11 +1,7 @@
-data "aws_ecs_cluster" "jobs" {
-  cluster_name = var.cluster_name
-}
-
 resource "aws_cloudwatch_event_rule" "file_upload_jobs" {
   for_each = var.file_upload_jobs
 
-  name        = "${var.id}-${each.key}"
+  name        = "${local.cluster_name}-${each.key}"
   description = "File uploaded to bucket ${each.value.source_bucket} with path prefix ${each.value.path_prefix}"
 
   event_pattern = jsonencode({
@@ -27,19 +23,19 @@ resource "aws_cloudwatch_event_rule" "file_upload_jobs" {
 resource "aws_cloudwatch_event_target" "document_upload_jobs" {
   for_each = var.file_upload_jobs
 
-  target_id = "${var.id}-${each.key}"
+  target_id = "${local.cluster_name}-${each.key}"
   rule      = aws_cloudwatch_event_rule.file_upload_jobs[each.key].name
-  arn       = data.aws_ecs_cluster.jobs.arn
+  arn       = aws_ecs_cluster.cluster.arn
   role_arn  = aws_iam_role.events.arn
 
   ecs_target {
-    task_definition_arn = var.task_definition_arn
+    task_definition_arn = aws_ecs_task_definition.app.arn
     launch_type         = "FARGATE"
 
     # Configuring Network Configuration is required when the task definition uses the awsvpc network mode.
     network_configuration {
-      subnets         = var.app_subnet_ids
-      security_groups = [var.app_security_group]
+      subnets         = var.private_subnet_ids
+      security_groups = [aws_security_group.app.id]
     }
   }
 
@@ -60,7 +56,7 @@ resource "aws_cloudwatch_event_target" "document_upload_jobs" {
     input_template = replace(replace(jsonencode({
       containerOverrides = [
         {
-          name    = var.container_name,
+          name    = local.container_name,
           command = each.value.task_command
         }
       ]

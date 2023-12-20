@@ -89,3 +89,14 @@ variable "extra_policies" {
   type        = map(string)
   default     = {}
 }
+
+variable "file_upload_jobs" {
+  type = map(object({
+    source_bucket = string
+    path_prefix   = string
+    task_command  = list(string)
+  }))
+
+  description = "File upload jobs"
+  default     = {}
+}

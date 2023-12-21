@@ -42,9 +42,12 @@ data "aws_iam_policy_document" "run_task" {
   }
 
   statement {
-    effect    = "Allow"
-    actions   = ["iam:PassRole"]
-    resources = [aws_iam_role.app_service.arn]
+    effect  = "Allow"
+    actions = ["iam:PassRole"]
+    resources = [
+      aws_iam_role.task_executor.arn,
+      aws_iam_role.app_service.arn,
+    ]
     condition {
       test     = "StringLike"
       variable = "iam:PassedToService"

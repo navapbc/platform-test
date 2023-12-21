@@ -9,54 +9,46 @@
 resource "aws_iam_role" "events" {
   name                = "${local.cluster_name}-events"
   managed_policy_arns = [aws_iam_policy.run_task.arn]
+  assume_role_policy  = data.aws_iam_policy_document.events_assume_role.json
+}
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "events.amazonaws.com"
-        }
-      },
-    ]
-  })
+data "aws_iam_policy_document" "events_assume_role" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["events.amazonaws.com"]
+    }
+  }
 }
 
 # Policy that allows running tasks on the ECS cluster
 resource "aws_iam_policy" "run_task" {
-  name = "${var.service_name}-run-access"
+  name   = "${var.service_name}-run-access"
+  policy = data.aws_iam_policy_document.run_task.json
+}
 
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = [
-          "ecs:RunTask"
-        ],
-        Resource = [
-          "${aws_ecs_task_definition.app.arn_without_revision}:*"
-        ],
-        Condition = {
-          ArnLike = {
-            "ecs:cluster" : "${aws_ecs_cluster.cluster.arn}"
-          }
-        }
-      },
-      {
-        Effect = "Allow",
-        Action = "iam:PassRole",
-        Resource = [
-          "*"
-        ],
-        Condition = {
-          StringLike = {
-            "iam:PassedToService" : "ecs-tasks.amazonaws.com"
-          }
-        }
-      }
-    ]
-  })
+data "aws_iam_policy_document" "run_task" {
+  statement {
+    effect    = "Allow"
+    actions   = ["ecs:RunTask"]
+    resources = ["${aws_ecs_task_definition.app.arn_without_revision}:*"]
+    condition {
+      test     = "ArnLike"
+      variable = "ecs:cluster"
+      values   = [aws_ecs_cluster.cluster.arn]
+    }
+  }
+
+  statement {
+    effect    = "Allow"
+    actions   = ["iam:PassRole"]
+    resources = [aws_iam_role.app_service.arn]
+    condition {
+      test     = "StringLike"
+      variable = "iam:PassedToService"
+      values   = ["ecs-tasks.amazonaws.com"]
+    }
+  }
 }

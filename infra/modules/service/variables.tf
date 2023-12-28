@@ -67,7 +67,7 @@ variable "extra_environment_variables" {
   default     = {}
 }
 
-variable "secrets" {
+variable "secret_names" {
   type = set(string)
 }
 

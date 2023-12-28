@@ -6,6 +6,9 @@ data "aws_ssm_parameter" "secret" {
 locals {
   secrets = [
     for secret_name in var.secret_names :
-    { name = upper(replace(secret_name, "-", "_")), valueFrom = data.aws_ssm_parameter.secret[secret_name].arn }
+    {
+      name      = replace(replace(upper(secret_name), "-", "_"), "/", "_"),
+      valueFrom = data.aws_ssm_parameter.secret[secret_name].arn
+    }
   ]
 }

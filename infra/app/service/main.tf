@@ -136,7 +136,7 @@ module "service" {
     BUCKET_NAME           = local.storage_config.bucket_name
   }, local.service_config.extra_environment_variables)
 
-  secret_names = local.service_config.secret_names
+  secrets = local.service_config.secrets
 
   extra_policies = {
     feature_flags_access = module.feature_flags.access_policy_arn,

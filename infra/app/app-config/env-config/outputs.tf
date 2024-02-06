@@ -27,7 +27,7 @@ output "service_config" {
       var.service_override_extra_environment_variables
     )
 
-    secret_names = toset(local.secret_names)
+    secrets = toset(local.secrets)
 
     file_upload_jobs = {
       for job_name, job_config in local.file_upload_jobs :

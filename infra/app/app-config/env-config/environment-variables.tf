@@ -7,13 +7,11 @@ locals {
   }
 
   # Configuration for secrets
-  # List of secret names. The names will be used to define environment variables that
-  # pull from SSM parameter store. The environment variable name will be the secret
-  # name converted to upper case, with dashes replaced by underscores. The SSM parameter
-  # name will be "/<SERVICE_NAME>/<SECRET_NAME>"
-  # For example, a secret named "secret-sauce" will generate a secret configuration
-  # { "name": "SECRET_SAUCE", "valueFrom": "arn:aws:ssm:<REGION>:<AWS_ACCOUNT_ID>:parameter/app-dev/secret-sauce" }
-  secret_names = [
-    "secret-sauce"
-  ]
+  # List of configurations for defining environment variables that pull from SSM parameter
+  # store. Configurations are of the format
+  # { name = "ENV_VAR_NAME", ssm_param_name = "/ssm/param/name" }
+  secrets = [{
+    name           = "SECRET_SAUCE"
+    ssm_param_name = "/app-dev/secret-sauce"
+  }]
 }

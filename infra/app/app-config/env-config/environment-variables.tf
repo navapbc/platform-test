@@ -12,6 +12,6 @@ locals {
   # { name = "ENV_VAR_NAME", ssm_param_name = "/ssm/param/name" }
   secrets = [{
     name           = "SECRET_SAUCE"
-    ssm_param_name = "/app-dev/secret-sauce"
+    ssm_param_name = "/${var.app_name}-${var.environment}/secret-sauce"
   }]
 }

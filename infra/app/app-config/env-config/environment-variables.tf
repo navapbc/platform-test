@@ -13,11 +13,8 @@ locals {
   # List of configurations for defining environment variables that pull from SSM parameter
   # store. Configurations are of the format
   # { name = "ENV_VAR_NAME", ssm_param_name = "/ssm/param/name" }
-  secrets = [
-    # Example secret
-    # {
-    #   name           = "SECRET_SAUCE"
-    #   ssm_param_name = "/${var.app_name}-${var.environment}/secret-sauce"
-    # }
-  ]
+  secrets = [{
+    name           = "SECRET_SAUCE"
+    ssm_param_name = "/${var.app_name}-${var.environment}/secret-sauce"
+  }]
 }

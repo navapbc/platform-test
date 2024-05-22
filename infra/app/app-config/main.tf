@@ -34,6 +34,13 @@ locals {
     region = module.project_config.default_region
   }
 
+  # The name of the AWS account that contains the resources shared across all
+  # application environments, such as the build repository.
+  # The list of configured AWS accounts can be found in /infra/account
+  # by looking for the backend config files of the form:
+  #   <ACCOUNT_NAME>.<ACCOUNT_ID>.s3.tfbackend
+  shared_account_name = "dev"
+
   # Map from environment name to the account name for the AWS account that
   # contains the resources for that environment. Resources that are shared
   # across environments use the key "shared".

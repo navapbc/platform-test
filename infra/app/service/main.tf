@@ -177,7 +177,7 @@ module "secrets" {
 
   # Append the terraform workspace to the secret store path if the environment is temporary
   # to avoid conflicts with existing environments
-  secret_store_path = "${each.value.secret_store_path}${is_temporary ? "-${terraform.workspace}" : ""}"
+  secret_store_path = "${each.value.secret_store_path}${local.is_temporary ? "/${terraform.workspace}" : ""}"
   manage_method     = each.value.manage_method
 }
 

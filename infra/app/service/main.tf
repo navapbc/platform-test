@@ -162,16 +162,10 @@ module "service" {
     }
   ]
 
-  extra_policies = merge(
-    {
-      feature_flags_access = module.feature_flags.access_policy_arn,
-      storage_access       = module.storage.access_policy_arn
-    },
-    {
-      for secret_name in keys(local.service_config.secrets) :
-      secret_name => module.secrets[secret_name].access_policy_arn
-    }
-  )
+  extra_policies = {
+    feature_flags_access = module.feature_flags.access_policy_arn,
+    storage_access       = module.storage.access_policy_arn
+  }
 
   is_temporary = local.is_temporary
 }

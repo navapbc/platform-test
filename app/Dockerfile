@@ -6,11 +6,10 @@ WORKDIR /app
 
 
 
-RUN apk --no-cache upgrade busybox \
+RUN apk --no-cache upgrade busybox openssl \
   && apk --no-cache add \
   aws-cli~=2 \
-  postgresql14-client~=14 \
-  openssl~=1
+  postgresql14-client~=14
 
 COPY requirements.txt ./
 

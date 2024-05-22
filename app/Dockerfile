@@ -14,7 +14,7 @@ RUN apk --no-cache upgrade busybox openssl \
 COPY requirements.txt ./
 
 RUN pip3 install --no-cache-dir -r requirements.txt \
-  && pip upgrade cryptography
+  && pip install --upgrade cryptography
 
 COPY db-migrate /usr/bin/
 COPY migrations.sql /app/

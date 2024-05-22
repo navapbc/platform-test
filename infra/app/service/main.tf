@@ -155,14 +155,33 @@ module "service" {
     BUCKET_NAME           = local.storage_config.bucket_name
   }, local.service_config.extra_environment_variables)
 
-  secrets = local.service_config.secrets
+  secrets = [
+    for secret_name in keys(local.service_config.secrets) : {
+      name      = secret_name
+      valueFrom = module.secrets[secret_name].secret_arn
+    }
+  ]
 
-  extra_policies = {
-    feature_flags_access = module.feature_flags.access_policy_arn,
-    storage_access       = module.storage.access_policy_arn
-  }
+  extra_policies = merge(
+    {
+      feature_flags_access = module.feature_flags.access_policy_arn,
+      storage_access       = module.storage.access_policy_arn
+    },
+    {
+      for secret_name in keys(local.service_config.secrets) :
+      secret_name => module.secrets[secret_name].access_policy_arn
+    }
+  )
 
   is_temporary = local.is_temporary
+}
+
+module "secrets" {
+  for_each = local.service_config.secrets
+
+  source            = "../../modules/secret"
+  secret_store_path = each.value.secret_store_path
+  manage_method     = each.value.manage_method
 }
 
 module "monitoring" {

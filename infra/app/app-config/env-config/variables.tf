@@ -11,6 +11,11 @@ variable "environment" {
   type        = string
 }
 
+variable "account_name" {
+  description = "Name of the AWS account that contains the resources for the application environment."
+  type        = string
+}
+
 variable "network_name" {
   description = "Human readable identifier of the network / VPC"
   type        = string

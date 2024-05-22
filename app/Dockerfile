@@ -4,7 +4,8 @@ RUN adduser --system --disabled-password --no-create-home app
 
 WORKDIR /app
 
-RUN apk --no-cache add \
+RUN apk --no-cache upgrade busybox \
+  && apk --no-cache add \
   aws-cli~=2 \
   postgresql14-client~=14
 

@@ -24,4 +24,3 @@ data "aws_ssm_parameter" "secret" {
 
   name = var.secret_store_path
 }
-

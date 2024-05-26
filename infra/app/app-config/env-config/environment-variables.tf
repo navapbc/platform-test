@@ -15,17 +15,17 @@ locals {
   # {
   #   ENV_VAR_NAME = {
   #     manage_method     = "generated" # or "manual" for a secret that was created and stored in SSM manually
-  #     secret_store_path = "/ssm/param/name"
+  #     secret_store_name = "/ssm/param/name"
   #   }
   # }
   secrets = {
     RANDOM_SECRET = {
       manage_method     = "generated"
-      secret_store_path = "/${var.app_name}-${var.environment}/random-secret"
+      secret_store_name = "/${var.app_name}-${var.environment}/random-secret"
     }
     SECRET_SAUCE = {
       manage_method     = "manual"
-      secret_store_path = "/${var.app_name}-${var.environment}/secret-sauce"
+      secret_store_name = "/${var.app_name}-${var.environment}/secret-sauce"
     }
   }
 }

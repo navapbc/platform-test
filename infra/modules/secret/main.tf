@@ -14,7 +14,7 @@ resource "random_password" "secret" {
 resource "aws_ssm_parameter" "secret" {
   count = var.manage_method == "generated" ? 1 : 0
 
-  name  = var.secret_store_path
+  name  = var.secret_store_name
   type  = "SecureString"
   value = random_password.secret[0].result
 }
@@ -22,5 +22,5 @@ resource "aws_ssm_parameter" "secret" {
 data "aws_ssm_parameter" "secret" {
   count = var.manage_method == "manual" ? 1 : 0
 
-  name = var.secret_store_path
+  name = var.secret_store_name
 }

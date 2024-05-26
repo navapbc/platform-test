@@ -13,7 +13,7 @@ variable "manage_method" {
   }
 }
 
-variable "secret_store_path" {
+variable "secret_store_name" {
   type        = string
   description = <<EOT
     If manage_method is 'generated', path to store the secret in AWS parameter store.

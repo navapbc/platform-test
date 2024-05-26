@@ -40,7 +40,6 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Configure AWS credentials
-        if: steps.check-image-published.outputs.IS_IMAGE_PUBLISHED == 'false'
         uses: ./.github/actions/configure-aws-credentials
         with:
           app_name: ${{ inputs.app_name }}

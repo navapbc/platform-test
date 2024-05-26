@@ -8,7 +8,7 @@ module "secrets" {
   # to avoid conflicts with existing environments.
   # Don't do this for secrets that are managed manually since the temporary
   # environments will need to share those secrets.
-  secret_store_path = (each.value.manage_method == "code" && local.is_temporary ?
+  secret_store_path = (each.value.manage_method == "generated" && local.is_temporary ?
     "${each.value.secret_store_path}/${terraform.workspace}" :
     each.value.secret_store_path
   )

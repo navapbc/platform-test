@@ -14,13 +14,13 @@ locals {
   # store. Configurations are of the format
   # {
   #   ENV_VAR_NAME = {
-  #     manage_method     = "code" # or "manual" for a secret that was created and stored in SSM manually
+  #     manage_method     = "generated" # or "manual" for a secret that was created and stored in SSM manually
   #     secret_store_path = "/ssm/param/name"
   #   }
   # }
   secrets = {
     RANDOM_SECRET = {
-      manage_method     = "code"
+      manage_method     = "generated"
       secret_store_path = "/${var.app_name}-${var.environment}/random-secret"
     }
     SECRET_SAUCE = {

@@ -26,14 +26,6 @@ on:
 concurrency: ${{ github.workflow }}-${{ github.sha }}
 
 jobs:
-  check-image-published:
-    name: Check if image is already published
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      id-token: write
-
   build-and-publish:
     name: Build and publish
     runs-on: ubuntu-latest

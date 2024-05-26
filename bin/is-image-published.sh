@@ -19,7 +19,7 @@ REGION=$(./bin/current-region.sh)
 RESULT=""
 RESULT=$(aws ecr describe-images --repository-name "$IMAGE_REPOSITORY_NAME" --image-ids "imageTag=$IMAGE_TAG" --region "$REGION" 2> /dev/null ) || true
 if [ -n "$RESULT" ];then
-  echo "1"
+  echo "true"
 else
-  echo "0"
+  echo "false"
 fi

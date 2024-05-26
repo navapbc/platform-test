@@ -43,19 +43,20 @@ jobs:
         id: check-image-published
         run: |
           IS_IMAGE_PUBLISHED=$(./bin/is-image-published.sh "${{ inputs.app_name }}" "${{ inputs.ref }}")
+          echo "Is image published: $IS_IMAGE_PUBLISHED"
           echo "IS_IMAGE_PUBLISHED=$IS_IMAGE_PUBLISHED" >> "$GITHUB_OUTPUT"
 
       - name: Build release
-        if: steps.check-image-published.outputs.IS_IMAGE_PUBLISHED == '0'
+        if: steps.check-image-published.outputs.IS_IMAGE_PUBLISHED == 'false'
         run: make APP_NAME=${{ inputs.app_name }} release-build
 
       - name: Configure AWS credentials
-        if: steps.check-image-published.outputs.IS_IMAGE_PUBLISHED == '0'
+        if: steps.check-image-published.outputs.IS_IMAGE_PUBLISHED == 'false'
         uses: ./.github/actions/configure-aws-credentials
         with:
           app_name: ${{ inputs.app_name }}
           environment: shared
 
       - name: Publish release
-        if: steps.check-image-published.outputs.IS_IMAGE_PUBLISHED == '0'
+        if: steps.check-image-published.outputs.IS_IMAGE_PUBLISHED == 'false'
         run: make APP_NAME=${{ inputs.app_name }} release-publish

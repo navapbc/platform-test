@@ -16,10 +16,6 @@ terraform -chdir="infra/$APP_NAME/app-config" apply -auto-approve > /dev/null
 IMAGE_REPOSITORY_NAME=$(terraform -chdir="infra/$APP_NAME/app-config" output -raw image_repository_name)
 REGION=$(./bin/current-region.sh)
 
-echo "$IMAGE_TAG"
-echo "$IMAGE_REPOSITORY_NAME"
-echo "$REGION"
-
 RESULT=""
 RESULT=$(aws ecr describe-images --repository-name "$IMAGE_REPOSITORY_NAME" --image-ids "imageTag=$IMAGE_TAG" --region "$REGION" 2> /dev/null ) || true
 if [ -n "$RESULT" ];then

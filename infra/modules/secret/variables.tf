@@ -1,11 +1,11 @@
 variable "manage_method" {
   type        = string
-  description = <<EOF
+  description = <<EOT
     Method to manage the secret. Options are 'manual' or 'code'.
     Set to 'code' to generate a random secret.
     Set to 'manual' to reference a secret that was manually created and stored in AWS parameter store.
     Defaults to 'code'."
-    EOF
+    EOT
   default     = "code"
   validation {
     condition     = can(regex("^(manual|code)$", var.manage_method))
@@ -15,8 +15,8 @@ variable "manage_method" {
 
 variable "secret_store_path" {
   type        = string
-  description = <<EOF
+  description = <<EOT
     If manage_method is 'code', path to store the secret in AWS parameter store.
     If manage_method is 'manual', path to reference the secret in AWS parameter store.
-    EOF
+    EOT
 }

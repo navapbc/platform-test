@@ -23,12 +23,11 @@ on:
         required: true
         type: string
 
-concurrency: ${{ github.workflow }}-${{ github.sha }}
-
 jobs:
   build-and-publish:
     name: Build and publish
     runs-on: ubuntu-latest
+    concurrency: ${{ github.workflow }}-${{ github.sha }}
 
     permissions:
       contents: read

@@ -23,11 +23,20 @@ on:
         required: true
         type: string
 
+concurrency: ${{ github.workflow }}-${{ github.sha }}
+
 jobs:
+  check-image-published:
+    name: Check if image is already published
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
   build-and-publish:
     name: Build and publish
     runs-on: ubuntu-latest
-    concurrency: ${{ github.workflow }}-${{ github.sha }}
 
     permissions:
       contents: read
@@ -38,14 +47,23 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
 
+      - name: Check if image is already published
+        id: check-image-published
+        run: |
+          IS_IMAGE_PUBLISHED=$(./bin/is-image-published.sh "${{ inputs.app_name }}" "${{ inputs.ref }}")
+          echo "IS_IMAGE_PUBLISHED=$IS_IMAGE_PUBLISHED" >> "$GITHUB_OUTPUT"
+
       - name: Build release
+        if: steps.check-image-published.outputs.IS_IMAGE_PUBLISHED == '0'
         run: make APP_NAME=${{ inputs.app_name }} release-build
 
       - name: Configure AWS credentials
+        if: steps.check-image-published.outputs.IS_IMAGE_PUBLISHED == '0'
         uses: ./.github/actions/configure-aws-credentials
         with:
           app_name: ${{ inputs.app_name }}
           environment: shared
 
       - name: Publish release
+        if: steps.check-image-published.outputs.IS_IMAGE_PUBLISHED == '0'
         run: make APP_NAME=${{ inputs.app_name }} release-publish

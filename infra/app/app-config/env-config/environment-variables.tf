@@ -28,5 +28,4 @@ locals {
       secret_store_name = "/${var.app_name}-${var.environment}/secret-sauce"
     }
   }
-  }
 }

@@ -4,6 +4,7 @@ module "dev_config" {
   app_name                        = local.app_name
   default_region                  = module.project_config.default_region
   environment                     = "dev"
+  account_name                    = "dev"
   network_name                    = "dev"
   domain_name                     = "platform-test-dev.navateam.com"
   enable_https                    = true

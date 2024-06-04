@@ -86,9 +86,6 @@ def check_migrator_create_table(migrator_conn: Connection, app_username: str):
         app_username,
     )
     migrator_conn.run("CREATE TABLE IF NOT EXISTS temporary(created_at TIMESTAMP)")
-    migrator_conn.run(
-        f"GRANT ALL PRIVILEGES ON temporary TO {identifier(app_username)}"
-    )
 
 
 def check_app_use_table(app_conn: Connection):

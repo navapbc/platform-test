@@ -9,7 +9,7 @@ def check():
     """Check that database roles, schema, and privileges were
     properly configured
     """
-    print("Running command 'check' to check database roles, schema, and privileges")
+    print("-- Running command 'check' to check database roles, schema, and privileges")
     app_username = os.environ.get("APP_USER")
     migrator_username = os.environ.get("MIGRATOR_USER")
     schema_name = os.environ.get("DB_SCHEMA")
@@ -27,7 +27,7 @@ def check():
 
 
 def check_search_path(migrator_conn: Connection, schema_name: str):
-    print("Checking that search path is %s", schema_name)
+    print("-- Checking that search path is %s", schema_name)
     assert db.execute(migrator_conn, "SHOW search_path") == [[schema_name]]
 
 
@@ -42,11 +42,11 @@ def check_migrator_create_table(migrator_conn: Connection, app_username: str):
 
 
 def check_app_use_table(app_conn: Connection):
-    print("Checking that app is able to read and write from the table")
+    print("-- Checking that app is able to read and write from the table")
     db.execute(app_conn, "INSERT INTO temporary (created_at) VALUES (NOW())")
     db.execute(app_conn, "SELECT * FROM temporary")
 
 
 def cleanup_migrator_drop_table(migrator_conn: Connection):
-    print("Cleaning up the table that migrator created")
+    print("-- Cleaning up the table that migrator created")
     db.execute(migrator_conn, "DROP TABLE IF EXISTS temporary")

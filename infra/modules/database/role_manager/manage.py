@@ -1,5 +1,4 @@
 import itertools
-import logging
 import os
 from operator import itemgetter
 
@@ -8,25 +7,20 @@ from pg8000.native import Connection, identifier
 import db
 
 
-logger = logging.getLogger(__name__)
-
-
 def manage():
     """Manage database roles, schema, and privileges"""
 
-    logger.info(
-        "Running command 'manage' to manage database roles, schema, and privileges"
-    )
+    print("Running command 'manage' to manage database roles, schema, and privileges")
     conn = db.connect_as_master_user()
 
-    logger.info("Current database configuration")
+    print("Current database configuration")
     print_roles(get_roles(conn))
     print_schema_privileges(get_schema_privileges(conn))
 
-    logger.info("Configuring database")
+    print("Configuring database")
     configure_database(conn)
 
-    logger.info("New database configuration")
+    print("New database configuration")
 
     new_roles = get_roles(conn)
     print_roles(new_roles)
@@ -93,17 +87,17 @@ def get_schema_privileges(conn: Connection) -> list[tuple[str, str]]:
 
 
 def configure_database(conn: Connection) -> None:
-    logger.info("-- Configuring database")
+    print("-- Configuring database")
     app_username = os.environ.get("APP_USER")
     migrator_username = os.environ.get("MIGRATOR_USER")
     schema_name = os.environ.get("DB_SCHEMA")
     database_name = os.environ.get("DB_NAME")
 
-    logger.info("---- Revoking default access on public schema")
+    print("---- Revoking default access on public schema")
     db.execute(conn, "REVOKE CREATE ON SCHEMA public FROM PUBLIC")
-    logger.info("---- Revoking database access from public role")
+    print("---- Revoking database access from public role")
     db.execute(conn, f"REVOKE ALL ON DATABASE {identifier(database_name)} FROM PUBLIC")
-    logger.info("---- Setting default search path to schema=%s", schema_name)
+    print("---- Setting default search path to schema=%s", schema_name)
     db.execute(
         conn,
         f"ALTER DATABASE {identifier(database_name)} SET search_path TO {identifier(schema_name)}",
@@ -114,13 +108,13 @@ def configure_database(conn: Connection) -> None:
 
 
 def configure_roles(conn: Connection, roles: list[str], database_name: str) -> None:
-    logger.info("---- Configuring roles")
+    print("---- Configuring roles")
     for role in roles:
         configure_role(conn, role, database_name)
 
 
 def configure_role(conn: Connection, username: str, database_name: str) -> None:
-    logger.info("------ Configuring role: username=%s", username)
+    print("------ Configuring role: username=%s", username)
     role = "rds_iam"
     db.execute(
         conn,
@@ -144,10 +138,10 @@ def configure_role(conn: Connection, username: str, database_name: str) -> None:
 def configure_schema(
     conn: Connection, schema_name: str, migrator_username: str, app_username: str
 ) -> None:
-    logger.info("---- Configuring schema")
-    logger.info("------ Creating schema: schema_name=%s", schema_name)
+    print("---- Configuring schema")
+    print("------ Creating schema: schema_name=%s", schema_name)
     db.execute(conn, f"CREATE SCHEMA IF NOT EXISTS {identifier(schema_name)}")
-    logger.info(
+    print(
         "------ Changing schema owner: schema_name=%s owner=%s",
         schema_name,
         migrator_username,
@@ -156,7 +150,7 @@ def configure_schema(
         conn,
         f"ALTER SCHEMA {identifier(schema_name)} OWNER TO {identifier(migrator_username)}",
     )
-    logger.info(
+    print(
         "------ Granting schema usage privileges: schema_name=%s role=%s",
         schema_name,
         app_username,
@@ -168,12 +162,12 @@ def configure_schema(
 
 
 def print_roles(roles: list[str]) -> None:
-    logger.info("Roles")
+    print("Roles")
     for role in roles:
-        logger.info(f"Role info: name={role}")
+        print(f"Role info: name={role}")
 
 
 def print_schema_privileges(schema_privileges: list[tuple[str, str]]) -> None:
-    logger.info("Schema privileges")
+    print("Schema privileges")
     for schema_name, schema_acl in schema_privileges:
-        logger.info(f"Schema info: name={schema_name} acl={schema_acl}")
+        print(f"Schema info: name={schema_name} acl={schema_acl}")

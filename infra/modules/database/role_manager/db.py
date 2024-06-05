@@ -1,12 +1,8 @@
 import json
-import logging
 import os
 
 import boto3
 from pg8000.native import Connection, identifier
-
-
-logger = logging.getLogger(__name__)
 
 
 def connect_as_master_user() -> Connection:
@@ -16,7 +12,7 @@ def connect_as_master_user() -> Connection:
     database = os.environ["DB_NAME"]
     password = get_master_password()
 
-    logger.info(
+    print(
         "Connecting to database: user=%s host=%s port=%s database=%s",
         user,
         host,
@@ -36,7 +32,7 @@ def connect_as_master_user() -> Connection:
 def get_master_password() -> str:
     ssm = boto3.client("ssm", region_name=os.environ["AWS_REGION"])
     param_name = os.environ["DB_PASSWORD_PARAM_NAME"]
-    logger.info("Fetching password from parameter store:\n%s" % param_name)
+    print("Fetching password from parameter store:\n%s" % param_name)
     result = json.loads(
         ssm.get_parameter(
             Name=param_name,
@@ -54,7 +50,7 @@ def connect_using_iam(user: str) -> Connection:
     port = os.environ["DB_PORT"]
     database = os.environ["DB_NAME"]
     token = client.generate_db_auth_token(DBHostname=host, Port=port, DBUsername=user)
-    logger.info(
+    print(
         "Connecting to database: user=%s host=%s port=%s database=%s",
         user,
         host,
@@ -72,5 +68,5 @@ def connect_using_iam(user: str) -> Connection:
 
 
 def execute(conn: Connection, query: str):
-    logger.info(f"{conn.user.decode('utf-8')}> {query}")
+    print(f"{conn.user.decode('utf-8')}> {query}")
     return conn.run(query)

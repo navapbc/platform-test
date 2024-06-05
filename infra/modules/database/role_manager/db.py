@@ -67,6 +67,7 @@ def connect_using_iam(user: str) -> Connection:
     )
 
 
-def execute(conn: Connection, query: str):
-    print(f"{conn.user.decode('utf-8')}> {query}")
+def execute(conn: Connection, query: str, print_query: bool = True):
+    if print_query:
+        print(f"{conn.user.decode('utf-8')}> {query}")
     return conn.run(query)

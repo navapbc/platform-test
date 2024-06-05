@@ -35,6 +35,7 @@ def get_roles(conn: Connection) -> list[str]:
             "FROM pg_roles "
             "WHERE rolname NOT LIKE 'pg_%' "
             "AND rolname NOT LIKE 'rds%'",
+            print_query=False,
         )
     ]
 
@@ -49,6 +50,7 @@ def get_roles_with_groups(conn: Connection) -> dict[str, str]:
         INNER JOIN pg_roles g ON g.oid = a.roleid
         ORDER BY user ASC
         """,
+        print_query=False,
     )
 
     result = {}
@@ -71,6 +73,7 @@ def get_schema_privileges(conn: Connection) -> list[tuple[str, str]]:
             WHERE nspname NOT LIKE 'pg_%'
             AND nspname <> 'information_schema'
             """,
+            print_query=False,
         )
     ]
 
@@ -164,10 +167,10 @@ def print_current_db_config(
 def print_roles(roles: list[str]) -> None:
     print("---- Roles")
     for role in roles:
-        print(f"------ Role info: name={role}")
+        print(f"------ Role {role}")
 
 
 def print_schema_privileges(schema_privileges: list[tuple[str, str]]) -> None:
     print("---- Schema privileges")
     for schema_name, schema_acl in schema_privileges:
-        print(f"------ Schema info: name={schema_name} acl={schema_acl}")
+        print(f"------ Schema name={schema_name} acl={schema_acl}")

@@ -47,22 +47,24 @@ def manage():
 def get_roles(conn: Connection) -> list[str]:
     return [
         row[0]
-        for row in conn.run(
+        for row in db.execute(
+            conn,
             "SELECT rolname "
             "FROM pg_roles "
             "WHERE rolname NOT LIKE 'pg_%' "
-            "AND rolname NOT LIKE 'rds%'"
+            "AND rolname NOT LIKE 'rds%'",
         )
     ]
 
 
 def get_roles_with_groups(conn: Connection) -> dict[str, str]:
-    roles_groups = conn.run(
+    roles_groups = db.execute(
+        conn,
         "SELECT u.rolname AS user, g.rolname AS group \
                             FROM pg_roles u \
                             INNER JOIN pg_auth_members a ON u.oid = a.member \
                             INNER JOIN pg_roles g ON g.oid = a.roleid \
-                            ORDER BY user ASC"
+                            ORDER BY user ASC",
     )
 
     result = {}
@@ -77,11 +79,12 @@ def get_roles_with_groups(conn: Connection) -> dict[str, str]:
 def get_schema_privileges(conn: Connection) -> list[tuple[str, str]]:
     return [
         (row[0], row[1])
-        for row in conn.run(
+        for row in db.execute(
+            conn,
             "SELECT nspname, nspacl \
                                                  FROM pg_namespace \
                                                  WHERE nspname NOT LIKE 'pg_%' \
-                                                 AND nspname <> 'information_schema'"
+                                                 AND nspname <> 'information_schema'",
         )
     ]
 
@@ -94,12 +97,13 @@ def configure_database(conn: Connection) -> None:
     database_name = os.environ.get("DB_NAME")
 
     logger.info("Revoking default access on public schema")
-    conn.run("REVOKE CREATE ON SCHEMA public FROM PUBLIC")
+    db.execute(conn, "REVOKE CREATE ON SCHEMA public FROM PUBLIC")
     logger.info("Revoking database access from public role")
-    conn.run(f"REVOKE ALL ON DATABASE {identifier(database_name)} FROM PUBLIC")
+    db.execute(conn, f"REVOKE ALL ON DATABASE {identifier(database_name)} FROM PUBLIC")
     logger.info("Setting default search path to schema=%s", schema_name)
-    conn.run(
-        f"ALTER DATABASE {identifier(database_name)} SET search_path TO {identifier(schema_name)}"
+    db.execute(
+        conn,
+        f"ALTER DATABASE {identifier(database_name)} SET search_path TO {identifier(schema_name)}",
     )
 
     configure_roles(conn, [migrator_username, app_username], database_name)
@@ -115,7 +119,8 @@ def configure_roles(conn: Connection, roles: list[str], database_name: str) -> N
 def configure_role(conn: Connection, username: str, database_name: str) -> None:
     logger.info("Configuring role: username=%s", username)
     role = "rds_iam"
-    conn.run(
+    db.execute(
+        conn,
         f"""
         DO $$
         BEGIN
@@ -124,11 +129,12 @@ def configure_role(conn: Connection, username: str, database_name: str) -> None:
             RAISE NOTICE 'user already exists';
         END
         $$;
-        """
+        """,
     )
-    conn.run(f"GRANT {identifier(role)} TO {identifier(username)}")
-    conn.run(
-        f"GRANT CONNECT ON DATABASE {identifier(database_name)} TO {identifier(username)}"
+    db.execute(conn, f"GRANT {identifier(role)} TO {identifier(username)}")
+    db.execute(
+        conn,
+        f"GRANT CONNECT ON DATABASE {identifier(database_name)} TO {identifier(username)}",
     )
 
 
@@ -137,20 +143,22 @@ def configure_schema(
 ) -> None:
     logger.info("Configuring schema")
     logger.info("Creating schema: schema_name=%s", schema_name)
-    conn.run(f"CREATE SCHEMA IF NOT EXISTS {identifier(schema_name)}")
+    db.execute(conn, f"CREATE SCHEMA IF NOT EXISTS {identifier(schema_name)}")
     logger.info(
         "Changing schema owner: schema_name=%s owner=%s", schema_name, migrator_username
     )
-    conn.run(
-        f"ALTER SCHEMA {identifier(schema_name)} OWNER TO {identifier(migrator_username)}"
+    db.execute(
+        conn,
+        f"ALTER SCHEMA {identifier(schema_name)} OWNER TO {identifier(migrator_username)}",
     )
     logger.info(
         "Granting schema usage privileges: schema_name=%s role=%s",
         schema_name,
         app_username,
     )
-    conn.run(
-        f"GRANT USAGE ON SCHEMA {identifier(schema_name)} TO {identifier(app_username)}"
+    db.execute(
+        conn,
+        f"GRANT USAGE ON SCHEMA {identifier(schema_name)} TO {identifier(app_username)}",
     )
 
 

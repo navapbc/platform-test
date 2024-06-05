@@ -73,4 +73,4 @@ def connect_using_iam(user: str) -> Connection:
 
 def execute(conn: Connection, query: str):
     logger.info(f"{conn.user}> {query}")
-    conn.run(query)
+    return conn.run(query)

@@ -19,6 +19,8 @@ def manage():
         roles, schema_privileges = print_current_db_config(master_conn)
         roles_with_groups = get_roles_with_groups(master_conn)
 
+    configure_default_privileges()
+
     return {
         "roles": roles,
         "roles_with_groups": roles_with_groups,
@@ -145,21 +147,34 @@ def configure_schema(
         conn,
         f"GRANT USAGE ON SCHEMA {identifier(schema_name)} TO {identifier(app_username)}",
     )
-    print(
-        f"------ Granting privileges for future objects in schema: grantee={app_username}"
-    )
-    db.execute(
-        conn,
-        f"ALTER DEFAULT PRIVILEGES IN SCHEMA {identifier(schema_name)} GRANT ALL ON TABLES TO {identifier(app_username)}",
-    )
-    db.execute(
-        conn,
-        f"ALTER DEFAULT PRIVILEGES IN SCHEMA {identifier(schema_name)} GRANT ALL ON SEQUENCES TO {identifier(app_username)}",
-    )
-    db.execute(
-        conn,
-        f"ALTER DEFAULT PRIVILEGES IN SCHEMA {identifier(schema_name)} GRANT ALL ON ROUTINES TO {identifier(app_username)}",
-    )
+
+
+def configure_default_privileges():
+    """
+    Configure default privileges so that future tables, sequences, and routines
+    created by the migrator user can be accessed by the app user.
+    You can only alter default privileges for the current role, so we need to
+    run these SQL queries as the migrator user rather than as the maste user.
+    """
+    migrator_username = os.environ.get("MIGRATOR_USER")
+    schema_name = os.environ.get("DB_SCHEMA")
+    app_username = os.environ.get("APP_USER")
+    with db.connect_using_iam(migrator_username) as conn:
+        print(
+            f"------ Granting privileges for future objects in schema: grantee={app_username}"
+        )
+        db.execute(
+            conn,
+            f"ALTER DEFAULT PRIVILEGES IN SCHEMA {identifier(schema_name)} GRANT ALL ON TABLES TO {identifier(app_username)}",
+        )
+        db.execute(
+            conn,
+            f"ALTER DEFAULT PRIVILEGES IN SCHEMA {identifier(schema_name)} GRANT ALL ON SEQUENCES TO {identifier(app_username)}",
+        )
+        db.execute(
+            conn,
+            f"ALTER DEFAULT PRIVILEGES IN SCHEMA {identifier(schema_name)} GRANT ALL ON ROUTINES TO {identifier(app_username)}",
+        )
 
 
 def print_current_db_config(

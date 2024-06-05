@@ -10,7 +10,9 @@ import db
 def manage():
     """Manage database roles, schema, and privileges"""
 
-    print("Running command 'manage' to manage database roles, schema, and privileges")
+    print(
+        "-- Running command 'manage' to manage database roles, schema, and privileges"
+    )
     conn = db.connect_as_master_user()
 
     print_current_db_config(conn)

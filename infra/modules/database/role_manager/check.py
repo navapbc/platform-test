@@ -9,7 +9,7 @@ def check():
     """Check that database roles, schema, and privileges were
     properly configured
     """
-    print("-- Running command 'check' to check database roles, schema, and privileges")
+    print("Running command 'check' to check database roles, schema, and privileges")
     app_username = os.environ.get("APP_USER")
     migrator_username = os.environ.get("MIGRATOR_USER")
     schema_name = os.environ.get("DB_SCHEMA")

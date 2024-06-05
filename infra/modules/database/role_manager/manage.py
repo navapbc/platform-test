@@ -60,11 +60,13 @@ def get_roles(conn: Connection) -> list[str]:
 def get_roles_with_groups(conn: Connection) -> dict[str, str]:
     roles_groups = db.execute(
         conn,
-        "SELECT u.rolname AS user, g.rolname AS group \
-                            FROM pg_roles u \
-                            INNER JOIN pg_auth_members a ON u.oid = a.member \
-                            INNER JOIN pg_roles g ON g.oid = a.roleid \
-                            ORDER BY user ASC",
+        """
+        SELECT u.rolname AS user, g.rolname AS group
+        FROM pg_roles u
+        INNER JOIN pg_auth_members a ON u.oid = a.member
+        INNER JOIN pg_roles g ON g.oid = a.roleid
+        ORDER BY user ASC
+        """,
     )
 
     result = {}
@@ -81,10 +83,12 @@ def get_schema_privileges(conn: Connection) -> list[tuple[str, str]]:
         (row[0], row[1])
         for row in db.execute(
             conn,
-            "SELECT nspname, nspacl \
-                                                 FROM pg_namespace \
-                                                 WHERE nspname NOT LIKE 'pg_%' \
-                                                 AND nspname <> 'information_schema'",
+            """
+            SELECT nspname, nspacl
+            FROM pg_namespace
+            WHERE nspname NOT LIKE 'pg_%'
+            AND nspname <> 'information_schema'
+            """,
         )
     ]
 

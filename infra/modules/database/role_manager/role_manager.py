@@ -1,10 +1,12 @@
-import boto3
 import itertools
-from operator import itemgetter
-import os
-import json
 import logging
+import os
+from operator import itemgetter
+
 from pg8000.native import Connection, identifier
+
+import db
+
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -23,14 +25,11 @@ def manage():
     logger.info(
         "Running command 'manage' to manage database roles, schema, and privileges"
     )
-    conn = connect_as_master_user()
+    conn = db.connect_as_master_user()
 
     logger.info("Current database configuration")
-    prev_roles = get_roles(conn)
-    print_roles(prev_roles)
-
-    prev_schema_privileges = get_schema_privileges(conn)
-    print_schema_privileges(prev_schema_privileges)
+    print_roles(get_roles(conn))
+    print_schema_privileges(get_schema_privileges(conn))
 
     logger.info("Configuring database")
     configure_database(conn)
@@ -64,8 +63,8 @@ def check():
     schema_name = os.environ.get("DB_SCHEMA")
 
     with (
-        connect_using_iam(app_username) as app_conn,
-        connect_using_iam(migrator_username) as migrator_conn,
+        db.connect_using_iam(app_username) as app_conn,
+        db.connect_using_iam(migrator_username) as migrator_conn,
     ):
         check_search_path(migrator_conn, schema_name)
         check_migrator_create_table(migrator_conn, app_username)
@@ -77,7 +76,7 @@ def check():
 
 def check_search_path(migrator_conn: Connection, schema_name: str):
     logger.info("Checking that search path is %s", schema_name)
-    assert migrator_conn.run("SHOW search_path") == [[schema_name]]
+    assert db.execute(migrator_conn, "SHOW search_path") == [[schema_name]]
 
 
 def check_migrator_create_table(migrator_conn: Connection, app_username: str):
@@ -85,80 +84,20 @@ def check_migrator_create_table(migrator_conn: Connection, app_username: str):
         "Checking that migrator is able to create tables and grant access to app user: %s",
         app_username,
     )
-    migrator_conn.run("CREATE TABLE IF NOT EXISTS temporary(created_at TIMESTAMP)")
+    db.execute(
+        migrator_conn, "CREATE TABLE IF NOT EXISTS temporary(created_at TIMESTAMP)"
+    )
 
 
 def check_app_use_table(app_conn: Connection):
     logger.info("Checking that app is able to read and write from the table")
-    app_conn.run("INSERT INTO temporary (created_at) VALUES (NOW())")
-    app_conn.run("SELECT * FROM temporary")
+    db.execute(app_conn, "INSERT INTO temporary (created_at) VALUES (NOW())")
+    db.execute(app_conn, "SELECT * FROM temporary")
 
 
 def cleanup_migrator_drop_table(migrator_conn: Connection):
     logger.info("Cleaning up the table that migrator created")
-    migrator_conn.run("DROP TABLE IF EXISTS temporary")
-
-
-def connect_as_master_user() -> Connection:
-    user = os.environ["DB_USER"]
-    host = os.environ["DB_HOST"]
-    port = os.environ["DB_PORT"]
-    database = os.environ["DB_NAME"]
-    password = get_password()
-
-    logger.info(
-        "Connecting to database: user=%s host=%s port=%s database=%s",
-        user,
-        host,
-        port,
-        database,
-    )
-    return Connection(
-        user=user,
-        host=host,
-        port=port,
-        database=database,
-        password=password,
-        ssl_context=True,
-    )
-
-
-def connect_using_iam(user: str) -> Connection:
-    client = boto3.client("rds")
-    host = os.environ["DB_HOST"]
-    port = os.environ["DB_PORT"]
-    database = os.environ["DB_NAME"]
-    token = client.generate_db_auth_token(DBHostname=host, Port=port, DBUsername=user)
-    logger.info(
-        "Connecting to database: user=%s host=%s port=%s database=%s",
-        user,
-        host,
-        port,
-        database,
-    )
-    return Connection(
-        user=user,
-        host=host,
-        port=port,
-        database=database,
-        password=token,
-        ssl_context=True,
-    )
-
-
-def get_password() -> str:
-    ssm = boto3.client("ssm", region_name=os.environ["AWS_REGION"])
-    param_name = os.environ["DB_PASSWORD_PARAM_NAME"]
-    logger.info("Fetching password from parameter store:\n%s" % param_name)
-    result = json.loads(
-        ssm.get_parameter(
-            Name=param_name,
-            WithDecryption=True,
-        )[
-            "Parameter"
-        ]["Value"]
-    )
-    return result["password"]
+    db.execute(migrator_conn, "DROP TABLE IF EXISTS temporary")
 
 
 def get_roles(conn: Connection) -> list[str]:

@@ -13,26 +13,15 @@ def manage():
     print("Running command 'manage' to manage database roles, schema, and privileges")
     conn = db.connect_as_master_user()
 
-    print("Current database configuration")
-    print_roles(get_roles(conn))
-    print_schema_privileges(get_schema_privileges(conn))
-
-    print("Configuring database")
+    print_current_db_config(conn)
     configure_database(conn)
-
-    print("New database configuration")
-
-    new_roles = get_roles(conn)
-    print_roles(new_roles)
-
-    new_schema_privileges = get_schema_privileges(conn)
-    print_schema_privileges(new_schema_privileges)
+    roles, schema_privileges = print_current_db_config(conn)
 
     return {
-        "roles": new_roles,
+        "roles": roles,
         "roles_with_groups": get_roles_with_groups(conn),
         "schema_privileges": {
-            schema_name: schema_acl for schema_name, schema_acl in new_schema_privileges
+            schema_name: schema_acl for schema_name, schema_acl in schema_privileges
         },
     }
 
@@ -161,13 +150,24 @@ def configure_schema(
     )
 
 
+def print_current_db_config(
+    conn: Connection,
+) -> tuple[list[str], list[tuple[str, str]]]:
+    print("-- Current database configuration")
+    roles = get_roles(conn)
+    print_roles(roles)
+    schema_privileges = get_schema_privileges(conn)
+    print_schema_privileges(schema_privileges)
+    return roles, schema_privileges
+
+
 def print_roles(roles: list[str]) -> None:
-    print("Roles")
+    print("---- Roles")
     for role in roles:
-        print(f"Role info: name={role}")
+        print(f"------ Role info: name={role}")
 
 
 def print_schema_privileges(schema_privileges: list[tuple[str, str]]) -> None:
-    print("Schema privileges")
+    print("---- Schema privileges")
     for schema_name, schema_acl in schema_privileges:
-        print(f"Schema info: name={schema_name} acl={schema_acl}")
+        print(f"------ Schema info: name={schema_name} acl={schema_acl}")

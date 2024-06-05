@@ -72,5 +72,5 @@ def connect_using_iam(user: str) -> Connection:
 
 
 def execute(conn: Connection, query: str):
-    logger.info(f"{conn.user}> {query}")
+    logger.info(f"{conn.user.decode('utf-8')}> {query}")
     return conn.run(query)

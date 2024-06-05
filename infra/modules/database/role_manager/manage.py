@@ -13,15 +13,15 @@ def manage():
     print(
         "-- Running command 'manage' to manage database roles, schema, and privileges"
     )
-    conn = db.connect_as_master_user()
-
-    print_current_db_config(conn)
-    configure_database(conn)
-    roles, schema_privileges = print_current_db_config(conn)
+    with db.connect_as_master_user() as master_conn:
+        print_current_db_config(master_conn)
+        configure_database(master_conn)
+        roles, schema_privileges = print_current_db_config(master_conn)
+        roles_with_groups = get_roles_with_groups(master_conn)
 
     return {
         "roles": roles,
-        "roles_with_groups": get_roles_with_groups(conn),
+        "roles_with_groups": roles_with_groups,
         "schema_privileges": {
             schema_name: schema_acl for schema_name, schema_acl in schema_privileges
         },
@@ -91,7 +91,7 @@ def configure_database(conn: Connection) -> None:
     db.execute(conn, "REVOKE CREATE ON SCHEMA public FROM PUBLIC")
     print("---- Revoking database access from public role")
     db.execute(conn, f"REVOKE ALL ON DATABASE {identifier(database_name)} FROM PUBLIC")
-    print("---- Setting default search path to schema=%s", schema_name)
+    print(f"---- Setting default search path to schema {schema_name}")
     db.execute(
         conn,
         f"ALTER DATABASE {identifier(database_name)} SET search_path TO {identifier(schema_name)}",
@@ -108,7 +108,7 @@ def configure_roles(conn: Connection, roles: list[str], database_name: str) -> N
 
 
 def configure_role(conn: Connection, username: str, database_name: str) -> None:
-    print("------ Configuring role: username=%s", username)
+    print(f"------ Configuring role: {username=}")
     role = "rds_iam"
     db.execute(
         conn,
@@ -133,25 +133,29 @@ def configure_schema(
     conn: Connection, schema_name: str, migrator_username: str, app_username: str
 ) -> None:
     print("---- Configuring schema")
-    print("------ Creating schema: schema_name=%s", schema_name)
+    print(f"------ Creating schema: {schema_name=}")
     db.execute(conn, f"CREATE SCHEMA IF NOT EXISTS {identifier(schema_name)}")
-    print(
-        "------ Changing schema owner: schema_name=%s owner=%s",
-        schema_name,
-        migrator_username,
-    )
+    print(f"------ Changing schema owner: new_owner={migrator_username}")
     db.execute(
         conn,
         f"ALTER SCHEMA {identifier(schema_name)} OWNER TO {identifier(migrator_username)}",
     )
-    print(
-        "------ Granting schema usage privileges: schema_name=%s role=%s",
-        schema_name,
-        app_username,
-    )
+    print(f"------ Granting schema usage privileges: grantee={app_username}")
     db.execute(
         conn,
         f"GRANT USAGE ON SCHEMA {identifier(schema_name)} TO {identifier(app_username)}",
+    )
+    print(
+        f"------ Granting privileges for future objects in schema: grantee={app_username}"
+    )
+    conn.run(
+        f"ALTER DEFAULT PRIVILEGES IN SCHEMA {identifier(schema_name)} GRANT ALL ON TABLES TO {identifier(app_username)}"
+    )
+    conn.run(
+        f"ALTER DEFAULT PRIVILEGES IN SCHEMA {identifier(schema_name)} GRANT ALL ON SEQUENCES TO {identifier(app_username)}"
+    )
+    conn.run(
+        f"ALTER DEFAULT PRIVILEGES IN SCHEMA {identifier(schema_name)} GRANT ALL ON ROUTINES TO {identifier(app_username)}"
     )
 
 
@@ -174,5 +178,5 @@ def print_roles(roles: list[str]) -> None:
 
 def print_schema_privileges(schema_privileges: list[tuple[str, str]]) -> None:
     print("---- Schema privileges")
-    for schema_name, schema_acl in schema_privileges:
-        print(f"------ Schema name={schema_name} acl={schema_acl}")
+    for name, acl in schema_privileges:
+        print(f"------ Schema {name=} {acl=}")

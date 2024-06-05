@@ -27,26 +27,27 @@ def check():
 
 
 def check_search_path(migrator_conn: Connection, schema_name: str):
-    print("-- Checking that search path is %s", schema_name)
+    print("-- Check that search path is %s", schema_name)
     assert db.execute(migrator_conn, "SHOW search_path") == [[schema_name]]
 
 
 def check_migrator_create_table(migrator_conn: Connection, app_username: str):
     print(
-        "Checking that migrator is able to create tables and grant access to app user: %s",
+        "-- Check that migrator is able to create tables and grant access to app user: %s",
         app_username,
     )
+    cleanup_migrator_drop_table(migrator_conn)
     db.execute(
         migrator_conn, "CREATE TABLE IF NOT EXISTS temporary(created_at TIMESTAMP)"
     )
 
 
 def check_app_use_table(app_conn: Connection):
-    print("-- Checking that app is able to read and write from the table")
+    print("-- Check that app is able to read and write from the table")
     db.execute(app_conn, "INSERT INTO temporary (created_at) VALUES (NOW())")
     db.execute(app_conn, "SELECT * FROM temporary")
 
 
 def cleanup_migrator_drop_table(migrator_conn: Connection):
-    print("-- Cleaning up the table that migrator created")
+    print("-- Clean up temporary table if it exists")
     db.execute(migrator_conn, "DROP TABLE IF EXISTS temporary")

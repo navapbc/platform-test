@@ -8,8 +8,7 @@ from pg8000.native import Connection, identifier
 import db
 
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def manage():
@@ -94,17 +93,17 @@ def get_schema_privileges(conn: Connection) -> list[tuple[str, str]]:
 
 
 def configure_database(conn: Connection) -> None:
-    logger.info("Configuring database")
+    logger.info("-- Configuring database")
     app_username = os.environ.get("APP_USER")
     migrator_username = os.environ.get("MIGRATOR_USER")
     schema_name = os.environ.get("DB_SCHEMA")
     database_name = os.environ.get("DB_NAME")
 
-    logger.info("Revoking default access on public schema")
+    logger.info("---- Revoking default access on public schema")
     db.execute(conn, "REVOKE CREATE ON SCHEMA public FROM PUBLIC")
-    logger.info("Revoking database access from public role")
+    logger.info("---- Revoking database access from public role")
     db.execute(conn, f"REVOKE ALL ON DATABASE {identifier(database_name)} FROM PUBLIC")
-    logger.info("Setting default search path to schema=%s", schema_name)
+    logger.info("---- Setting default search path to schema=%s", schema_name)
     db.execute(
         conn,
         f"ALTER DATABASE {identifier(database_name)} SET search_path TO {identifier(schema_name)}",
@@ -115,13 +114,13 @@ def configure_database(conn: Connection) -> None:
 
 
 def configure_roles(conn: Connection, roles: list[str], database_name: str) -> None:
-    logger.info("Configuring roles")
+    logger.info("---- Configuring roles")
     for role in roles:
         configure_role(conn, role, database_name)
 
 
 def configure_role(conn: Connection, username: str, database_name: str) -> None:
-    logger.info("Configuring role: username=%s", username)
+    logger.info("------ Configuring role: username=%s", username)
     role = "rds_iam"
     db.execute(
         conn,
@@ -145,18 +144,20 @@ def configure_role(conn: Connection, username: str, database_name: str) -> None:
 def configure_schema(
     conn: Connection, schema_name: str, migrator_username: str, app_username: str
 ) -> None:
-    logger.info("Configuring schema")
-    logger.info("Creating schema: schema_name=%s", schema_name)
+    logger.info("---- Configuring schema")
+    logger.info("------ Creating schema: schema_name=%s", schema_name)
     db.execute(conn, f"CREATE SCHEMA IF NOT EXISTS {identifier(schema_name)}")
     logger.info(
-        "Changing schema owner: schema_name=%s owner=%s", schema_name, migrator_username
+        "------ Changing schema owner: schema_name=%s owner=%s",
+        schema_name,
+        migrator_username,
     )
     db.execute(
         conn,
         f"ALTER SCHEMA {identifier(schema_name)} OWNER TO {identifier(migrator_username)}",
     )
     logger.info(
-        "Granting schema usage privileges: schema_name=%s role=%s",
+        "------ Granting schema usage privileges: schema_name=%s role=%s",
         schema_name,
         app_username,
     )

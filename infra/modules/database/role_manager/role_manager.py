@@ -4,8 +4,7 @@ from check import check
 from manage import manage
 
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logging.getLogger().setLevel(logging.INFO)
 
 
 def lambda_handler(event, context):

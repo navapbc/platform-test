@@ -5,8 +5,8 @@ import os
 import boto3
 from pg8000.native import Connection, identifier
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+
+logger = logging.getLogger(__name__)
 
 
 def connect_as_master_user() -> Connection:

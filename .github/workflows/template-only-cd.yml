@@ -1,0 +1,47 @@
+name: Template Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Only allow one workflow at a time to prevent race conditions when pushing changes to the project repo
+concurrency: platform-template-only-cd
+
+jobs:
+  deploy:
+    name: Deploy to ${{ matrix.project_repo }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        project_repo:
+          - navapbc/platform-test
+          - navapbc/platform-test-flask
+          - navapbc/platform-test-nextjs
+    steps:
+      - name: Checkout template-infra repo
+        uses: actions/checkout@v3
+        with:
+          path: template-infra
+      - name: Checkout project repo
+        uses: actions/checkout@v3
+        with:
+          path: project-repo
+          repository: ${{ matrix.project_repo }}
+          token: ${{ secrets.PLATFORM_BOT_GITHUB_TOKEN }}
+
+      - name: Update infra template
+        working-directory: project-repo
+        run: ../template-infra/template-only-bin/update-template
+
+      - name: Push changes to project repo
+        working-directory: project-repo
+        run: |
+          git config user.name nava-platform-bot
+          git config user.email platform-admins@navapbc.com
+          git add --all
+          # Commit changes (if no changes then no-op)
+          git diff-index --quiet HEAD || git commit -m "Template infra deploy #${{ github.run_id }}"
+          git push

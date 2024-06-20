@@ -35,6 +35,12 @@ output "service_config" {
       job_name => merge({ source_bucket = local.bucket_name }, job_config)
     }
   }
+
+  # Identity provider configuration
+  enable_identity_provider = var.enable_identity_provider
+  # Support local development against remote resources
+  auth_callback_urls = var.domain_name != null ? ["https://${var.domain_name}", "http://localhost:3000"] : ["http://localhost:3000"]
+  logout_urls        = var.domain_name != null ? ["https://${var.domain_name}", "http://localhost:3000"] : ["http://localhost:3000"]
 }
 
 output "storage_config" {

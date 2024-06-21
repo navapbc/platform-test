@@ -1,0 +1,25 @@
+#!/bin/bash
+# -----------------------------------------------------------------------------
+# This script gets the account id for a given application environment
+#
+# Positional parameters:
+#   app_name (required) - the name of the folder under infra holding the app
+#   environment (required) - the name of the environment. The name of the
+#     environment holding the build repository is "shared".
+# -----------------------------------------------------------------------------
+set -euo pipefail
+
+app_name=$1
+environment=$2
+
+terraform -chdir="infra/${app_name}/app-config" init > /dev/null
+terraform -chdir="infra/${app_name}/app-config" apply -auto-approve > /dev/null
+account_name=$(terraform -chdir="infra/${app_name}/app-config" output -json account_names_by_environment | jq -r ".${environment}")
+
+# Get the account id associated with the account name extracting the
+# ACCOUNT_ID part of the tfbackend file name which looks like
+# <ACCOUNT_NAME>.<ACCOUNT_ID>.s3.tfbackend.
+# The cut command splits the string with period as the delimeter and
+# extracts the second field.
+account_id=$(find infra/accounts/"${account_name}".*.s3.tfbackend | cut -d. -f2)
+echo "${account_id}"

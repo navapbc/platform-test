@@ -2,6 +2,7 @@ name: Check CI/CD authentication
 run-name: Check authentication to ${{ inputs.account_name }} account
 
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       account_name:

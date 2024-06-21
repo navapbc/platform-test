@@ -137,10 +137,9 @@ infra-check-app-database-roles: ## Check that app database roles have been confi
 infra-check-compliance: ## Run compliance checks
 infra-check-compliance: infra-check-compliance-checkov infra-check-compliance-tfsec
 
-infra-check-github-actions-auth: ## Check that GitHub actions can authenticate to the account associated with the given application environment
-	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
-	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
-	./bin/check-github-actions-auth.sh $(APP_NAME) $(ENVIRONMENT)
+infra-check-github-actions-auth: ## Check that GitHub actions can authenticate to the AWS account
+	@:$(call check_defined, ACCOUNT_NAME, the name of account in infra/accounts)
+	./bin/check-github-actions-auth $(ACCOUNT_NAME)
 
 
 infra-check-compliance-checkov: ## Run checkov compliance checks

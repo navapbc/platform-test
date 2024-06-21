@@ -37,16 +37,12 @@ make infra-set-up-account ACCOUNT_NAME=<ACCOUNT_NAME>
 
 This command will create the S3 tfstate bucket and the GitHub OIDC provider. It will also create a `[account name].[account id].s3.tfbackend` file in the `infra/accounts` directory.
 
-### 3. Update the account names map in app-config
-
-For each environment of each of your applications, update the `account_name` config to reflect the account name you chose.
-
-### 4. Check that GitHub actions can authenticate into the AWS account for the environments you associated with the account in step 3
+### 3. Check that GitHub actions can authenticate into the AWS account
 
 This step requires [GitHub CLI](https://cli.github.com/) to be installed. If you don't have it, you can install on Mac via `brew install gh`
 
 ```bash
-make infra-check-github-actions-auth APP_NAME=app ENVIRONMENT=<ENVIRONMENT>
+make infra-check-github-actions-auth ACCOUNT_NAME=<ACCOUNT_NAME>
 ```
 
 ## Making changes to the account

@@ -1,4 +1,5 @@
-name: Check GitHub Actions AWS Authentication
+name: Check CI/CD authentication
+run-name: Check authentication to ${{ inputs.account_name }} account
 
 on:
   workflow_dispatch:

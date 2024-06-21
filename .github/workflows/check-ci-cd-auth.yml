@@ -1,5 +1,5 @@
 name: Check CI/CD authentication
-run-name: Check authentication to ${{ inputs.account_name }} account
+run-name: Check ${{ inputs.account_name }} account authentication
 
 on:
   workflow_dispatch:

@@ -37,7 +37,7 @@ jobs:
           # <account_name>.<account_id>.s3.tfbackend.
           # The cut command splits the string with period as the delimeter and
           # extracts the second field.
-          account_id=$(find infra/accounts/"${account_name}".*.s3.tfbackend | cut -d. -f2)
+          account_id=$(find infra/accounts/"${{ inputs.account_name }}".*.s3.tfbackend | cut -d. -f2)
           echo "account_id=${account_id}"
   
           aws_role_to_assume="arn:aws:iam::${account_id}:role/${github_actions_role_name}"

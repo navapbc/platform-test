@@ -13,10 +13,6 @@ on:
       - "infra/**"
   workflow_dispatch:
     inputs:
-      app_name:
-        description: "name of application folder under infra directory"
-        required: true
-        type: string
       environment:
         description: "target environment"
         required: true
@@ -24,6 +20,7 @@ on:
         type: choice
         options:
           - dev
+          - staging
           - prod
 
 jobs:
@@ -31,5 +28,5 @@ jobs:
     name: Deploy
     uses: ./.github/workflows/deploy.yml
     with:
-      app_name: ${{ inputs.app_name || 'app' }}
+      app_name: "app"
       environment: ${{ inputs.environment || 'dev' }}

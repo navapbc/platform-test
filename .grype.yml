@@ -18,7 +18,12 @@ ignore:
   - fix-state: unknown
 
   # Ignoring since this is a simple example app
+  # https://github.com/anchore/grype/issues/1172
   - vulnerability: GHSA-xqr8-7jwr-rhp7
   - vulnerability: GHSA-5cpq-8wj7-hf2v
   - vulnerability: GHSA-cf7p-gm2m-833m
   - vulnerability: GHSA-jm77-qphf-c4w8
+  - vulnerability: GHSA-jfhm-5ghh-2f97
+  - vulnerability: GHSA-v8gr-m533-ghj9
+  - vulnerability: GHSA-mq26-g339-26xf
+  - vulnerability: GHSA-3ww4-gg4f-jr7f

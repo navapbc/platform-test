@@ -8,7 +8,7 @@ These guidelines are meant to reinforce those two goals.
 Aim to respond to code reviews within 1 business day.
 
 Remember to highlight things that you like and appreciate while reading through the changes,
-and to make any other feedback clearly actionable by indicating if it is optional preference, an important consideration, or an error.
+and to make any other feedback clearly actionable by indicating if it is an optional preference, an important consideration, or an error.
 
 Don't be afraid to comment with a question, or to ask for clarification, or provide a suggestion,
 whenever you don’t understand what is going on at first glance — or if you think an approach or decision can be improved.
@@ -41,15 +41,15 @@ and state what you are looking for in the description.
 
 After you make requested changes in response to code review feedback, please re-request reviews from the reviewers to notify them that the work is ready to be reviewed again.
 
-Advantages of code review
+## Advantages of code review
 
-catch and prevent bugs
-consistent code
-find shared code
-share knowledge
+- catch and prevent bugs
+- consistent code
+- find shared code
+- share knowledge
 
-Challenges
-it can take long
-who to ask
-how do you know when is "enough" review
-what should i be reviewing
+## Challenges of code reviews
+- it can take long
+- who to ask
+- how do you know when is "enough" review
+- what should I be reviewing

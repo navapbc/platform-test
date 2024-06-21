@@ -6,10 +6,12 @@ locals {
   primary_instance_name = "${var.name}-primary"
   role_manager_name     = "${var.name}-role-manager"
   role_manager_package  = "${path.root}/role_manager.zip"
-
   # The ARN that represents the users accessing the database are of the format: "arn:aws:rds-db:<region>:<account-id>:dbuser:<resource-id>/<database-user-name>""
   # See https://aws.amazon.com/blogs/database/using-iam-authentication-to-connect-with-pgadmin-amazon-aurora-postgresql-or-amazon-rds-for-postgresql/
   db_user_arn_prefix = "arn:aws:rds-db:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_rds_cluster.db.cluster_resource_id}"
+
+  engine_version       = "16.2"
+  engine_major_version = regex("^\\d+", local.engine_version)
 }
 
 # Database Configuration
@@ -23,28 +25,35 @@ resource "aws_rds_cluster" "db" {
   # https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.CreateInstance.html
   cluster_identifier = var.name
 
-  engine            = "aurora-postgresql"
-  engine_mode       = "provisioned"
-  database_name     = var.database_name
-  port              = var.port
-  master_username   = local.master_username
-  master_password   = aws_ssm_parameter.random_db_password.value
-  storage_encrypted = true
-  kms_key_id        = aws_kms_key.db.arn
+  engine                      = "aurora-postgresql"
+  engine_mode                 = "provisioned"
+  engine_version              = local.engine_version
+  database_name               = var.database_name
+  port                        = var.port
+  master_username             = local.master_username
+  manage_master_user_password = true
+  storage_encrypted           = true
+  kms_key_id                  = aws_kms_key.db.arn
+  allow_major_version_upgrade = false
+
+  db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.rds_query_logging.name
 
   # checkov:skip=CKV_AWS_128:Auth decision needs to be ironed out
   # checkov:skip=CKV_AWS_162:Auth decision needs to be ironed out
   iam_database_authentication_enabled = true
-  deletion_protection                 = true
   copy_tags_to_snapshot               = true
   # final_snapshot_identifier = "${var.name}-final"
   skip_final_snapshot = true
+
+  # Use a separate line to support automated terraform destroy commands
+  deletion_protection = true
 
   serverlessv2_scaling_configuration {
     max_capacity = 1.0
     min_capacity = 0.5
   }
 
+  db_subnet_group_name   = var.database_subnet_group_name
   vpc_security_group_ids = [aws_security_group.db.id]
 
   enabled_cloudwatch_logs_exports = ["postgresql"]
@@ -61,18 +70,6 @@ resource "aws_rds_cluster_instance" "primary" {
   monitoring_interval        = 30
 }
 
-resource "random_password" "random_db_password" {
-  length = 48
-  # Remove '@' sign from allowed characters since only printable ASCII characters besides '/', '@', '"', ' ' may be used.
-  override_special = "!#$%&*()-_=+[]{}<>:?"
-}
-
-resource "aws_ssm_parameter" "random_db_password" {
-  name  = "/db/${var.name}/master-password"
-  type  = "SecureString"
-  value = random_password.random_db_password.result
-}
-
 resource "aws_kms_key" "db" {
   description         = "Key for RDS cluster ${var.name}"
   enable_key_rotation = true
@@ -82,8 +79,8 @@ resource "aws_kms_key" "db" {
 # -------------
 
 resource "aws_rds_cluster_parameter_group" "rds_query_logging" {
-  name        = var.name
-  family      = "aurora-postgresql13"
+  name        = "${var.name}-${local.engine_major_version}"
+  family      = "aurora-postgresql${local.engine_major_version}"
   description = "Default cluster parameter group"
 
   parameter {

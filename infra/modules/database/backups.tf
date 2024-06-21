@@ -18,6 +18,9 @@ resource "aws_backup_plan" "backup_plan" {
 resource "aws_backup_vault" "backup_vault" {
   name        = "${var.name}-db-backup-vault"
   kms_key_arn = data.aws_kms_key.backup_vault_key.arn
+
+  # Use a separate line to support automated terraform destroy commands
+  force_destroy = false
 }
 
 # KMS Key for the vault
@@ -41,7 +44,7 @@ resource "aws_backup_selection" "db_backup" {
 
 # Role that AWS Backup uses to authenticate when backing up the target resource
 resource "aws_iam_role" "db_backup_role" {
-  name_prefix        = "${var.name}-db-backup-role-"
+  name_prefix        = "${var.name}-db-backup-"
   assume_role_policy = data.aws_iam_policy_document.db_backup_policy.json
 }
 

@@ -4,10 +4,7 @@ on:
     types: [opened, reopened]
 jobs:
   create:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Call PR Environment Create Workflow
-        uses: ./.github/workflows/pr-environment-create.yml
-        with:
-          app_name: "app"
-          environment: "dev"
+    uses: ./.github/workflows/pr-environment-create.yml
+    with:
+      app_name: "app"
+      environment: "dev"

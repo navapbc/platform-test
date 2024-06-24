@@ -14,7 +14,7 @@ jobs:
     uses: ./.github/workflows/build-and-publish.yml
     with:
       app_name: ${{ inputs.app_name }}
-      ref: ${{ github.ref }}
+      ref: ${{ github.sha }}
   create:
     needs: [build-and-publish]
     runs-on: ubuntu-latest
@@ -36,4 +36,4 @@ jobs:
       - name: Create new Terraform workspace for PR
         run: terraform -chdir=infra/${{ inputs.app_name }}/service workspace new p-${{ github.event.number }}
       - name: Apply changes
-        run: terraform -chdir=infra/${{ inputs.app_name }}/service apply -input=false -auto-approve -var=image_tag=${{ github.ref }}
+        run: terraform -chdir=infra/${{ inputs.app_name }}/service apply -input=false -auto-approve -var=image_tag=${{ github.sha }}

@@ -1,0 +1,13 @@
+name: CI App PR Environment Update
+on:
+  pull_request:
+    types: [synchronize]
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call PR Environment Update Workflow
+        uses: ./.github/workflows/pr-environment-update.yml
+        with:
+          app_name: "app"
+          environment: "dev"

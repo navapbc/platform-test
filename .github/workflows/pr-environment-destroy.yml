@@ -1,0 +1,36 @@
+name: PR Environment Destroy
+run-name: Destroy PR Environment ${{ github.event.number }}
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+    concurrency: pr-environment-${{ github.event.number }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: ${{ inputs.app_name }}
+          environment: ${{ inputs.environment }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.8.3
+          terraform_wrapper: false
+      - name: Initialize Terraform with backend for environment
+        run: terraform -chdir=infra/${{ inputs.app_name }}/service init -backend-config=${{ inputs.environment }}.s3.tfbackend
+      - name: Destroy resources
+        run: terraform -chdir=infra/${{ inputs.app_name }}/service destroy -input=false -auto-approve
+      - name: Select default workspace
+        run: terraform -chdir=infra/${{ inputs.app_name }}/service workspace select default
+      - name: Delete workspace
+        run: terraform -chdir=infra/${{ inputs.app_name }}/service workspace delete p-${{ github.event.number }}

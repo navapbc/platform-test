@@ -1,0 +1,13 @@
+name: CI App PR Environment Destroy
+on:
+  pull_request:
+    types: [closed]
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call PR Environment Destroy Workflow
+        uses: ./.github/workflows/pr-environment-destroy.yml
+        with:
+          app_name: "app"
+          environment: "dev"

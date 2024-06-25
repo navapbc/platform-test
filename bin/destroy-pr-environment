@@ -1,20 +1,18 @@
 #!/bin/bash
 # -----------------------------------------------------------------------------
-# Update the temporary environment that was created for the pull request.
+# Destroy the temporary environment that was created for the pull request.
 #
 # Positional parameters:
 #   app_name (required) – the name of subdirectory of /infra that holds the
 #     application's infrastructure code.
 #   environment - the name of the application environment (e.g. dev, staging, prod)
 #   pr_nubmer - the pull request number in GitHub
-#   image_tag - the commit hash to deploy for the temporary environment
 # -----------------------------------------------------------------------------
 set -euo pipefail
 
 app_name=$1
 environment=$2
 pr_number=$3
-image_tag=$4
 
 workspace="p-${pr_number}"
 
@@ -24,10 +22,14 @@ terraform -chdir="infra/${app_name}/service" init -backend-config="${environment
 echo "Select Terraform workspace: ${workspace}"
 terraform -chdir="infra/${app_name}/service" workspace select "${workspace}"
 
-echo "Apply changes using image tag: ${image_tag}"
-terraform -chdir="infra/${app_name}/service" apply -input=false -auto-approve -var="environment_name=${environment}" -var="image_tag=${image_tag}"
+echo "Destroy resources"
+terraform -chdir="infra/${app_name}/service" destroy -var="environment_name=${environment}" -input=false -auto-approve
 
-# TODO: remove this once we verified it works for create
-echo "Post comment to PR with service endpoint"
-service_endpoint=$(terraform -chdir="infra/${app_name}/service" output -raw service_endpoint)
-gh pr comment "${pr_number}" -b "Created PR environment at ${service_endpoint}"
+echo "Select default workspace"
+terraform -chdir="infra/${app_name}/service" workspace select default
+
+echo "Delete workspace: ${workspace}"
+terraform -chdir="infra/${app_name}/service" workspace delete "${workspace}"
+
+echo "Post comment to PR confirming environment destruction"
+gh pr comment "${pr_number}" -b "Destroyed PR environment"

@@ -18,6 +18,9 @@ jobs:
   create:
     needs: [build-and-publish]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     concurrency: pr-environment-${{ github.event.number }}
     steps:
       - uses: actions/checkout@v3

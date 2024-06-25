@@ -5,7 +5,7 @@ on:
   #   types: [closed]
 jobs:
   destroy:
-    name: App
+    name: " " # GitHub UI is noisy when calling reusable workflows, so use whitespace for name to reduce noise
     uses: ./.github/workflows/pr-environment-destroy.yml
     with:
       app_name: "app"

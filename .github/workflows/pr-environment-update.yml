@@ -11,11 +11,12 @@ on:
         type: string
 jobs:
   build-and-publish:
-    name: ""
+    name: " " # GitHub UI is noisy when calling reusable workflows, so use whitespace for name to reduce noise
     uses: ./.github/workflows/build-and-publish.yml
     with:
       app_name: ${{ inputs.app_name }}
       ref: ${{ github.sha }}
+
   update:
     name: Update environment
     needs: [build-and-publish]

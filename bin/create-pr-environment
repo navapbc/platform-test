@@ -1,0 +1,31 @@
+#!/bin/bash
+# -----------------------------------------------------------------------------
+# Create a temporary environment that will exist while a pull request is open.
+# Create the environment in a separate Terraform workspace named "p-<PR_NUMBER>".
+#
+# Positional parameters:
+#   app_name (required) – the name of subdirectory of /infra that holds the
+#     application's infrastructure code.
+#   environment - the name of the application environment (e.g. dev, staging, prod)
+#   pr_nubmer - the pull request number in GitHub
+#   image_tag - the commit hash to deploy for the temporary environment
+# -----------------------------------------------------------------------------
+set -euo pipefail
+
+app_name=$1
+environment=$2
+pr_number=$3
+image_tag=$4
+
+echo "Initialize Terraform with backend for environment"
+terraform -chdir="infra/${app_name}/service" init -backend-config="${environment}.s3.tfbackend"
+
+echo "Create new Terraform workspace for PR"
+terraform -chdir="infra/${app_name}/service" workspace new "p-${pr_number}"
+
+echo "Apply changes"
+terraform -chdir="infra/${app_name}/service" apply -input=false -auto-approve -var="environment_name=${environment}" -var="image_tag=${image_tag}"
+
+echo "Post comment to PR with service endpoint"
+service_endpoint=$(terraform -chdir="infra/${app_name}/service" output -raw service_endpoint)
+gh pr comment "${pr_number}" -b "Created PR environment at ${service_endpoint}"

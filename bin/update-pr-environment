@@ -1,6 +1,7 @@
 #!/bin/bash
 # -----------------------------------------------------------------------------
-# Update the temporary environment that was created for the pull request.
+# Create or update a temporary environment that will exist while a pull request
+# is open.
 #
 # Positional parameters:
 #   app_name (required) – the name of subdirectory of /infra that holds the

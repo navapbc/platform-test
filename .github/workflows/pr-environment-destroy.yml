@@ -13,27 +13,36 @@ jobs:
   destroy:
     name: Destroy environment
     runs-on: ubuntu-latest
+
     permissions:
       contents: read
       id-token: write
+
     concurrency: pr-environment-${{ github.event.number }}
+
     steps:
       - uses: actions/checkout@v3
-      - name: Configure AWS credentials
-        uses: ./.github/actions/configure-aws-credentials
-        with:
-          app_name: ${{ inputs.app_name }}
-          environment: ${{ inputs.environment }}
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.8.3
           terraform_wrapper: false
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: ${{ inputs.app_name }}
+          environment: ${{ inputs.environment }}
+
       - name: Initialize Terraform with backend for environment
         run: terraform -chdir=infra/${{ inputs.app_name }}/service init -backend-config=${{ inputs.environment }}.s3.tfbackend
+
       - name: Destroy resources
         run: terraform -chdir=infra/${{ inputs.app_name }}/service destroy -var="environment_name=${{ inputs.environment }}" -input=false -auto-approve
+
       - name: Select default workspace
         run: terraform -chdir=infra/${{ inputs.app_name }}/service workspace select default
+
       - name: Delete workspace
         run: terraform -chdir=infra/${{ inputs.app_name }}/service workspace delete p-${{ github.event.number }}

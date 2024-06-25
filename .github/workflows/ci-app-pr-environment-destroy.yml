@@ -1,7 +1,8 @@
 name: CI App PR Environment Destroy
 on:
-  pull_request:
-    types: [closed]
+  workflow_dispatch:
+  # pull_request:
+  #   types: [closed]
 jobs:
   destroy:
     name: App

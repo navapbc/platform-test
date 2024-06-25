@@ -38,6 +38,9 @@ jobs:
       - name: Initialize Terraform with backend for environment
         run: terraform -chdir=infra/${{ inputs.app_name }}/service init -backend-config=${{ inputs.environment }}.s3.tfbackend
 
+      - name: Select Terraform workspace for PR
+        run: terraform -chdir=infra/${{ inputs.app_name }}/service workspace select p-${{ github.event.number }}
+
       - name: Destroy resources
         run: terraform -chdir=infra/${{ inputs.app_name }}/service destroy -var="environment_name=${{ inputs.environment }}" -input=false -auto-approve
 

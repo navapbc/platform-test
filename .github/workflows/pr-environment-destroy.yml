@@ -32,7 +32,7 @@ jobs:
       - name: Initialize Terraform with backend for environment
         run: terraform -chdir=infra/${{ inputs.app_name }}/service init -backend-config=${{ inputs.environment }}.s3.tfbackend
       - name: Destroy resources
-        run: terraform -chdir=infra/${{ inputs.app_name }}/service destroy -input=false -auto-approve
+        run: terraform -chdir=infra/${{ inputs.app_name }}/service destroy -var="environment_name=${{ inputs.environment }}" -input=false -auto-approve
       - name: Select default workspace
         run: terraform -chdir=infra/${{ inputs.app_name }}/service workspace select default
       - name: Delete workspace

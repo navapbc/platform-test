@@ -40,4 +40,4 @@ jobs:
       - name: Select Terraform workspace for PR
         run: terraform -chdir=infra/${{ inputs.app_name }}/service workspace select p-${{ github.event.number }}
       - name: Update service layer
-        run: terraform -chdir=infra/${{ inputs.app_name }}/service apply -input=false -auto-approve -var=image_tag=${{ github.sha }}
+        run: terraform -chdir=infra/${{ inputs.app_name }}/service apply -var="environment_name=${{ inputs.environment }}" -var=image_tag=${{ github.sha }} -input=false -auto-approve

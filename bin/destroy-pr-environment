@@ -30,9 +30,8 @@ echo "::endgroup::"
 echo "Select default workspace"
 terraform -chdir="infra/${app_name}/service" workspace select default
 
-echo "::group::Delete workspace: ${workspace}"
+echo "Delete workspace: ${workspace}"
 terraform -chdir="infra/${app_name}/service" workspace delete "${workspace}"
-echo "::endgroup::"
 
 echo "Post comment to PR confirming environment destruction"
 gh pr comment "${pr_number}" -b "Destroyed PR environment"

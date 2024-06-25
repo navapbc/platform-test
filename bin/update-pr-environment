@@ -28,8 +28,3 @@ terraform -chdir="infra/${app_name}/service" workspace select "${workspace}"
 echo "::group::Apply changes using image tag: ${image_tag}"
 terraform -chdir="infra/${app_name}/service" apply -input=false -auto-approve -var="environment_name=${environment}" -var="image_tag=${image_tag}"
 echo "::endgroup::"
-
-# TODO: remove this once we verified it works for create
-echo "Post comment to PR with service endpoint"
-service_endpoint=$(terraform -chdir="infra/${app_name}/service" output -raw service_endpoint)
-gh pr comment "${pr_number}" -b "Created PR environment at ${service_endpoint}"

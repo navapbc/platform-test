@@ -4,6 +4,7 @@ on:
     types: [opened, reopened]
 jobs:
   create:
+    name: App
     uses: ./.github/workflows/pr-environment-create.yml
     with:
       app_name: "app"

@@ -4,6 +4,7 @@ on:
     types: [synchronize]
 jobs:
   update:
+    name: App
     uses: ./.github/workflows/pr-environment-update.yml
     with:
       app_name: "app"

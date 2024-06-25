@@ -4,6 +4,7 @@ on:
     types: [closed]
 jobs:
   destroy:
+    name: App
     uses: ./.github/workflows/pr-environment-destroy.yml
     with:
       app_name: "app"

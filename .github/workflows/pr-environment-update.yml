@@ -43,11 +43,6 @@ jobs:
           app_name: ${{ inputs.app_name }}
           environment: ${{ inputs.environment }}
 
-      - name: Initialize Terraform with backend for environment
-        run: terraform -chdir=infra/${{ inputs.app_name }}/service init -backend-config=${{ inputs.environment }}.s3.tfbackend
-
-      - name: Select Terraform workspace for PR
-        run: terraform -chdir=infra/${{ inputs.app_name }}/service workspace select p-${{ github.event.number }}
-
-      - name: Update service layer
-        run: terraform -chdir=infra/${{ inputs.app_name }}/service apply -input=false -auto-approve -var="environment_name=${{ inputs.environment }}" -var=image_tag=${{ github.sha }}
+      - name: Update environment
+        run: ./bin/update-pr-environment "${{ inputs.app_name }}" "${{ inputs.environment }}" "${{ github.event.number }}" "${{ github.sha }}"
+  

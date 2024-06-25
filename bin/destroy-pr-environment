@@ -16,20 +16,23 @@ pr_number=$3
 
 workspace="p-${pr_number}"
 
-echo "Initialize Terraform with backend for environment: ${environment}"
+echo "::group::Initialize Terraform with backend for environment: ${environment}"
 terraform -chdir="infra/${app_name}/service" init -backend-config="${environment}.s3.tfbackend"
+echo "::endgroup::"
 
 echo "Select Terraform workspace: ${workspace}"
 terraform -chdir="infra/${app_name}/service" workspace select "${workspace}"
 
-echo "Destroy resources"
+echo "::group::Destroy resources"
 terraform -chdir="infra/${app_name}/service" destroy -var="environment_name=${environment}" -input=false -auto-approve
+echo "::endgroup::"
 
 echo "Select default workspace"
 terraform -chdir="infra/${app_name}/service" workspace select default
 
-echo "Delete workspace: ${workspace}"
+echo "::group::Delete workspace: ${workspace}"
 terraform -chdir="infra/${app_name}/service" workspace delete "${workspace}"
+echo "::endgroup::"
 
 echo "Post comment to PR confirming environment destruction"
 gh pr comment "${pr_number}" -b "Destroyed PR environment"

@@ -19,14 +19,16 @@ image_tag=$4
 
 workspace="p-${pr_number}"
 
-echo "Initialize Terraform with backend for environment: ${environment}"
+echo "::group::Initialize Terraform with backend for environment: ${environment}"
 terraform -chdir="infra/${app_name}/service" init -backend-config="${environment}.s3.tfbackend"
+echo "::endgroup::"
 
 echo "Create Terraform workspace: ${workspace}"
 terraform -chdir="infra/${app_name}/service" workspace new "${workspace}"
 
-echo "Create environment with image tag: ${image_tag}"
+echo "::group::Create environment with image tag: ${image_tag}"
 terraform -chdir="infra/${app_name}/service" apply -input=false -auto-approve -var="environment_name=${environment}" -var="image_tag=${image_tag}"
+echo "::endgroup::"
 
 echo "Post comment to PR with service endpoint"
 service_endpoint=$(terraform -chdir="infra/${app_name}/service" output -raw service_endpoint)

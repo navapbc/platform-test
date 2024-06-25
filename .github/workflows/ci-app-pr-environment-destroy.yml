@@ -1,8 +1,8 @@
 name: CI App PR Environment Destroy
 on:
   workflow_dispatch:
-  # pull_request:
-  #   types: [closed]
+  pull_request:
+    types: [closed]
 jobs:
   destroy:
     name: " " # GitHub UI is noisy when calling reusable workflows, so use whitespace for name to reduce noise

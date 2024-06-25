@@ -16,6 +16,7 @@ jobs:
       app_name: ${{ inputs.app_name }}
       ref: ${{ github.sha }}
   update:
+    name: Update environment
     needs: [build-and-publish]
     runs-on: ubuntu-latest
     permissions:

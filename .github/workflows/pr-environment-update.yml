@@ -45,4 +45,5 @@ jobs:
 
       - name: Update environment
         run: ./bin/update-pr-environment "${{ inputs.app_name }}" "${{ inputs.environment }}" "${{ github.event.number }}" "${{ github.sha }}"
-  
+        env:
+          GH_TOKEN: ${{ github.token }}

@@ -45,3 +45,5 @@ jobs:
   
       - name: Create environment
         run: ./bin/create-pr-environment "${{ inputs.app_name }}" "${{ inputs.environment }}" "${{ github.event.number }}" "${{ github.sha }}"
+        env:
+          GH_TOKEN: ${{ github.token }}

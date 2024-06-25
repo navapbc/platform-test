@@ -37,3 +37,5 @@ jobs:
 
       - name: Destroy environment
         run: ./bin/destroy-pr-environment "${{ inputs.app_name }}" "${{ inputs.environment }}" "${{ github.event.number }}"
+        env:
+          GH_TOKEN: ${{ github.token }}

@@ -21,7 +21,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Collect root module configurations
         id: collect-root-module-configurations
-        run: echo "root_module_configs=$(node ./bin/root-module-configurations.js)" >> "$GITHUB_OUTPUT"
+        run: |
+          root_module_configs="$(node ./bin/root-module-configurations.js)"
+          echo "root_module_configs=${root_module_configs}" >> "$GITHUB_OUTPUT"
   check:
     name: Check ${{ matrix.rootModule }} ${{ matrix.backendConfigName }}
     runs-on: ubuntu-latest

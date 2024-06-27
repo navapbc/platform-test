@@ -12,27 +12,27 @@ on:
   pull_request:
 
 jobs:
-  collect-root-module-configurations:
+  collect-configs:
     name: Collect configs
     runs-on: ubuntu-latest
     outputs:
-      root_module_configs: ${{ steps.collect-root-module-configurations.outputs.root_module_configs }}
+      root_module_configs: ${{ steps.collect-infra-deploy-status-check-configs.outputs.root_module_configs }}
     steps:
       - uses: actions/checkout@v4
       - name: Collect root module configurations
-        id: collect-root-module-configurations
+        id: collect-infra-deploy-status-check-configs
         run: |
-          root_module_configs="$(node ./bin/root-module-configurations.js)"
+          root_module_configs="$(node ./bin/infra-deploy-status-check-configs.js)"
           echo "${root_module_configs}"
           echo "root_module_configs=${root_module_configs}" >> "$GITHUB_OUTPUT"
   check:
     name: ${{ matrix.root_module_subdir }} ${{ matrix.backend_config_name }}
     runs-on: ubuntu-latest
-    needs: collect-root-module-configurations
+    needs: collect-configs
 
     strategy:
       matrix:
-        include: ${{ fromJson(needs.collect-root-module-configurations.outputs.root_module_configs) }}
+        include: ${{ fromJson(needs.collect-configs.outputs.root_module_configs) }}
 
     permissions:
       contents: read

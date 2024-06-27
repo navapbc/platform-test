@@ -57,7 +57,9 @@ function getAppConfigs(appName) {
   }
   rootModuleConfigs.forEach(config => {
     config.account_name = accountNamesByEnvironment[config.backend_config_name]
-    config.extra_params = `-var="environment_name=${config.backend_config_name}"`
+    if (config.backend_config_name != "shared") {
+      config.extra_params = `-var="environment_name=${config.backend_config_name}"`
+    }
   })
   return rootModuleConfigs
 }

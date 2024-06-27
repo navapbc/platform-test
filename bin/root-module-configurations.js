@@ -6,6 +6,21 @@ const path = require('path');
 
 let rootModuleConfigs = [];
 
+function main() {
+  // Iterate over infra layers
+  for (const infraLayer of ["account", "network"]) {
+    rootModuleConfigs.push(...getRootModuleConfigs(`${infraLayer}s`))
+  }
+
+  for (const appName of getAppNames()) {
+    for (const infraLayer of ["build-repository", "database", "service"]) {
+      rootModuleConfigs.push(...getRootModuleConfigs(path.join(appName, infraLayer)))
+    }
+  }
+
+  console.log(JSON.stringify(rootModuleConfigs));
+}
+
 function getRootModuleConfigs(rootModuleSubdir) {
   return getBackendConfigNames(rootModuleSubdir).map(backendConfigName => {
     return {root_module_subdir: rootModuleSubdir, backend_config_name: backendConfigName};
@@ -29,15 +44,4 @@ function getAppNames() {
     .filter(dir => !['accounts', 'modules', 'networks', 'project-config', 'test'].includes(dir));
 }
 
-// Iterate over infra layers
-for (const infraLayer of ["account", "network"]) {
-  rootModuleConfigs.push(...getRootModuleConfigs(`${infraLayer}s`))
-}
-
-for (const appName of getAppNames()) {
-  for (const infraLayer of ["build-repository", "database", "service"]) {
-    rootModuleConfigs.push(...getRootModuleConfigs(path.join(appName, infraLayer)))
-  }
-}
-
-console.log(JSON.stringify(rootModuleConfigs));
+main();

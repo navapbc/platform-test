@@ -9,7 +9,6 @@ on:
   schedule:
     # Run every day at 00:00 UTC
     - cron: "0 0 * * *"
-  pull_request:
 
 jobs:
   collect-configs:

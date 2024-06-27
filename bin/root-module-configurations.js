@@ -23,20 +23,20 @@ for (const infraLayer of ["account", "network"]) {
   const rootModule = path.join('infra', `${infraLayer}s`);
 
   for (const backendConfigName of getBackendConfigNames(rootModule)) {
-    rootModuleConfigs.push({rootModule, backendConfigName});
+    rootModuleConfigs.push({root_module_subdir: rootModule, backend_config_name: backendConfigName});
   }
 }
 
 for (const appName of getAppNames()) {
   // Add ["infra/build-repository", "shared"] to rootModuleConfigs
-  rootModuleConfigs.push([path.join("infra", "build-repository"), "shared"]);
+  rootModuleConfigs.push({root_module_subdir: "build-repository", backend_config_name: "shared"});
 
   const infraLayers = ["database", "service"];
   for (const infraLayer of infraLayers) {
     const rootModule = path.join("infra", appName, infraLayer);
 
     for (const backendConfigName of getBackendConfigNames(rootModule)) {
-      rootModuleConfigs.push({rootModule, backendConfigName});
+      rootModuleConfigs.push({root_module_subdir: rootModule, backend_config_name: backendConfigName});
     }
   }
 }

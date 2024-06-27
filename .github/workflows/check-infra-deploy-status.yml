@@ -13,7 +13,7 @@ on:
 
 jobs:
   collect-root-module-configurations:
-    name: Collect root module configurations
+    name: Collect configs
     runs-on: ubuntu-latest
     outputs:
       root_module_configs: ${{ steps.collect-root-module-configurations.outputs.root_module_configs }}

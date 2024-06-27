@@ -53,4 +53,4 @@ jobs:
       - name: Check Terraform plan
         run: |
           terraform -chdir="infra/${{ matrix.root_module_subdir }}" init -input=false -reconfigure -backend-config="${{ matrix.backend_config_name }}.s3.tfbackend"
-          terraform -chdir="infra/${{ matrix.root_module_subdir }}" plan -input=false -detailed-exitcode
+          terraform -chdir="infra/${{ matrix.root_module_subdir }}" plan -input=false -detailed-exitcode "${{ matrix.extra_params }}"

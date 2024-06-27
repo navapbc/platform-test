@@ -6,6 +6,12 @@ const path = require('path');
 
 let rootModuleConfigs = [];
 
+function getRootModuleConfigs(rootModuleSubdir) {
+  return getBackendConfigNames(rootModuleSubdir).map(backendConfigName => {
+    return {root_module_subdir: rootModuleSubdir, backend_config_name: backendConfigName};
+  });
+}
+
 function getBackendConfigNames(rootModuleSubdir) {
   const rootModule = path.join("infra", rootModuleSubdir);
   if (fs.existsSync(rootModule)) {
@@ -25,24 +31,12 @@ function getAppNames() {
 
 // Iterate over infra layers
 for (const infraLayer of ["account", "network"]) {
-  const rootModuleSubdir = `${infraLayer}s`;
-
-  for (const backendConfigName of getBackendConfigNames(rootModuleSubdir)) {
-    rootModuleConfigs.push({root_module_subdir: rootModuleSubdir, backend_config_name: backendConfigName});
-  }
+  rootModuleConfigs.push(...getRootModuleConfigs(`${infraLayer}s`))
 }
 
 for (const appName of getAppNames()) {
-  const rootModuleSubdir = path.join(appName, "build-repository");
-  rootModuleConfigs.push({root_module_subdir: rootModuleSubdir, backend_config_name: "shared"});
-
-  const infraLayers = ["database", "service"];
-  for (const infraLayer of infraLayers) {
-    const rootModuleSubdir = path.join(appName, infraLayer);
-
-    for (const backendConfigName of getBackendConfigNames(rootModuleSubdir)) {
-      rootModuleConfigs.push({root_module_subdir: rootModuleSubdir, backend_config_name: backendConfigName});
-    }
+  for (const infraLayer of ["build-repository", "database", "service"]) {
+    rootModuleConfigs.push(...getRootModuleConfigs(path.join(appName, infraLayer)))
   }
 }
 

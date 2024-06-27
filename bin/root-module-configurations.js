@@ -6,7 +6,8 @@ const path = require('path');
 
 let rootModuleConfigs = [];
 
-function getBackendConfigNames(rootModule) {
+function getBackendConfigNames(rootModuleSubdir) {
+  const rootModule = path.join("infra", rootModuleSubdir);
   if (fs.existsSync(rootModule)) {
     return fs.readdirSync(rootModule)
       .filter(file => file.endsWith('.s3.tfbackend'))
@@ -24,23 +25,23 @@ function getAppNames() {
 
 // Iterate over infra layers
 for (const infraLayer of ["account", "network"]) {
-  const rootModule = path.join('infra', `${infraLayer}s`);
+  const rootModuleSubdir = `${infraLayer}s`;
 
-  for (const backendConfigName of getBackendConfigNames(rootModule)) {
-    rootModuleConfigs.push({root_module_subdir: rootModule, backend_config_name: backendConfigName});
+  for (const backendConfigName of getBackendConfigNames(rootModuleSubdir)) {
+    rootModuleConfigs.push({root_module_subdir: rootModuleSubdir, backend_config_name: backendConfigName});
   }
 }
 
 for (const appName of getAppNames()) {
-  // Add ["infra/build-repository", "shared"] to rootModuleConfigs
-  rootModuleConfigs.push({root_module_subdir: "build-repository", backend_config_name: "shared"});
+  const rootModuleSubdir = path.join(appName, "build-repository");
+  rootModuleConfigs.push({root_module_subdir: rootModuleSubdir, backend_config_name: "shared"});
 
   const infraLayers = ["database", "service"];
   for (const infraLayer of infraLayers) {
-    const rootModule = path.join("infra", appName, infraLayer);
+    const rootModuleSubdir = path.join(appName, infraLayer);
 
-    for (const backendConfigName of getBackendConfigNames(rootModule)) {
-      rootModuleConfigs.push({root_module_subdir: rootModule, backend_config_name: backendConfigName});
+    for (const backendConfigName of getBackendConfigNames(rootModuleSubdir)) {
+      rootModuleConfigs.push({root_module_subdir: rootModuleSubdir, backend_config_name: backendConfigName});
     }
   }
 }

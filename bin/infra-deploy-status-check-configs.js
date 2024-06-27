@@ -39,6 +39,7 @@ function getNetworkLayerConfigs() {
   networkLayerConfigs = getRootModuleConfigs("networks")
   networkLayerConfigs.forEach(config => {
     config.account_name = networkConfigs[config.backend_config_name].account_name
+    config.extra_params = `-var="network_name=${config.backend_config_name}"`
   })
   return networkLayerConfigs
 }
@@ -56,6 +57,7 @@ function getAppConfigs(appName) {
   }
   rootModuleConfigs.forEach(config => {
     config.account_name = accountNamesByEnvironment[config.backend_config_name]
+    config.extra_params = `-var="environment_name=${config.backend_config_name}"`
   })
   return rootModuleConfigs
 }

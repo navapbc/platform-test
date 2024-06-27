@@ -52,7 +52,11 @@ function getAppConfigs(appName) {
   const accountNamesByEnvironment = JSON.parse(output);
 
   const rootModuleConfigs = []
-  for (const infraLayer of ["build-repository", "database", "service"]) {
+
+  // TODO: Add back in database layer once we can figure out how to get around
+  // the role-manager issues
+  // for (const infraLayer of ["build-repository", "database", "service"]) {
+  for (const infraLayer of ["build-repository", "service"]) {
     rootModuleConfigs.push(...getRootModuleConfigs(path.join(appName, infraLayer)))
   }
   rootModuleConfigs.forEach(config => {

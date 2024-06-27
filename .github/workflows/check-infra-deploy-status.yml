@@ -58,12 +58,6 @@ jobs:
           echo "::endgroup::"
           echo "::group::Check Terraform plan"
 
-          # Workaround for the database layer. The first two applies will
-          # show changes.
-          # This workaround is only relevant for the database layer but it's
-          # harmless for other layeres so don't bother adding an if check.
-          touch infra/${{ matrix.root_module_subdir }}/role_manager.zip
-
           echo terraform -chdir="infra/${{ matrix.root_module_subdir }}" plan -input=false -detailed-exitcode ${{ matrix.extra_params }}
           terraform -chdir="infra/${{ matrix.root_module_subdir }}" plan -input=false -detailed-exitcode ${{ matrix.extra_params }}
           echo "::endgroup::"

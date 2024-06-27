@@ -15,7 +15,6 @@ function main() {
   rootModuleConfigs.push(...getNetworkLayerConfigs())
 
   for (const appName of getAppNames()) {
-    console.log(`Processing app: ${appName}`)
     rootModuleConfigs.push(...getAppConfigs(appName))
   }
 

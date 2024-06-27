@@ -39,16 +39,17 @@ echo "Update PR description with PR environment info"
 service_endpoint="$(terraform -chdir="infra/${app_name}/service" output -raw service_endpoint)"
 
 pr_info=$(cat <<EOF
-<div data-tag="pr-environment">
-[PR environment](${service_endpoint})
+<!-- begin PR environment info -->
+## PR environment info
+Service endpoint: ${service_endpoint}
 Deployed commit: ${image_tag}
-</div data-tag="pr-environment">
+<!-- end PR environment info -->
 EOF
 )
 
 pr_body="$(gh pr view "${pr_number}" --json body | jq --raw-output .body)"
-if [[ $pr_body == *"<div data-tag=\"pr-environment\">"*"</div data-tag=\"pr-environment\">"* ]]; then
-  pr_body=$(echo "$pr_body" | sed 's/<div data-tag="pr-environment">.*<\/div data-tag="pr-environment">/'"${pr_info}"'/')
+if [[ $pr_body == *"<!-- begin PR environment info -->"*"<!-- end PR environment info -->"* ]]; then
+  pr_body="${pr_body//<!-- begin PR environment info -->*<!-- end PR environment info -->/$pr_info}"
 else
   pr_body="${pr_body}"$'\n\n'"${pr_info}"
 fi

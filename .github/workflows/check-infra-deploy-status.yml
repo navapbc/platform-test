@@ -53,6 +53,7 @@ jobs:
       - name: Check Terraform plan
         run: |
           echo "::group::Initialize Terraform"
+          echo terraform -chdir="infra/${{ matrix.root_module_subdir }}" init -input=false -reconfigure -backend-config="${{ matrix.backend_config_name }}.s3.tfbackend"
           terraform -chdir="infra/${{ matrix.root_module_subdir }}" init -input=false -reconfigure -backend-config="${{ matrix.backend_config_name }}.s3.tfbackend"
           echo "::endgroup::"
           echo "::group::Check Terraform plan"

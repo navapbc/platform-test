@@ -7,9 +7,13 @@ const path = require('path');
 let rootModuleConfigs = [];
 
 function getBackendConfigNames(rootModule) {
-  return fs.readdirSync(rootModule)
-    .filter(file => file.endsWith('.s3.tfbackend'))
-    .map(file => file.replace('.s3.tfbackend', ''));
+  if (fs.existsSync(rootModule)) {
+    return fs.readdirSync(rootModule)
+      .filter(file => file.endsWith('.s3.tfbackend'))
+      .map(file => file.replace('.s3.tfbackend', ''));
+  } else {
+    return [];
+  }
 }
 
 function getAppNames() {

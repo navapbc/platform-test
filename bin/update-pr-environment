@@ -23,17 +23,17 @@ echo "::group::Initialize Terraform with backend for environment: ${environment}
 terraform -chdir="infra/${app_name}/service" init -backend-config="${environment}.s3.tfbackend"
 echo "::endgroup::"
 
-# echo "Select or create Terraform workspace: ${workspace}"
-# terraform -chdir="infra/${app_name}/service" workspace select -or-create "${workspace}"
+echo "Select or create Terraform workspace: ${workspace}"
+terraform -chdir="infra/${app_name}/service" workspace select -or-create "${workspace}"
 
-# echo "::group::Apply changes to environment using image tag: ${image_tag}"
-# terraform -chdir="infra/${app_name}/service" apply -input=false -auto-approve -var="environment_name=${environment}" -var="image_tag=${image_tag}"
-# echo "::endgroup::"
+echo "::group::Apply changes to environment using image tag: ${image_tag}"
+terraform -chdir="infra/${app_name}/service" apply -input=false -auto-approve -var="environment_name=${environment}" -var="image_tag=${image_tag}"
+echo "::endgroup::"
 
-# cluster_name="$(terraform -chdir="infra/$app_name/service" output -raw service_cluster_name)"
-# service_name="$(terraform -chdir="infra/$app_name/service" output -raw service_name)"
-# echo "Wait for service ${service_name} to become stable"
-# aws ecs wait services-stable --cluster "${cluster_name}" --services "${service_name}"
+cluster_name="$(terraform -chdir="infra/$app_name/service" output -raw service_cluster_name)"
+service_name="$(terraform -chdir="infra/$app_name/service" output -raw service_name)"
+echo "Wait for service ${service_name} to become stable"
+aws ecs wait services-stable --cluster "${cluster_name}" --services "${service_name}"
 
 service_endpoint="$(terraform -chdir="infra/${app_name}/service" output -raw service_endpoint)"
 pr_info=$(cat <<EOF

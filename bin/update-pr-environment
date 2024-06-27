@@ -17,11 +17,11 @@ environment="$2"
 pr_number="$3"
 image_tag="$4"
 
-# workspace="p-${pr_number}"
+workspace="p-${pr_number}"
 
-# echo "::group::Initialize Terraform with backend for environment: ${environment}"
-# terraform -chdir="infra/${app_name}/service" init -backend-config="${environment}.s3.tfbackend"
-# echo "::endgroup::"
+echo "::group::Initialize Terraform with backend for environment: ${environment}"
+terraform -chdir="infra/${app_name}/service" init -backend-config="${environment}.s3.tfbackend"
+echo "::endgroup::"
 
 # echo "Select or create Terraform workspace: ${workspace}"
 # terraform -chdir="infra/${app_name}/service" workspace select -or-create "${workspace}"

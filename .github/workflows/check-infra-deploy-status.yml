@@ -26,7 +26,7 @@ jobs:
           echo "${root_module_configs}"
           echo "root_module_configs=${root_module_configs}" >> "$GITHUB_OUTPUT"
   check:
-    name: Check ${{ matrix.rootModule }} ${{ matrix.backendConfigName }}
+    name: ${{ matrix.root_module_subdir }} ${{ matrix.backend_config_name }}
     runs-on: ubuntu-latest
     needs: collect-root-module-configurations
     strategy:
@@ -40,5 +40,5 @@ jobs:
           terraform_wrapper: false
       - name: Check Terraform plan
         run: |
-          terraform -chdir="${{ matrix.rootModule }}" -input=false -reconfigure -backend-config="${{ matrix.backendConfigName }}.s3.tfbackend"
-          terraform -chdir="${{ matrix.rootModule }}" plan -input=false -detailed-exitcode
+          terraform -chdir="infra/${{ matrix.root_module_subdir }}" -input=false -reconfigure -backend-config="${{ matrix.backend_config_name }}.s3.tfbackend"
+          terraform -chdir="infra/${{ matrix.root_module_subdir }}" plan -input=false -detailed-exitcode

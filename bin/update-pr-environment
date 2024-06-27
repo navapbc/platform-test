@@ -35,9 +35,7 @@ echo "::endgroup::"
 # echo "Wait for service ${service_name} to become stable"
 # aws ecs wait services-stable --cluster "${cluster_name}" --services "${service_name}"
 
-echo "Update PR description with PR environment info"
 service_endpoint="$(terraform -chdir="infra/${app_name}/service" output -raw service_endpoint)"
-
 pr_info=$(cat <<EOF
 <!-- begin PR environment info -->
 ## PR environment info
@@ -54,5 +52,6 @@ else
   pr_body="${pr_body}"$'\n\n'"${pr_info}"
 fi
 
-echo "${pr_body}"
+echo "Update PR description with PR environment info"
+echo "${pr_info}"
 gh pr edit "${pr_number}" --body "${pr_body}"

@@ -46,8 +46,8 @@ runs:
         network_name="${{ inputs.network_name || steps.get-network-name.outputs.network_name }}"
         echo "Get account name for ${network_name}"
 
-        terraform -chdir=infra/${{ inputs.app_name }}/app-config init > /dev/null
-        terraform -chdir=infra/${{ inputs.app_name }}/app-config apply -auto-approve > /dev/null
+        terraform -chdir=infra/project-config init > /dev/null
+        terraform -chdir=infra/project-config apply -auto-approve > /dev/null
         account_name=$(terraform -chdir=infra/project-config output -json network_configs | jq -r .${network_name}})
 
         echo "account_name=${account_name}"

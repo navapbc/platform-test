@@ -34,6 +34,6 @@ output "environment_configs" {
   value = local.environment_configs
 }
 
-output "shared_account_name" {
-  value = local.shared_account_name
+output "shared_network_name" {
+  value = local.shared_network_name
 }

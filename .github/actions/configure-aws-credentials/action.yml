@@ -28,7 +28,12 @@ runs:
 
         terraform -chdir=infra/${{ inputs.app_name }}/app-config init > /dev/null
         terraform -chdir=infra/${{ inputs.app_name }}/app-config apply -auto-approve > /dev/null
-        network_name=$(terraform -chdir=infra/${{ inputs.app_name }}/app-config output -json environment_configs | jq -r .${{ inputs.environment }}.network_name)
+
+        if [[ "${{ inputs.environment }}" == "shared" ]]; then
+          network_name=$(terraform -chdir=infra/${{ inputs.app_name }}/app-config output -raw shared_network_name)
+        else
+          network_name=$(terraform -chdir=infra/${{ inputs.app_name }}/app-config output -json environment_configs | jq -r .${{ inputs.environment }}.network_name)
+        fi
 
         echo "network_name=${network_name}"
         echo "network_name=${network_name}" >> "$GITHUB_OUTPUT"

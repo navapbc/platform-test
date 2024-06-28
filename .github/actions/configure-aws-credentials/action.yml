@@ -32,6 +32,8 @@ runs:
 
         echo "network_name=${network_name}"
         echo "network_name=${network_name}" >> "$GITHUB_OUTPUT"
+      shell: bash
+
     - name: Get account name from network
       id: get-account-name
       if: ${{ inputs.network_name || steps.get-network-name.outputs.network_name }}

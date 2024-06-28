@@ -38,7 +38,7 @@ aws ecs wait services-stable --cluster "${cluster_name}" --services "${service_n
 service_endpoint="$(terraform -chdir="infra/${app_name}/service" output -raw service_endpoint)"
 pr_info=$(cat <<EOF
 <!-- begin PR environment info -->
-## PR environment info
+## Preview environment
 Service endpoint: ${service_endpoint}
 Deployed commit: ${image_tag}
 <!-- end PR environment info -->

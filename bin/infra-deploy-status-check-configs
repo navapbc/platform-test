@@ -1,4 +1,12 @@
 #!/bin/bash
+# -----------------------------------------------------------------------------
+# This script is used by the GitHub Action workflow check-infra-deploy-status.yml
+# to generate the matrix strategy for all the jobs in that workflow.
+# It retrieves all the root modules in the repository and all the backend configurations
+# for each of those root modules, excluding the database layer. This script is
+# used by the GitHub Action workflow check-infra-deploy-status.yml.
+# -----------------------------------------------------------------------------
+set -euo pipefail
 
 function get_backend_config_names() {
   local root_module_subdir="$1"
@@ -10,7 +18,7 @@ function get_backend_config_names() {
 
 function get_root_module_configs() {
   local infra_layer="$1"
-  local app_name="$2"
+  local app_name="${2:-}"
   local root_module_subdir
   if [ -z "${app_name}" ]; then
     root_module_subdir="${infra_layer}"

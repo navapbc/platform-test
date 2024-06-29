@@ -1,63 +1,63 @@
 #!/bin/bash
 
-function getBackendConfigNames() {
-  local rootModuleSubdir=$1
-  local rootModule="infra/${rootModuleSubdir}"
-  if [ -d "${rootModule}" ]; then
-    find "${rootModule}" -name "*.s3.tfbackend" -exec basename {} .s3.tfbackend \;
+function get_backend_config_names() {
+  local root_module_subdir="$1"
+  local root_module="infra/${root_module_subdir}"
+  if [ -d "${root_module}" ]; then
+    find "${root_module}" -name "*.s3.tfbackend" -exec basename {} .s3.tfbackend \;
   fi
 }
 
-function getRootModuleConfigs() {
-  local infraLayer=$1
-  local appName=$2
-  local rootModuleSubdir
-  if [ -z "${appName}" ]; then
-    rootModuleSubdir="${infraLayer}"
+function get_root_module_configs() {
+  local infra_layer="$1"
+  local app_name="$2"
+  local root_module_subdir
+  if [ -z "${app_name}" ]; then
+    root_module_subdir="${infra_layer}"
   else
-    rootModuleSubdir="${appName}/${infraLayer}"
+    root_module_subdir="${app_name}/${infra_layer}"
   fi
-  local backendConfigNames
-  backendConfigNames=$(getBackendConfigNames "${rootModuleSubdir}")
-  for backendConfigName in ${backendConfigNames}; do
-    echo "{\"backend_config_name\": \"${backendConfigName}\", \"infra_layer\": \"${infraLayer}\", \"root_module_subdir\": \"${rootModuleSubdir}\"}"
+  local backend_config_names
+  backend_config_names=$(get_backend_config_names "${root_module_subdir}")
+  for backend_config_name in ${backend_config_names}; do
+    echo "{\"backend_config_name\": \"${backend_config_name}\", \"infra_layer\": \"${infra_layer}\", \"root_module_subdir\": \"${root_module_subdir}\"}"
   done
 }
 
-function getAppNames() {
+function get_app_names() {
   find "infra" -maxdepth 1 -type d -not -name "infra" -not -name "accounts" -not -name "modules" -not -name "networks" -not -name "project-config" -not -name "test" -exec basename {} \;
 }
 
-function getAccountLayerConfigs() {
+function get_account_layer_configs() {
   local configs
-  configs=$(getRootModuleConfigs "accounts")
+  configs=$(get_root_module_configs "accounts")
   echo "${configs}" | jq -c '. + {account_name: (.backend_config_name | split(".")[0])}'
 }
 
-function getNetworkLayerConfigs() {
+function get_network_layer_configs() {
   local configs
-  configs=$(getRootModuleConfigs "networks")
+  configs=$(get_root_module_configs "networks")
   echo "${configs}" | jq -c '. + {extra_params: "-var=\"network_name=\(.backend_config_name)\""}'
 }
 
-function getAppConfigs() {
-  local appName=$1
+function get_app_configs() {
+  local app_name="$1"
   local configs=""
-  for infraLayer in "build-repository" "service"; do
-    configs+=$(getRootModuleConfigs "${infraLayer}" "${appName}")
+  for infra_layer in "build-repository" "service"; do
+    configs+=$(get_root_module_configs "${infra_layer}" "${app_name}")
     configs+=$'\n'
   done
-  echo "${configs}" | jq -c 'if .backend_config_name != "shared" then . + {app_name: "'${appName}'", extra_params: "-var=\"environment_name=\(.backend_config_name)\""} else . + {app_name: "'${appName}'"} end'
+  echo "${configs}" | jq -c 'if .backend_config_name != "shared" then . + {app_name: "'${app_name}'", extra_params: "-var=\"environment_name=\(.backend_config_name)\""} else . + {app_name: "'${app_name}'"} end'
 }
 
 function main() {
-  local rootModuleConfigs
-  rootModuleConfigs=$(getAccountLayerConfigs)
-  rootModuleConfigs+=$(getNetworkLayerConfigs)
-  for appName in $(getAppNames); do    
-    rootModuleConfigs+=$(getAppConfigs "${appName}")
+  local root_module_configs
+  root_module_configs=$(get_account_layer_configs)
+  root_module_configs+=$(get_network_layer_configs)
+  for app_name in $(get_app_names); do    
+    root_module_configs+=$(get_app_configs "${app_name}")
   done
-  echo "${rootModuleConfigs}" | jq -s .
+  echo "${root_module_configs}" | jq -s .
 }
 
 main

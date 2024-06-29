@@ -22,7 +22,11 @@ function main() {
 }
 
 function getAccountLayerConfigs() {
-  return getRootModuleConfigs("accounts")
+  accountLayerConfigs = getRootModuleConfigs("accounts")
+  accountLayerConfigs.forEach(config => {
+    config.account_name = config.backend_config_name.split(".")[0]
+  })
+  return accountLayerConfigs
 }
 
 function getNetworkLayerConfigs() {

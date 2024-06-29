@@ -48,10 +48,10 @@ jobs:
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials
         with:
-          account_name: ${{ matrix.infra_layer == 'accounts' && matrix.backend_config_name || null }}
+          account_name: ${{ matrix.infra_layer == 'accounts' && matrix.account_name || null }}
           network_name: ${{ matrix.infra_layer == 'networks' && matrix.backend_config_name || null }}
-          app_name: ${{ matrix.infra_layer == 'app_name' && matrix.app_name || null }}
-          environment: ${{ matrix.infra_layer == 'environment' && matrix.backend_config_name || null }}
+          app_name: ${{ contains(fromJSON('["build-repository", "database", "service"]'), matrix.infra_layer) && matrix.app_name || null }}
+          environment: ${{ contains(fromJSON('["build-repository", "database", "service"]'), matrix.infra_layer) && matrix.backend_config_name || null }}
 
       - name: Check Terraform plan
         run: |

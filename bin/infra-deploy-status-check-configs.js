@@ -47,8 +47,8 @@ function getAppConfigs(appName) {
     rootModuleConfigs.push(...getRootModuleConfigs(infraLayer, appName))
   }
   rootModuleConfigs.forEach(config => {
+    config.app_name = appName
     if (config.backend_config_name != "shared") {
-      config.app_name = appName
       config.extra_params = `-var="environment_name=${config.backend_config_name}"`
     }
   })

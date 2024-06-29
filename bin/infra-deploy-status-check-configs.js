@@ -22,57 +22,43 @@ function main() {
 }
 
 function getAccountLayerConfigs() {
-  accountLayerConfigs = getRootModuleConfigs("accounts")
-  accountLayerConfigs.forEach(config => {
-    config.account_name = config.backend_config_name.split(".")[0]
-  })
-  return accountLayerConfigs
+  return getRootModuleConfigs("accounts")
 }
 
 function getNetworkLayerConfigs() {
-  execSync("terraform -chdir=infra/project-config init")
-  execSync("terraform -chdir=infra/project-config apply -auto-approve")
-  const command = "terraform -chdir=infra/project-config output -json network_configs";
-  const output = execSync(command, { encoding: 'utf8' });
-  const networkConfigs = JSON.parse(output);
- 
   networkLayerConfigs = getRootModuleConfigs("networks")
   networkLayerConfigs.forEach(config => {
-    config.account_name = networkConfigs[config.backend_config_name].account_name
     config.extra_params = `-var="network_name=${config.backend_config_name}"`
   })
   return networkLayerConfigs
 }
 
 function getAppConfigs(appName) {
-  execSync(`terraform -chdir=infra/${appName}/app-config init`)
-  execSync(`terraform -chdir=infra/${appName}/app-config apply -auto-approve`)
-  const command = `terraform -chdir=infra/${appName}/app-config output -json account_names_by_environment`;
-  const output = execSync(command, { encoding: 'utf8' });
-  const accountNamesByEnvironment = JSON.parse(output);
-
   const rootModuleConfigs = []
 
   // TODO: Add back in database layer once we can figure out how to get around
   // the role-manager issues
   // for (const infraLayer of ["build-repository", "database", "service"]) {
   for (const infraLayer of ["build-repository", "service"]) {
-    rootModuleConfigs.push(...getRootModuleConfigs(path.join(appName, infraLayer)))
+    rootModuleConfigs.push(...getRootModuleConfigs(infraLayer, appName))
   }
   rootModuleConfigs.forEach(config => {
-    config.account_name = accountNamesByEnvironment[config.backend_config_name]
     if (config.backend_config_name != "shared") {
+      config.app_name = appName
       config.extra_params = `-var="environment_name=${config.backend_config_name}"`
-    } else {
-      config.extra_params = ""
     }
   })
   return rootModuleConfigs
 }
 
-function getRootModuleConfigs(rootModuleSubdir) {
+function getRootModuleConfigs(infraLayer, appName = null) {
+  rootModuleSubdir = appName ? `${appName}/${infraLayer}` : infraLayer
   return getBackendConfigNames(rootModuleSubdir).map(backendConfigName => {
-    return {root_module_subdir: rootModuleSubdir, backend_config_name: backendConfigName};
+    return {
+      backend_config_name: backendConfigName,
+      infra_layer: infraLayer,
+      root_module_subdir: rootModuleSubdir,
+    };
   });
 }
 

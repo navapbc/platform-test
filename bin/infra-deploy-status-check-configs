@@ -1,0 +1,63 @@
+#!/bin/bash
+
+function getBackendConfigNames() {
+  local rootModuleSubdir=$1
+  local rootModule="infra/${rootModuleSubdir}"
+  if [ -d "${rootModule}" ]; then
+    find "${rootModule}" -name "*.s3.tfbackend" -exec basename {} .s3.tfbackend \;
+  fi
+}
+
+function getRootModuleConfigs() {
+  local infraLayer=$1
+  local appName=$2
+  local rootModuleSubdir
+  if [ -z "${appName}" ]; then
+    rootModuleSubdir="${infraLayer}"
+  else
+    rootModuleSubdir="${appName}/${infraLayer}"
+  fi
+  local backendConfigNames
+  backendConfigNames=$(getBackendConfigNames "${rootModuleSubdir}")
+  for backendConfigName in ${backendConfigNames}; do
+    echo "{\"backend_config_name\": \"${backendConfigName}\", \"infra_layer\": \"${infraLayer}\", \"root_module_subdir\": \"${rootModuleSubdir}\"}"
+  done
+}
+
+function getAppNames() {
+  find "infra" -maxdepth 1 -type d -not -name "infra" -not -name "accounts" -not -name "modules" -not -name "networks" -not -name "project-config" -not -name "test" -exec basename {} \;
+}
+
+function getAccountLayerConfigs() {
+  local configs
+  configs=$(getRootModuleConfigs "accounts")
+  echo "${configs}" | jq -c '. + {account_name: (.backend_config_name | split(".")[0])}'
+}
+
+function getNetworkLayerConfigs() {
+  local configs
+  configs=$(getRootModuleConfigs "networks")
+  echo "${configs}" | jq -c '. + {extra_params: "-var=\"network_name=\(.backend_config_name)\""}'
+}
+
+function getAppConfigs() {
+  local appName=$1
+  local configs=""
+  for infraLayer in "build-repository" "service"; do
+    configs+=$(getRootModuleConfigs "${infraLayer}" "${appName}")
+    configs+=$'\n'
+  done
+  echo "${configs}" | jq -c '. + {app_name: "'${appName}'", extra_params: (if .backend_config_name != "shared" then "-var=\"environment_name=\(.backend_config_name)\"" else "default_value" end)}'
+}
+
+function main() {
+  local rootModuleConfigs
+  rootModuleConfigs=$(getAccountLayerConfigs)
+  rootModuleConfigs+=$(getNetworkLayerConfigs)
+  for appName in $(getAppNames); do    
+    rootModuleConfigs+=$(getAppConfigs "${appName}")
+  done
+  echo "${rootModuleConfigs}" | jq -s .
+}
+
+main

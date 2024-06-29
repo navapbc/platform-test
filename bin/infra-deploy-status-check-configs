@@ -57,7 +57,7 @@ function main() {
   for app_name in $(get_app_names); do
     root_module_configs+="$(get_app_configs "${app_name}")"
   done
-  echo "${root_module_configs}" | jq -s .
+  echo "${root_module_configs}" | jq -s -c .
 }
 
 main

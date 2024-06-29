@@ -18,7 +18,7 @@ function get_root_module_configs() {
     root_module_subdir="${app_name}/${infra_layer}"
   fi
   local backend_config_names
-  backend_config_names=$(get_backend_config_names "${root_module_subdir}")
+  backend_config_names="$(get_backend_config_names "${root_module_subdir}")"
   for backend_config_name in ${backend_config_names}; do
     echo "{\"backend_config_name\": \"${backend_config_name}\", \"infra_layer\": \"${infra_layer}\", \"root_module_subdir\": \"${root_module_subdir}\"}"
   done
@@ -44,7 +44,7 @@ function get_app_configs() {
   local app_name="$1"
   local configs=""
   for infra_layer in "build-repository" "service"; do
-    configs+=$(get_root_module_configs "${infra_layer}" "${app_name}")
+    configs+="$(get_root_module_configs "${infra_layer}" "${app_name}")"
     configs+=$'\n'
   done
   echo "${configs}" | jq -c 'if .backend_config_name != "shared" then . + {app_name: "'${app_name}'", extra_params: "-var=\"environment_name=\(.backend_config_name)\""} else . + {app_name: "'${app_name}'"} end'
@@ -52,10 +52,10 @@ function get_app_configs() {
 
 function main() {
   local root_module_configs
-  root_module_configs=$(get_account_layer_configs)
-  root_module_configs+=$(get_network_layer_configs)
-  for app_name in $(get_app_names); do    
-    root_module_configs+=$(get_app_configs "${app_name}")
+  root_module_configs="$(get_account_layer_configs)"
+  root_module_configs+="$(get_network_layer_configs)"
+  for app_name in $(get_app_names); do
+    root_module_configs+="$(get_app_configs "${app_name}")"
   done
   echo "${root_module_configs}" | jq -s .
 }

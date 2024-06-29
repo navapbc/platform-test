@@ -55,7 +55,7 @@ function get_app_configs() {
     configs+="$(get_root_module_configs "${infra_layer}" "${app_name}")"
     configs+=$'\n'
   done
-  echo "${configs}" | jq -c 'if .backend_config_name != "shared" then . + {app_name: "'${app_name}'", extra_params: "-var=\"environment_name=\(.backend_config_name)\""} else . + {app_name: "'${app_name}'"} end'
+  echo "${configs}" | jq -c 'if .backend_config_name != "shared" then . + {app_name: "'"${app_name}"'", extra_params: "-var=\"environment_name=\(.backend_config_name)\""} else . + {app_name: "'"${app_name}"'"} end'
 }
 
 function main() {

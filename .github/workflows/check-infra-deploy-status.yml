@@ -21,7 +21,7 @@ jobs:
       - name: Collect root module configurations
         id: collect-infra-deploy-status-check-configs
         run: |
-          root_module_configs="$(node ./bin/infra-deploy-status-check-configs.js)"
+          root_module_configs="$(./bin/infra-deploy-status-check-configs)"
           echo "${root_module_configs}"
           echo "root_module_configs=${root_module_configs}" >> "$GITHUB_OUTPUT"
   check:

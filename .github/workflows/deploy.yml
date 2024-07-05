@@ -39,11 +39,11 @@ jobs:
           app_name: ${{ inputs.app_name }}
           environment: ${{ inputs.environment }}
 
-      # - name: Set up Terraform
-      #   uses: hashicorp/setup-terraform@v2
-      #   with:
-      #     terraform_version: 1.8.3
-      #     terraform_wrapper: false
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.8.3
+          terraform_wrapper: false
 
       - name: Deploy release
         run: make release-deploy APP_NAME=${{ inputs.app_name }} ENVIRONMENT=${{ inputs.environment }}

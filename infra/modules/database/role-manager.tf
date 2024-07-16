@@ -7,7 +7,7 @@
 
 locals {
   db_password_param_name    = "/aws/reference/secretsmanager/${data.aws_secretsmanager_secret.db_password.name}"
-  role_manager_archive_path = "${path.root}/role_manager.zip"
+  role_manager_archive_path = "${path.module}/role_manager/dist/role_manager.zip"
 }
 
 resource "aws_lambda_function" "role_manager" {

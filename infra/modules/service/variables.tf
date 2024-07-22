@@ -74,7 +74,6 @@ variable "file_upload_jobs" {
     path_prefix   = string
     task_command  = list(string)
   }))
-
   description = <<EOT
     Configurations for jobs that trigger on a file upload event.
     Each configuration is a map from the job name to an object defining the

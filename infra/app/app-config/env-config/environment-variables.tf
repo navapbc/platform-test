@@ -27,5 +27,9 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}-${var.environment}/secret-sauce"
     }
+    NEW_SECRET = {
+      manage_method     = "generated"
+      secret_store_name = "/${var.app_name}-${var.environment}/new-secret"
+    }
   }
 }

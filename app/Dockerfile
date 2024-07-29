@@ -7,13 +7,17 @@ RUN adduser --system --disabled-password --no-create-home app
 
 WORKDIR /app
 
-RUN apk --no-cache add \
+
+
+RUN apk --no-cache upgrade busybox openssl \
+  && apk --no-cache add \
   aws-cli~=2 \
   postgresql14-client~=14
 
 COPY requirements.txt ./
 
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt \
+  && pip3 install --no-cache-dir --upgrade cryptography
 
 COPY db-migrate /usr/bin/
 COPY migrations.sql /app/

@@ -28,6 +28,9 @@ locals {
     description = "Application resources created in ${var.environment_name} environment"
   })
 
+  # All non-default terraform workspace is considered temporary.
+  # Temporary environments do not have deletion protection enabled.
+  # Examples: pull request preview environments are temporary.
   is_temporary = terraform.workspace != "default"
 
   environment_config                             = module.app_config.environment_configs[var.environment_name]
@@ -157,10 +160,18 @@ module "service" {
       FEATURE_FLAGS_PROJECT = module.feature_flags.evidently_project_name
       BUCKET_NAME           = local.storage_config.bucket_name
     },
-    module.app_config.enable_identity_provider ? {
-      COGNITO_USER_POOL_ID = module.identity_provider[0].user_pool_id
-      COGNITO_CLIENT_ID    = module.identity_provider_client[0].client_id
-    } : {},
+    (
+      module.app_config.enable_identity_provider ?
+      local.is_temporary ? {
+        COGNITO_USER_POOL_ID = tolist(data.aws_cognito_user_pools.existing_user_pools[0].ids)[0]
+        COGNITO_CLIENT_ID    = tolist(data.aws_cognito_user_pool_clients.existing_user_pool_clients[0].client_ids)[0]
+      } :
+      {
+        COGNITO_USER_POOL_ID = module.identity_provider[0].user_pool_id
+        COGNITO_CLIENT_ID    = module.identity_provider_client[0].client_id
+      } :
+      {}
+    ),
     local.service_config.extra_environment_variables
   )
 
@@ -169,10 +180,19 @@ module "service" {
       name      = secret_name
       valueFrom = module.secrets[secret_name].secret_arn
     }],
-    module.app_config.enable_identity_provider ? [{
-      name      = "COGNITO_CLIENT_SECRET"
-      valueFrom = module.identity_provider_client[0].client_secret_arn
-    }] : []
+    (
+      module.app_config.enable_identity_provider ?
+      local.is_temporary ?
+      [{
+        name  = "COGNITO_CLIENT_SECRET"
+        value = data.aws_cognito_user_pool_client.existing_user_pool_client[0].client_secret
+      }] :
+      [{
+        name      = "COGNITO_CLIENT_SECRET"
+        valueFrom = module.identity_provider_client[0].client_secret_arn
+      }]
+      : []
+    )
   )
 
   extra_policies = merge(
@@ -211,8 +231,10 @@ module "storage" {
   is_temporary = local.is_temporary
 }
 
+# If the app has `enable_identity_provider` set to true AND this is not a temporary
+# environment, then create a new identity provider.
 module "identity_provider" {
-  count        = module.app_config.enable_identity_provider ? 1 : 0
+  count        = module.app_config.enable_identity_provider && !local.is_temporary ? 1 : 0
   source       = "../../modules/identity-provider"
   is_temporary = local.is_temporary
 
@@ -227,12 +249,32 @@ module "identity_provider" {
   reply_to_email      = local.notifications_config == null ? null : local.notifications_config.reply_to_email
 }
 
+# If the app has `enable_identity_provider` set to true AND this is *not* a temporary
+# environment, then create a new identity provider client for the service.
 module "identity_provider_client" {
-  count  = module.app_config.enable_identity_provider ? 1 : 0
+  count  = module.app_config.enable_identity_provider && !local.is_temporary ? 1 : 0
   source = "../../modules/identity-provider-client"
 
   name                 = local.identity_provider_config.identity_provider_name
   cognito_user_pool_id = module.identity_provider[0].user_pool_id
   callback_urls        = local.identity_provider_config.client.callback_urls
   logout_urls          = local.identity_provider_config.client.logout_urls
+}
+
+# If the app has `enable_identity_provider` set to true AND this *is* a temporary
+# environment, then use an existing identity provider with the expected name.
+data "aws_cognito_user_pools" "existing_user_pools" {
+  count = module.app_config.enable_identity_provider && local.is_temporary ? 1 : 0
+  name  = local.identity_provider_config.identity_provider_name
+}
+
+data "aws_cognito_user_pool_clients" "existing_user_pool_clients" {
+  count        = module.app_config.enable_identity_provider && local.is_temporary ? 1 : 0
+  user_pool_id = tolist(data.aws_cognito_user_pools.existing_user_pools[0].ids)[0]
+}
+
+data "aws_cognito_user_pool_client" "existing_user_pool_client" {
+  count        = module.app_config.enable_identity_provider && local.is_temporary ? 1 : 0
+  client_id    = tolist(data.aws_cognito_user_pool_clients.existing_user_pool_clients[0].client_ids)[0]
+  user_pool_id = tolist(data.aws_cognito_user_pools.existing_user_pools[0].ids)[0]
 }

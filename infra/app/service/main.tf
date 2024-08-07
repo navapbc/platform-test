@@ -28,7 +28,7 @@ locals {
     description = "Application resources created in ${var.environment_name} environment"
   })
 
-  # All non-default terraform workspace is considered temporary.
+  # All non-default terraform workspaces are considered temporary.
   # Temporary environments do not have deletion protection enabled.
   # Examples: pull request preview environments are temporary.
   is_temporary = terraform.workspace != "default"

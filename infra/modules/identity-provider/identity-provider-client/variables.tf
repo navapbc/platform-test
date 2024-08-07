@@ -26,6 +26,6 @@ variable "name" {
 }
 
 variable "user_pool_access_policy_name" {
-  value       = aws_iam_policy.cognito_access.arn
+  type        = string
   description = "The name of the IAM policy that will grant access to the user pool"
 }

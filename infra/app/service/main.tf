@@ -236,3 +236,13 @@ module "identity_provider_client" {
   callback_urls        = local.identity_provider_config.client.callback_urls
   logout_urls          = local.identity_provider_config.client.logout_urls
 }
+
+module "notifications" {
+  count  = module.app_config.enable_notifications ? 1 : 0
+  source = "../../modules/notifications"
+
+  name                      = local.notifications_config.name
+  email_verification_method = local.notifications_config.email_verification_method
+  sender_display_name       = local.notifications_config.sender_display_name
+  sender_email              = local.notifications_config.sender_email
+}

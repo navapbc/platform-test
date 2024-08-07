@@ -34,6 +34,10 @@ output "enable_identity_provider" {
   value = local.enable_identity_provider
 }
 
+output "enable_notifications" {
+  value = local.enable_notifications
+}
+
 output "image_repository_name" {
   value = local.image_repository_name
 }

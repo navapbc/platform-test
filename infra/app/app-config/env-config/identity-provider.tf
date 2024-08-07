@@ -34,8 +34,8 @@ locals {
     }
 
     # Define variable names used across modules.
-    client_secret_ssm_name       = "/${local.identity_provider_name}/identity-provider/client-secret"
-    user_pool_access_policy_name = "${local.identity_provider_name}-cognito-access"
+    client_secret_ssm_name       = "/${var.app_name}-${var.environment}/identity-provider/client-secret"
+    user_pool_access_policy_name = "${var.app_name}-${var.environment}-cognito-access"
 
     # Do not modify this block directly.
     client = {

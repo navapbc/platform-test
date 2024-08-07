@@ -185,7 +185,7 @@ module "service" {
       local.is_temporary ?
       [{
         name  = "COGNITO_CLIENT_SECRET"
-        value = data.aws_cognito_user_pool_client.existing_user_pool_client[0].client_secret
+        valueFrom = data.aws_ssm_parameter.existing_user_pool_client_secret[0].arn
       }] :
       [{
         name      = "COGNITO_CLIENT_SECRET"
@@ -200,9 +200,16 @@ module "service" {
       feature_flags_access = module.feature_flags.access_policy_arn,
       storage_access       = module.storage.access_policy_arn
     },
-    module.app_config.enable_identity_provider ? {
-      identity_provider_access = module.identity_provider_client[0].access_policy_arn,
-    } : {}
+    (
+      module.app_config.enable_identity_provider ?
+      local.is_temporary ?
+      {
+        identity_provider_access = data.aws_iam_policy.existing_cognito_access[0].arn
+      } :
+      {
+        identity_provider_access = module.identity_provider_client[0].access_policy_arn,
+      } : {}
+    )
   )
 
   is_temporary = local.is_temporary
@@ -273,8 +280,12 @@ data "aws_cognito_user_pool_clients" "existing_user_pool_clients" {
   user_pool_id = tolist(data.aws_cognito_user_pools.existing_user_pools[0].ids)[0]
 }
 
-data "aws_cognito_user_pool_client" "existing_user_pool_client" {
+data "aws_ssm_parameter" "existing_user_pool_client_secret" {
   count        = module.app_config.enable_identity_provider && local.is_temporary ? 1 : 0
-  client_id    = tolist(data.aws_cognito_user_pool_clients.existing_user_pool_clients[0].client_ids)[0]
-  user_pool_id = tolist(data.aws_cognito_user_pools.existing_user_pools[0].ids)[0]
+  name  = "/${local.identity_provider_config.identity_provider_name}/identity-provider/client-secret"
+}
+
+data "aws_iam_policy" "existing_cognito_access" {
+  count = module.app_config.enable_identity_provider && local.is_temporary ? 1 : 0
+  name  = "${local.identity_provider_config.identity_provider_name}-cognito-access"
 }

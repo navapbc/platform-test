@@ -6,7 +6,7 @@ data "aws_cognito_user_pools" "existing_user_pools" {
 }
 
 data "aws_cognito_user_pool_clients" "existing_user_pool_clients" {
-  user_pool_id = tolist(data.aws_cognito_user_pools.existing_user_pools[0].ids)[0]
+  user_pool_id = tolist(data.aws_cognito_user_pools.existing_user_pools.ids)[0]
 }
 
 data "aws_ssm_parameter" "existing_user_pool_client_secret" {

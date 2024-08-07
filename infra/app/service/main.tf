@@ -163,8 +163,8 @@ module "service" {
     (
       module.app_config.enable_identity_provider ?
       local.is_temporary ? {
-        COGNITO_USER_POOL_ID = tolist(data.aws_cognito_user_pools.existing_user_pools[0].ids)[0]
-        COGNITO_CLIENT_ID    = tolist(data.aws_cognito_user_pool_clients.existing_user_pool_clients[0].client_ids)[0]
+        COGNITO_USER_POOL_ID = module.existing_identity_provider[0].user_pool_id
+        COGNITO_CLIENT_ID    = module.existing_identity_provider[0].client_id
       } :
       {
         COGNITO_USER_POOL_ID = module.identity_provider[0].user_pool_id
@@ -185,7 +185,7 @@ module "service" {
       local.is_temporary ?
       [{
         name      = "COGNITO_CLIENT_SECRET"
-        valueFrom = data.aws_ssm_parameter.existing_user_pool_client_secret[0].arn
+        valueFrom = module.existing_identity_provider[0].client_secret_arn
       }] :
       [{
         name      = "COGNITO_CLIENT_SECRET"
@@ -204,7 +204,7 @@ module "service" {
       module.app_config.enable_identity_provider ?
       local.is_temporary ?
       {
-        identity_provider_access = data.aws_iam_policy.existing_cognito_access[0].arn
+        identity_provider_access = module.existing_identity_provider[0].access_policy_arn,
       } :
       {
         identity_provider_access = module.identity_provider_client[0].access_policy_arn,
@@ -242,7 +242,7 @@ module "storage" {
 # environment, then create a new identity provider.
 module "identity_provider" {
   count        = module.app_config.enable_identity_provider && !local.is_temporary ? 1 : 0
-  source       = "../../modules/identity-provider"
+  source       = "../../modules/identity-provider/identity-provider"
   is_temporary = local.is_temporary
 
   name                             = local.identity_provider_config.identity_provider_name
@@ -260,32 +260,23 @@ module "identity_provider" {
 # environment, then create a new identity provider client for the service.
 module "identity_provider_client" {
   count  = module.app_config.enable_identity_provider && !local.is_temporary ? 1 : 0
-  source = "../../modules/identity-provider-client"
+  source = "../../modules/identity-provider/identity-provider-client"
 
-  name                 = local.identity_provider_config.identity_provider_name
-  cognito_user_pool_id = module.identity_provider[0].user_pool_id
-  callback_urls        = local.identity_provider_config.client.callback_urls
-  logout_urls          = local.identity_provider_config.client.logout_urls
+  callback_urls                = local.identity_provider_config.client.callback_urls
+  client_secret_ssm_name       = local.identity_provider_config.client_secret_ssm_name
+  cognito_user_pool_id         = module.identity_provider[0].user_pool_id
+  logout_urls                  = local.identity_provider_config.client.logout_urls
+  name                         = local.identity_provider_config.identity_provider_name
+  user_pool_access_policy_name = local.identity_provider_config.user_pool_access_policy_name
 }
 
 # If the app has `enable_identity_provider` set to true AND this *is* a temporary
-# environment, then use an existing identity provider with the expected name.
-data "aws_cognito_user_pools" "existing_user_pools" {
-  count = module.app_config.enable_identity_provider && local.is_temporary ? 1 : 0
-  name  = local.identity_provider_config.identity_provider_name
-}
+# environment, then use an existing identity provider and client.
+module "existing_identity_provider" {
+  count  = module.app_config.enable_identity_provider && local.is_temporary ? 1 : 0
+  source = "../../modules/identity-provider/existing-identity-provider"
 
-data "aws_cognito_user_pool_clients" "existing_user_pool_clients" {
-  count        = module.app_config.enable_identity_provider && local.is_temporary ? 1 : 0
-  user_pool_id = tolist(data.aws_cognito_user_pools.existing_user_pools[0].ids)[0]
-}
-
-data "aws_ssm_parameter" "existing_user_pool_client_secret" {
-  count = module.app_config.enable_identity_provider && local.is_temporary ? 1 : 0
-  name  = "/${local.identity_provider_config.identity_provider_name}/identity-provider/client-secret"
-}
-
-data "aws_iam_policy" "existing_cognito_access" {
-  count = module.app_config.enable_identity_provider && local.is_temporary ? 1 : 0
-  name  = "${local.identity_provider_config.identity_provider_name}-cognito-access"
+  client_secret_ssm_name       = local.identity_provider_config.client_secret_ssm_name
+  name                         = local.identity_provider_config.identity_provider_name
+  user_pool_access_policy_name = local.identity_provider_config.user_pool_access_policy_name
 }

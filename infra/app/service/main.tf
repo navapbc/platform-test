@@ -184,7 +184,7 @@ module "service" {
       module.app_config.enable_identity_provider ?
       local.is_temporary ?
       [{
-        name  = "COGNITO_CLIENT_SECRET"
+        name      = "COGNITO_CLIENT_SECRET"
         valueFrom = data.aws_ssm_parameter.existing_user_pool_client_secret[0].arn
       }] :
       [{
@@ -281,7 +281,7 @@ data "aws_cognito_user_pool_clients" "existing_user_pool_clients" {
 }
 
 data "aws_ssm_parameter" "existing_user_pool_client_secret" {
-  count        = module.app_config.enable_identity_provider && local.is_temporary ? 1 : 0
+  count = module.app_config.enable_identity_provider && local.is_temporary ? 1 : 0
   name  = "/${local.identity_provider_config.identity_provider_name}/identity-provider/client-secret"
 }
 

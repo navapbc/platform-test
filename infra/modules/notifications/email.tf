@@ -6,9 +6,9 @@
 #    of the domain.
 resource "aws_pinpoint_email_channel" "email" {
   application_id    = aws_pinpoint_app.app.application_id
-  configuration_set = aws_sesv2_configuration_set.email.configuration_set_name
+  configuration_set = var.email_configuration_set_name
   from_address      = var.sender_email != null ? (var.sender_display_name != null ? "${var.sender_display_name} <${var.sender_email}>" : var.sender_email) : null
-  identity          = aws_sesv2_email_identity.sender.arn
+  identity          = var.email_identity_arn
 
   # Note: There is a known bug where role_arn isn't being persisted to AWS. This means
   # that this module will always show that there are changes that haven't been applied.

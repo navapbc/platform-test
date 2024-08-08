@@ -1,10 +1,14 @@
 # Notifications configuration
 locals {
   notifications_config = var.enable_notifications ? {
-    name = "${local.prefix}${var.app_name}-${var.environment}"
+    # Pinpoint app name.
+    name = "${var.app_name}-${var.environment}"
 
-    # The method to use to verify the sender email address
-    # Must be 'email' or 'domain'
+    # The method to use to verify the sender email address.
+    # - Must be 'email' or 'domain'.
+    # - For email, AWS will send you an email with a one-time link. Click on the link to verify the email address.
+    # - For domain, create CNAME records for the domain using the DKIM values in the terraform output.
+    # Docs: https://docs.aws.amazon.com/pinpoint/latest/userguide/channels-email-manage-verify.html
     email_verification_method = "domain"
 
     # Configure the name that users see in the "From" section of their inbox, so that it's

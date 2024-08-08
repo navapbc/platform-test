@@ -1,3 +1,5 @@
+# This module manages an SESv2 email identity.
+# Docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sesv2_email_identity
 locals {
   # Extract the domain used for sender identity verification from the sender_email.
   domain = regex("@(.*)", var.sender_email)[0]
@@ -14,7 +16,7 @@ locals {
 }
 
 # Verify email sender identity.
-# Docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sesv2_email_identity
+# Docs: https://docs.aws.amazon.com/pinpoint/latest/userguide/channels-email-manage-verify.html
 resource "aws_sesv2_email_identity" "sender" {
   email_identity         = var.email_verification_method == "email" ? var.sender_email : local.domain
   configuration_set_name = aws_sesv2_configuration_set.email.configuration_set_name

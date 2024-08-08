@@ -1,6 +1,16 @@
+variable "email_configuration_set_name" {
+  type = string
+  description = "The name of the SESv2 configuration set to apply to the pinpoint email channel"
+}
+
+variable "email_identity_arn" {
+  type = string
+  description = "The arn for the SESv2 email identity to use to send emails"
+}
+
 variable "name" {
   type        = string
-  description = "Name of the notifications project/application"
+  description = "The name of the notifications project/application"
 }
 
 variable "sender_display_name" {
@@ -11,5 +21,5 @@ variable "sender_display_name" {
 
 variable "sender_email" {
   type        = string
-  description = "Email address to use to send notification emails"
+  description = "The email address to use to send notification emails"
 }

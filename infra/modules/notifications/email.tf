@@ -3,14 +3,14 @@ locals {
   domain = regex("@(.*)", var.sender_email)[0]
 
   # Construct DNS records to be added to the sending domain.
-  # Only useful if the sender identity verification method is domain verification.
-  dkim_dns_verification_records = [
+  # Only used if the sender identity verification method is domain verification.
+  dkim_dns_verification_records = var.email_verification_method == "domain" ? [
     for token in flatten(aws_sesv2_email_identity.sender[*].dkim_signing_attributes.tokens) : {
       type  = "CNAME"
       name  = "${token}._domainkey"
       value = "${token}.dkim.amazonses.com"
     }
-  ]
+  ] : []
 }
 
 # The AWS Pinpoint Email channel requires sender identity verification. It supports:

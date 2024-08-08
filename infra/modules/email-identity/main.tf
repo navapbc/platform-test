@@ -42,3 +42,47 @@ resource "aws_sesv2_configuration_set" "email" {
     suppressed_reasons = ["BOUNCE", "COMPLAINT"]
   }
 }
+
+# Allow AWS Pinpoint to send email on behalf of this email identity.
+# Docs: https://docs.aws.amazon.com/pinpoint/latest/developerguide/security_iam_id-based-policy-examples.html#security_iam_resource-based-policy-examples-access-ses-identities
+#
+# This is a new resource that was added to the terraform aws provider in v5.35.0.
+# See https://github.com/hashicorp/terraform-provider-aws/pull/35486
+#
+# @TODO See https://github.com/navapbc/template-infra/issues/724
+# Until we update, you have to manually attach the generated policy in the AWS console by
+# going to Pinpoint > Email > Email identities and following the on-screen banners.
+# This has been verified to be working when using v5.61.0.
+
+# data "aws_caller_identity" "current" {}
+# data "aws_region" "current" {}
+
+# resource "aws_sesv2_email_identity_policy" "sender" {
+#   email_identity = aws_sesv2_email_identity.sender.email_identity
+#   policy_name    = "PinpointEmail"
+
+#   policy = <<EOF
+# {
+#   "Version": "2008-10-17",
+#   "Statement": [
+#     {
+#       "Sid": "PinpointEmail",
+#       "Effect": "Allow",
+#       "Principal":{
+#         "Service": "pinpoint.amazonaws.com"
+#       },
+#       "Action": "ses:*",
+#       "Resource": "${aws_sesv2_email_identity.sender.arn}",
+#       "Condition": {
+#         "StringEquals": {
+#           "aws:SourceAccount": "${data.aws_caller_identity.current.account_id}"
+#         },
+#         "StringLike": {
+#           "aws:SourceArn": "arn:aws:mobiletargeting:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:apps/*"
+#         }
+#       }
+#     }
+#   ]
+# }
+# EOF
+# }

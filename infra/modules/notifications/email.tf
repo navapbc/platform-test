@@ -22,10 +22,14 @@ locals {
 resource "aws_pinpoint_email_channel" "email" {
   application_id    = aws_pinpoint_app.app.application_id
   configuration_set = aws_sesv2_configuration_set.email.configuration_set_name
-  # @TODO may have overlap with idp
-  from_address = var.sender_display_name != null ? "${var.sender_display_name} <${var.sender_email}>" : var.sender_email
-  identity     = aws_sesv2_email_identity.sender.arn
-  role_arn     = aws_iam_role.analytics.arn
+  from_address      = var.sender_email != null ? (var.sender_display_name != null ? "${var.sender_display_name} <${var.sender_email}>" : var.sender_email) : null
+  identity          = aws_sesv2_email_identity.sender.arn
+
+  # Note: There is a known bug where role_arn isn't being persisted to AWS. This means
+  # that this module will always show that there are changes that haven't been applied.
+  # Commenting it out for now.
+  # See https://github.com/hashicorp/terraform-provider-aws/issues/38772
+  # role_arn          = aws_iam_role.analytics.arn
 }
 
 # The configuration set applied to messages that sent through this email channel.

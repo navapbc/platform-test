@@ -2,7 +2,7 @@
 ## A module for retrieving an existing Cognito User Pool and App Client
 ############################################################################################
 module "identity_provider_client_interface" {
-  source = "./interface"
+  source = "../interface"
   name   = var.name
 }
 

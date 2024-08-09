@@ -1,5 +1,5 @@
 module "identity_provider_client_interface" {
-  source = "./interface"
+  source = "../interface"
   name   = var.name
 }
 

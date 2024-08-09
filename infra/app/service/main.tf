@@ -244,6 +244,7 @@ module "identity_provider" {
   verification_email_message       = local.identity_provider_config.verification_email.verification_email_message
   verification_email_subject       = local.identity_provider_config.verification_email.verification_email_subject
 
+  email_identity_arn  = module.app_config.enable_notifications ? module.email_identity[0].verified_sender_email_arn : null
   sender_email        = module.app_config.enable_notifications ? local.notifications_config.sender_email : null
   sender_display_name = module.app_config.enable_notifications ? local.notifications_config.sender_display_name : null
   reply_to_email      = module.app_config.enable_notifications ? local.notifications_config.reply_to_email : null

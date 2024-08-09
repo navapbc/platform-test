@@ -7,7 +7,7 @@ output "application_log_stream_prefix" {
 }
 
 output "email_dkim_dns_verification_records" {
-  value = module.app_config.enable_notifications ? module.email_identity[0].dkim_dns_verification_records : ""
+  value = module.app_config.enable_notifications ? module.email_identity[0].dkim_dns_verification_records : []
 }
 
 output "email_dkim_status" {

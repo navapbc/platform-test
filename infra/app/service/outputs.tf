@@ -6,6 +6,18 @@ output "application_log_stream_prefix" {
   value = module.service.application_log_stream_prefix
 }
 
+output "email_dkim_dns_verification_records" {
+  value = module.app_config.enable_notifications ? module.email_identity[0].dkim_dns_verification_records : ""
+}
+
+output "email_dkim_status" {
+  value = module.app_config.enable_notifications ? module.email_identity[0].dkim_status : ""
+}
+
+output "email_verified_for_sending_status" {
+  value = module.app_config.enable_notifications ? module.email_identity[0].verified_for_sending_status : false
+}
+
 output "migrator_role_arn" {
   value = module.service.migrator_role_arn
 }

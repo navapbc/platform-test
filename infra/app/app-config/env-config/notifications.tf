@@ -16,6 +16,7 @@ locals {
     sender_display_name = null
 
     # Set to an SES-verified email address to be used when sending emails.
+    # If enable_notifications is true, this is required.
     # Docs: https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-email.html
     sender_email = null
 

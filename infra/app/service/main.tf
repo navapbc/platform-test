@@ -211,6 +211,28 @@ module "storage" {
   is_temporary = local.is_temporary
 }
 
+# @TODO If this is a temporary environment, we should use an existing email identity,
+# rather than having to verify the identity every time.
+module "email_identity" {
+  count  = module.app_config.enable_notifications ? 1 : 0
+  source = "../../modules/email-identity"
+
+  email_verification_method = local.notifications_config.email_verification_method
+  name                      = local.notifications_config.name
+  sender_email              = local.notifications_config.sender_email
+}
+
+module "notifications" {
+  count  = module.app_config.enable_notifications ? 1 : 0
+  source = "../../modules/notifications"
+
+  email_configuration_set_name = module.email_identity[0].email_configuration_set_name
+  email_identity_arn           = module.email_identity[0].email_identity_arn
+  name                         = local.notifications_config.name
+  sender_display_name          = local.notifications_config.sender_display_name
+  sender_email                 = local.notifications_config.sender_email
+}
+
 module "identity_provider" {
   count        = module.app_config.enable_identity_provider ? 1 : 0
   source       = "../../modules/identity-provider"
@@ -222,9 +244,9 @@ module "identity_provider" {
   verification_email_message       = local.identity_provider_config.verification_email.verification_email_message
   verification_email_subject       = local.identity_provider_config.verification_email.verification_email_subject
 
-  sender_email        = local.notifications_config == null ? null : local.notifications_config.sender_email
-  sender_display_name = local.notifications_config == null ? null : local.notifications_config.sender_display_name
-  reply_to_email      = local.notifications_config == null ? null : local.notifications_config.reply_to_email
+  sender_email        = module.app_config.enable_notifications ? local.notifications_config.sender_email : null
+  sender_display_name = module.app_config.enable_notifications ? local.notifications_config.sender_display_name : null
+  reply_to_email      = module.app_config.enable_notifications ? local.notifications_config.reply_to_email : null
 }
 
 module "identity_provider_client" {
@@ -235,14 +257,4 @@ module "identity_provider_client" {
   cognito_user_pool_id = module.identity_provider[0].user_pool_id
   callback_urls        = local.identity_provider_config.client.callback_urls
   logout_urls          = local.identity_provider_config.client.logout_urls
-}
-
-module "notifications" {
-  count  = module.app_config.enable_notifications ? 1 : 0
-  source = "../../modules/notifications"
-
-  name                      = local.notifications_config.name
-  email_verification_method = local.notifications_config.email_verification_method
-  sender_display_name       = local.notifications_config.sender_display_name
-  sender_email              = local.notifications_config.sender_email
 }

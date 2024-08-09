@@ -242,7 +242,7 @@ module "storage" {
 # environment, then create a new identity provider.
 module "identity_provider" {
   count  = module.app_config.enable_identity_provider && !local.is_temporary ? 1 : 0
-  source = "../../modules/identity-provider/identity-provider"
+  source = "../../modules/identity-provider/resources"
 
   is_temporary = local.is_temporary
 
@@ -261,7 +261,7 @@ module "identity_provider" {
 # environment, then create a new identity provider client for the service.
 module "identity_provider_client" {
   count  = module.app_config.enable_identity_provider && !local.is_temporary ? 1 : 0
-  source = "../../modules/identity-provider/identity-provider-client"
+  source = "../../modules/identity-provider-client/resources"
 
   callback_urls = local.identity_provider_config.client.callback_urls
   logout_urls   = local.identity_provider_config.client.logout_urls
@@ -274,7 +274,7 @@ module "identity_provider_client" {
 # environment, then use an existing identity provider and client.
 module "existing_identity_provider" {
   count  = module.app_config.enable_identity_provider && local.is_temporary ? 1 : 0
-  source = "../../modules/identity-provider/existing-identity-provider"
+  source = "../../modules/identity-provider-client/data"
 
   name = local.identity_provider_config.identity_provider_name
 }

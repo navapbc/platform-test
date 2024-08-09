@@ -15,9 +15,6 @@ locals {
   logout_url_path = ""
 
   identity_provider_config = var.enable_identity_provider ? {
-    # We don't prefix the identity provider name with the terraform workspace because
-    # non-default workspaces use the default workspace identity provider instead of
-    # creating a new resource.
     identity_provider_name = "${var.app_name}-${var.environment}"
 
     password_policy = {

@@ -33,10 +33,6 @@ locals {
       verification_email_subject = null
     }
 
-    # Define variable names used across modules.
-    client_secret_ssm_name       = "/${var.app_name}-${var.environment}/identity-provider/client-secret"
-    user_pool_access_policy_name = "${var.app_name}-${var.environment}-cognito-access"
-
     # Do not modify this block directly.
     client = {
       callback_urls = concat(

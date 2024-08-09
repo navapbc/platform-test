@@ -13,12 +13,12 @@ locals {
 
     # Configure the name that users see in the "From" section of their inbox, so that it's
     # clearer who the email is from.
-    sender_display_name = null
+    sender_display_name = "FOOBAR"
 
     # Set to an SES-verified email address to be used when sending emails.
     # If enable_notifications is true, this is required.
     # Docs: https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-email.html
-    sender_email = null
+    sender_email = "rocket@navateam.com"
 
     # Configure the REPLY-TO email address if it should be different from the sender.
     # Note: Only used by the identity-provider service.

@@ -22,6 +22,11 @@ data "aws_subnets" "private" {
 }
 
 locals {
+  # The prefix key/value pair is used for Terraform Workspaces, which is useful for projects with multiple infrastructure developers.
+  # By default, Terraform creates a workspace named “default.” If a non-default workspace is not created this prefix will equal “default”,
+  # if you choose not to use workspaces set this value to "dev"
+  prefix = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
+
   # Add environment specific tags
   tags = merge(module.project_config.default_tags, {
     environment = var.environment_name
@@ -162,15 +167,19 @@ module "service" {
     },
     (
       module.app_config.enable_identity_provider ?
-      local.is_temporary ? {
-        COGNITO_USER_POOL_ID = module.existing_identity_provider[0].user_pool_id
-        COGNITO_CLIENT_ID    = module.existing_identity_provider[0].client_id
-      } :
-      {
-        COGNITO_USER_POOL_ID = module.identity_provider[0].user_pool_id
-        COGNITO_CLIENT_ID    = module.identity_provider_client[0].client_id
-      } :
-      {}
+      { COGNITO_CLIENT_ID = module.identity_provider_client[0].client_id }
+      : {}
+    ),
+    # If enabled_identity_provider is true:
+    #   If this is a temporary environment, re-use an existing Cognito user pool.
+    #   Otherwise, create a new one.
+    (
+      module.app_config.enable_identity_provider ?
+      (
+        local.is_temporary ?
+        { COGNITO_USER_POOL_ID = module.existing_identity_provider[0].user_pool_id }
+        : { COGNITO_USER_POOL_ID = module.identity_provider[0].user_pool_id }
+      ) : {}
     ),
     local.service_config.extra_environment_variables
   )
@@ -182,11 +191,6 @@ module "service" {
     }],
     (
       module.app_config.enable_identity_provider ?
-      local.is_temporary ?
-      [{
-        name      = "COGNITO_CLIENT_SECRET"
-        valueFrom = module.existing_identity_provider[0].client_secret_arn
-      }] :
       [{
         name      = "COGNITO_CLIENT_SECRET"
         valueFrom = module.identity_provider_client[0].client_secret_arn
@@ -202,10 +206,6 @@ module "service" {
     },
     (
       module.app_config.enable_identity_provider ?
-      local.is_temporary ?
-      {
-        identity_provider_access = module.existing_identity_provider[0].access_policy_arn,
-      } :
       {
         identity_provider_access = module.identity_provider_client[0].access_policy_arn,
       } : {}
@@ -257,24 +257,25 @@ module "identity_provider" {
   reply_to_email      = local.notifications_config == null ? null : local.notifications_config.reply_to_email
 }
 
-# If the app has `enable_identity_provider` set to true AND this is *not* a temporary
-# environment, then create a new identity provider client for the service.
+# If the app has `enable_identity_provider` set to true AND this *is* a temporary
+# environment, then use an existing identity provider.
+module "existing_identity_provider" {
+  count  = module.app_config.enable_identity_provider && local.is_temporary ? 1 : 0
+  source = "../../modules/identity-provider/data"
+
+  name = local.identity_provider_config.identity_provider_name
+}
+
+# If the app has `enable_identity_provider` set to true, create a new identity provider
+# client for the service. A new client is created for all environments, including
+# temporary environments.
 module "identity_provider_client" {
-  count  = module.app_config.enable_identity_provider && !local.is_temporary ? 1 : 0
+  count  = module.app_config.enable_identity_provider ? 1 : 0
   source = "../../modules/identity-provider-client/resources"
 
   callback_urls = local.identity_provider_config.client.callback_urls
   logout_urls   = local.identity_provider_config.client.logout_urls
-  name          = local.identity_provider_config.identity_provider_name
+  name          = "${local.prefix}local.identity_provider_config.identity_provider_name"
 
-  user_pool_id = module.identity_provider[0].user_pool_id
-}
-
-# If the app has `enable_identity_provider` set to true AND this *is* a temporary
-# environment, then use an existing identity provider and client.
-module "existing_identity_provider" {
-  count  = module.app_config.enable_identity_provider && local.is_temporary ? 1 : 0
-  source = "../../modules/identity-provider-client/data"
-
-  name = local.identity_provider_config.identity_provider_name
+  user_pool_id = module.app_config.enable_identity_provider && !local.is_temporary ? module.identity_provider[0].user_pool_id : module.existing_identity_provider[0].user_pool_id
 }

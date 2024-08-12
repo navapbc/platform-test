@@ -165,10 +165,6 @@ module "service" {
       FEATURE_FLAGS_PROJECT = module.feature_flags.evidently_project_name
       BUCKET_NAME           = local.storage_config.bucket_name
     },
-    module.app_config.enable_identity_provider ?
-    {
-      COGNITO_CLIENT_ID = module.identity_provider_client[0].client_id
-    } : {},
     # If enabled_identity_provider is true:
     #   If this is a temporary environment, re-use an existing Cognito user pool.
     #   Otherwise, create a new one.
@@ -180,6 +176,10 @@ module "service" {
         : { COGNITO_USER_POOL_ID = module.identity_provider[0].user_pool_id }
       ) : {}
     ),
+    module.app_config.enable_identity_provider ?
+    {
+      COGNITO_CLIENT_ID = module.identity_provider_client[0].client_id
+    } : {},
     local.service_config.extra_environment_variables
   )
 

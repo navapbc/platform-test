@@ -165,11 +165,10 @@ module "service" {
       FEATURE_FLAGS_PROJECT = module.feature_flags.evidently_project_name
       BUCKET_NAME           = local.storage_config.bucket_name
     },
-    (
-      module.app_config.enable_identity_provider ?
-      { COGNITO_CLIENT_ID = module.identity_provider_client[0].client_id }
-      : {}
-    ),
+    module.app_config.enable_identity_provider ?
+    {
+      COGNITO_CLIENT_ID = module.identity_provider_client[0].client_id
+    } : {},
     # If enabled_identity_provider is true:
     #   If this is a temporary environment, re-use an existing Cognito user pool.
     #   Otherwise, create a new one.
@@ -189,14 +188,10 @@ module "service" {
       name      = secret_name
       valueFrom = module.secrets[secret_name].secret_arn
     }],
-    (
-      module.app_config.enable_identity_provider ?
-      [{
-        name      = "COGNITO_CLIENT_SECRET"
-        valueFrom = module.identity_provider_client[0].client_secret_arn
-      }]
-      : []
-    )
+    module.app_config.enable_identity_provider ? [{
+      name      = "COGNITO_CLIENT_SECRET"
+      valueFrom = module.identity_provider_client[0].client_secret_arn
+    }] : [],
   )
 
   extra_policies = merge(
@@ -204,12 +199,9 @@ module "service" {
       feature_flags_access = module.feature_flags.access_policy_arn,
       storage_access       = module.storage.access_policy_arn
     },
-    (
-      module.app_config.enable_identity_provider ?
-      {
-        identity_provider_access = module.identity_provider_client[0].access_policy_arn,
-      } : {}
-    )
+    module.app_config.enable_identity_provider ? {
+      identity_provider_access = module.identity_provider_client[0].access_policy_arn,
+    } : {}
   )
 
   is_temporary = local.is_temporary

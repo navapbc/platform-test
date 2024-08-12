@@ -45,7 +45,7 @@ module "email_identity_data" {
   sender_email              = var.sender_email
 
   depends_on = [
-    aws_sesv2_email_identity
+    aws_sesv2_email_identity.sender
   ]
 }
 

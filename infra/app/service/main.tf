@@ -22,6 +22,11 @@ data "aws_subnets" "private" {
 }
 
 locals {
+  # The prefix key/value pair is used for Terraform Workspaces, which is useful for projects with multiple infrastructure developers.
+  # By default, Terraform creates a workspace named “default.” If a non-default workspace is not created this prefix will equal “default”,
+  # if you choose not to use workspaces set this value to "dev"
+  prefix = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
+
   # Add environment specific tags
   tags = merge(module.project_config.default_tags, {
     environment = var.environment_name
@@ -211,11 +216,18 @@ module "storage" {
   is_temporary = local.is_temporary
 }
 
-# @TODO If this is a temporary environment, we should use an existing email identity,
-# rather than having to verify the identity every time.
 module "email_identity" {
-  count  = module.app_config.enable_notifications ? 1 : 0
-  source = "../../modules/email-identity"
+  count  = module.app_config.enable_notifications && !local.is_temporary ? 1 : 0
+  source = "../../modules/email-identity/resources"
+
+  email_verification_method = local.notifications_config.email_verification_method
+  name                      = local.notifications_config.name
+  sender_email              = local.notifications_config.sender_email
+}
+
+module "existing_email_identity" {
+  count  = module.app_config.enable_notifications && local.is_temporary ? 1 : 0
+  source = "../../modules/email-identity/data"
 
   email_verification_method = local.notifications_config.email_verification_method
   name                      = local.notifications_config.name
@@ -226,11 +238,12 @@ module "notifications" {
   count  = module.app_config.enable_notifications ? 1 : 0
   source = "../../modules/notifications"
 
-  email_configuration_set_name = module.email_identity[0].email_configuration_set_name
-  email_identity_arn           = module.email_identity[0].email_identity_arn
-  name                         = local.notifications_config.name
-  sender_display_name          = local.notifications_config.sender_display_name
-  sender_email                 = local.notifications_config.sender_email
+  email_configuration_set_name = local.is_temporary ? module.existing_email_identity[0].email_configuration_set_name : module.email_identity[0].email_configuration_set_name
+  email_identity_arn           = local.is_temporary ? module.existing_email_identity[0].email_identity_arn : module.email_identity[0].email_identity_arn
+
+  name                = "${local.prefix}local.notifications_config.name"
+  sender_display_name = local.notifications_config.sender_display_name
+  sender_email        = local.notifications_config.sender_email
 }
 
 module "identity_provider" {
@@ -244,7 +257,7 @@ module "identity_provider" {
   verification_email_message       = local.identity_provider_config.verification_email.verification_email_message
   verification_email_subject       = local.identity_provider_config.verification_email.verification_email_subject
 
-  email_identity_arn  = module.app_config.enable_notifications ? module.email_identity[0].verified_sender_email_arn : null
+  email_identity_arn  = module.app_config.enable_notifications ? local.is_temporary ? module.existing_email_identity[0].verified_email_identity_arn : module.email_identity[0].verified_email_identity_arn : null
   sender_email        = module.app_config.enable_notifications ? local.notifications_config.sender_email : null
   sender_display_name = module.app_config.enable_notifications ? local.notifications_config.sender_display_name : null
   reply_to_email      = module.app_config.enable_notifications ? local.notifications_config.reply_to_email : null

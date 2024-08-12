@@ -1,24 +1,17 @@
 # This module manages an SESv2 email identity.
 # Docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sesv2_email_identity
-locals {
-  # Extract the domain used for sender identity verification from the sender_email.
-  domain = regex("@(.*)", var.sender_email)[0]
 
-  # Construct DNS records to be added to the sending domain.
-  # Only used if the sender identity verification method is domain verification.
-  dkim_dns_verification_records = var.email_verification_method == "domain" ? [
-    for token in aws_sesv2_email_identity.sender.dkim_signing_attributes[0].tokens : {
-      type  = "CNAME"
-      name  = "${token}._domainkey"
-      value = "${token}.dkim.amazonses.com"
-    }
-  ] : []
+# Retrieve shared config names.
+module "interface" {
+  source = "../interface"
+
+  sender_email = var.sender_email
 }
 
 # Verify email sender identity.
 # Docs: https://docs.aws.amazon.com/pinpoint/latest/userguide/channels-email-manage-verify.html
 resource "aws_sesv2_email_identity" "sender" {
-  email_identity         = var.email_verification_method == "email" ? var.sender_email : local.domain
+  email_identity         = var.email_verification_method == "email" ? var.sender_email : module.interface.domain
   configuration_set_name = aws_sesv2_configuration_set.email.configuration_set_name
 }
 
@@ -41,6 +34,19 @@ resource "aws_sesv2_configuration_set" "email" {
   suppression_options {
     suppressed_reasons = ["BOUNCE", "COMPLAINT"]
   }
+}
+
+# Use the data module to handle all the output logic.
+module "email_identity_data" {
+  source = "../data"
+
+  email_verification_method = var.email_verification_method
+  name                      = var.name
+  sender_email              = var.sender_email
+
+  depends_on = [
+    aws_sesv2_email_identity
+  ]
 }
 
 # Allow AWS Pinpoint to send email on behalf of this email identity.

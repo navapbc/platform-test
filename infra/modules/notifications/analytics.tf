@@ -4,7 +4,7 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 resource "aws_iam_role" "analytics" {
-  name               = "${var.name}-analytics"
+  name               = "${var.name}-notifications-analytics"
   assume_role_policy = data.aws_iam_policy_document.analytics_assume_role_policy.json
 }
 

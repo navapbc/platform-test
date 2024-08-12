@@ -1,8 +1,3 @@
-module "identity_provider_client_interface" {
-  source = "../interface"
-  name   = var.name
-}
-
 resource "aws_cognito_user_pool_client" "client" {
   name         = var.name
   user_pool_id = var.user_pool_id

@@ -191,7 +191,7 @@ module "service" {
     module.app_config.enable_identity_provider ? [{
       name      = "COGNITO_CLIENT_SECRET"
       valueFrom = module.identity_provider_client[0].client_secret_arn
-    }] : [],
+    }] : []
   )
 
   extra_policies = merge(

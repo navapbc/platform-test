@@ -267,7 +267,7 @@ module "identity_provider_client" {
   logout_urls   = local.identity_provider_config.client.logout_urls
   name          = local.identity_provider_config.identity_provider_name
 
-  cognito_user_pool_id = module.identity_provider[0].user_pool_id
+  user_pool_id = module.identity_provider[0].user_pool_id
 }
 
 # If the app has `enable_identity_provider` set to true AND this *is* a temporary

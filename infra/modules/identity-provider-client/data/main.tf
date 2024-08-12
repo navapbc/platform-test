@@ -18,6 +18,6 @@ data "aws_ssm_parameter" "existing_user_pool_client_secret" {
   name = module.identity_provider_client_interface.client_secret_ssm_name
 }
 
-data "aws_iam_policy" "existing_cognito_access_policy" {
+data "aws_iam_policy" "existing_identity_access_policy" {
   name = module.identity_provider_client_interface.user_pool_access_policy_name
 }

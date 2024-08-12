@@ -5,5 +5,5 @@ output "client_secret_ssm_name" {
 
 output "user_pool_access_policy_name" {
   description = "The name of the IAM policy that grants access to the existing user pool"
-  value       =  "${var.name}-identity-access"
+  value       = "${var.name}-identity-access"
 }

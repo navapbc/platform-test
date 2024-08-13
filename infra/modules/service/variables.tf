@@ -44,15 +44,17 @@ variable "scheduled_jobs" {
     # The name of your step function cron job, for example: "copy-data"
     name = string
     # A list of environment variables to add to your step function, for example: [name: "LOG_LEVEL", value: "INFO"]
-    environment = list(object({
+    environment = optional(list(object({
       name  = string
       value = string
-    }))
+    })))
     # The command you want you step function to run, for example: ["poetry", "run", "flask"]
     command = list(string)
     # The frequency that you want to run
-    # TODO: add frequency syntax docs from AWS
-    schedule_expression          = string
+    # docs: https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html
+    schedule_expression = string
+    # The timezone to use for the schedule expression
+    # docs: https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html#time-zones
     schedule_expression_timezone = string
     maximum_retry_attempts       = number
   }))

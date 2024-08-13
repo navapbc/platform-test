@@ -152,6 +152,8 @@ module "service" {
     }
   } : null
 
+  scheduled_jobs = local.environment_config.scheduled_jobs
+
   extra_environment_variables = merge(
     {
       FEATURE_FLAGS_PROJECT = module.feature_flags.evidently_project_name

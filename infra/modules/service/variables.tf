@@ -38,8 +38,8 @@ variable "db_vars" {
   default = null
 }
 
-variable "sfn_vars" {
-  description = "Variable for configuration the AWS step functions cronjob"
+variable "scheduled_jobs" {
+  description = "Variable for configuration the AWS step functions scheduled job"
   type = list(object({
     # The name of your step function cron job, for example: "copy-data"
     name = string

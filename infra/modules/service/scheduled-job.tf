@@ -1,8 +1,8 @@
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group
-resource "aws_cloudwatch_log_group" "sfn_cron_job" {
+resource "aws_cloudwatch_log_group" "scheduled_job" {
   for_each = {
-    for index, sfn_vars in var.sfn_vars :
-    sfn_vars.name => sfn_vars
+    for index, job in var.scheduled_jobs :
+    job.name => job
   }
 
   name_prefix = "/aws/vendedlogs/states/${var.service_name}-${each.value.name}"
@@ -16,14 +16,15 @@ resource "aws_cloudwatch_log_group" "sfn_cron_job" {
 }
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sfn_state_machine
-resource "aws_sfn_state_machine" "sfn_cron_job" {
+resource "aws_sfn_state_machine" "scheduled_job" {
   for_each = {
-    for index, sfn_vars in var.sfn_vars :
-    sfn_vars.name => sfn_vars
+    for index, job in var.scheduled_jobs :
+    job.name => job
   }
 
   name     = "${var.service_name}-${each.value.name}"
-  role_arn = module.service.task_role_arn
+  role_arn = aws_iam_role.app_service.arn
+
 
   definition = jsonencode({
     "StartAt" : "ExecuteECSTask",
@@ -33,13 +34,13 @@ resource "aws_sfn_state_machine" "sfn_cron_job" {
         # docs: https://docs.aws.amazon.com/step-functions/latest/dg/connect-ecs.html
         "Resource" : "arn:aws:states:::ecs:runTask.sync",
         "Parameters" : {
-          "Cluster" : module.service.cluster_arn,
-          "TaskDefinition" : module.service.task_definition_arn,
+          "Cluster" : aws_ecs_cluster.cluster.arn,
+          "TaskDefinition" : aws_ecs_task_definition.app.arn,
           "LaunchType" : "FARGATE",
           "NetworkConfiguration" : {
             "AwsvpcConfiguration" : {
-              "Subnets" : data.aws_subnets.private.ids,
-              "SecurityGroups" : [module.service.app_security_group_id],
+              "Subnets" : var.private_subnet_ids,
+              "SecurityGroups" : [aws_security_group.app.id],
             }
           },
           "Overrides" : {
@@ -58,7 +59,7 @@ resource "aws_sfn_state_machine" "sfn_cron_job" {
   })
 
   logging_configuration {
-    log_destination        = "${aws_cloudwatch_log_group.sfn_cron_job[each.key].arn}:*"
+    log_destination        = "${aws_cloudwatch_log_group.scheduled_job[each.key].arn}:*"
     include_execution_data = true
     level                  = "ERROR"
   }
@@ -69,20 +70,20 @@ resource "aws_sfn_state_machine" "sfn_cron_job" {
 }
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/scheduler_schedule_group
-resource "aws_scheduler_schedule_group" "sfn_cron_job" {
+resource "aws_scheduler_schedule_group" "scheduled_job" {
   for_each = {
-    for index, sfn_vars in var.sfn_vars :
-    sfn_vars.name => sfn_vars
+    for index, job in var.scheduled_jobs :
+    job.name => job
   }
 
   name = "${var.service_name}-${each.value.name}"
 }
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/scheduler_schedule
-resource "aws_scheduler_schedule" "sfn_cron_job" {
+resource "aws_scheduler_schedule" "scheduled_job" {
   for_each = {
-    for index, sfn_vars in var.sfn_vars :
-    sfn_vars.name => sfn_vars
+    for index, job in var.scheduled_jobs :
+    job.name => job
   }
 
   # TODO(https://github.com/navapbc/template-infra/issues/164) Encrypt with customer managed KMS key
@@ -90,7 +91,7 @@ resource "aws_scheduler_schedule" "sfn_cron_job" {
 
   name                         = "${var.service_name}-${each.value.name}"
   state                        = "ENABLED"
-  group_name                   = aws_scheduler_schedule_group.sfn_cron_job[each.key].id
+  group_name                   = aws_scheduler_schedule_group.scheduled_job[each.key].id
   schedule_expression          = each.value.schedule_expression
   schedule_expression_timezone = each.value.schedule_expression_timezone
 
@@ -100,8 +101,8 @@ resource "aws_scheduler_schedule" "sfn_cron_job" {
 
   # target is the state machine
   target {
-    arn      = aws_sfn_state_machine.sfn_cron_job[each.key].arn
-    role_arn = module.service.task_role_arn
+    arn      = aws_sfn_state_machine.scheduled_job[each.key].arn
+    role_arn = aws_iam_role.app_service.arn
 
     retry_policy {
       maximum_retry_attempts = each.value.maximum_retry_attempts

@@ -264,7 +264,7 @@ module "identity_provider_client" {
 
   callback_urls = local.identity_provider_config.client.callback_urls
   logout_urls   = local.identity_provider_config.client.logout_urls
-  name          = "${local.prefix}local.identity_provider_config.identity_provider_name"
+  name          = "${local.prefix}${local.identity_provider_config.identity_provider_name}"
 
   user_pool_id = local.identity_provider_user_pool_id
 }

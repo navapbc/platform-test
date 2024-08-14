@@ -49,6 +49,15 @@ locals {
   notifications_config                           = local.environment_config.notifications_config
 
   network_config = module.project_config.network_configs[local.environment_config.network_name]
+
+  # Identity provider locals.
+  # If this is a temporary environment, re-use an existing Cognito user pool.
+  # Otherwise, create a new one.
+  identity_provider_user_pool_id = module.app_config.enable_identity_provider && !local.is_temporary ? module.identity_provider[0].user_pool_id : module.existing_identity_provider[0].user_pool_id
+  identity_provider_environment_variables = module.app_config.enable_identity_provider ? {
+    COGNITO_USER_POOL_ID = local.identity_provider_user_pool_id,
+    COGNITO_CLIENT_ID    = module.identity_provider_client[0].client_id
+  } : {}
 }
 
 terraform {
@@ -167,21 +176,7 @@ module "service" {
       FEATURE_FLAGS_PROJECT = module.feature_flags.evidently_project_name
       BUCKET_NAME           = local.storage_config.bucket_name
     },
-    # If enabled_identity_provider is true:
-    #   If this is a temporary environment, re-use an existing Cognito user pool.
-    #   Otherwise, create a new one.
-    (
-      module.app_config.enable_identity_provider ?
-      (
-        local.is_temporary ?
-        { COGNITO_USER_POOL_ID = module.existing_identity_provider[0].user_pool_id }
-        : { COGNITO_USER_POOL_ID = module.identity_provider[0].user_pool_id }
-      ) : {}
-    ),
-    module.app_config.enable_identity_provider ?
-    {
-      COGNITO_CLIENT_ID = module.identity_provider_client[0].client_id
-    } : {},
+    local.identity_provider_environment_variables,
     local.service_config.extra_environment_variables
   )
 
@@ -271,5 +266,5 @@ module "identity_provider_client" {
   logout_urls   = local.identity_provider_config.client.logout_urls
   name          = "${local.prefix}local.identity_provider_config.identity_provider_name"
 
-  user_pool_id = module.app_config.enable_identity_provider && !local.is_temporary ? module.identity_provider[0].user_pool_id : module.existing_identity_provider[0].user_pool_id
+  user_pool_id = identity_provider_user_pool_id
 }

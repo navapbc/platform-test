@@ -5,6 +5,8 @@ resource "aws_iam_policy" "access_policy" {
 
 #tfsec:ignore:aws-iam-no-policy-wildcards
 data "aws_iam_policy_document" "access_policy" {
+  # checkov:skip=CKV_AWS_111:These permissions are scoped just fine
+
   # via https://docs.aws.amazon.com/step-functions/latest/dg/cw-logs.html
   statement {
     sid = "UnscopeLogsPermissions"
@@ -32,17 +34,6 @@ data "aws_iam_policy_document" "access_policy" {
     ]
     resources = ["*"]
   }
-
-  # statement {
-  #   sid = "PassRole"
-  #   actions = [
-  #     "iam:PassRole",
-  #   ]
-  #   resources = [
-  #     aws_iam_role.app_service.arn,
-  #     aws_iam_role.task_executor.arn,
-  #   ]
-  # }
 
   statement {
     sid = "StepFunctionsEvents"

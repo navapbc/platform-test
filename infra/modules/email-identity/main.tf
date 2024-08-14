@@ -10,7 +10,7 @@ locals {
     for token in data.aws_sesv2_email_identity.sender.dkim_signing_attributes[0].tokens : {
       type  = "CNAME"
       name  = "${token}._domainkey"
-      value = "${token}.dkim.amazonses.com"
+      record = "${token}.dkim.amazonses.com"
     }
   ] : []
 }
@@ -73,4 +73,24 @@ resource "aws_sesv2_email_identity_policy" "sender" {
   ]
 }
 EOF
+}
+
+# If email_verification_method is "domain", create a Route53 hosted zone for the sending
+# domain.
+resource "aws_route53_zone" "zone" {
+  count = var.email_verification_method == "domain" ? 1 : 0
+  name  = var.sender_email_domain_name
+  # checkov:skip=CKV2_AWS_38:TODO(https://github.com/navapbc/template-infra/issues/560) enable DNSSEC
+}
+
+# DNS records for email identity verification if email_verification_method is "domain"
+resource "aws_route53_record" "verification" {
+  for_each = local.dkim_dns_verification_records
+
+  allow_overwrite = true
+  zone_id         = aws_route53_zone.zone[0].zone_id
+  name            = each.value.name
+  type            = each.value.type
+  ttl             = 60
+  records         = [each.value.record]
 }

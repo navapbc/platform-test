@@ -90,6 +90,10 @@ data "aws_iam_policy_document" "pass_role" {
   }
 }
 
+resource "aws_iam_policy" "pass_role" {
+  name   = "${var.service_name}-pass-role-policy"
+  policy = data.aws_iam_policy_document.pass_role.json
+}
 
 resource "aws_iam_role_policy" "task_executor" {
   name   = "${var.service_name}-task-executor-role-policy"
@@ -99,7 +103,7 @@ resource "aws_iam_role_policy" "task_executor" {
 
 resource "aws_iam_role_policy_attachment" "pass_role" {
   role       = aws_iam_role.app_service.name
-  policy_arn = data.aws_iam_policy_document.pass_role.json
+  policy_arn = aws_iam_policy.pass_role.arn
 }
 
 resource "aws_iam_role_policy_attachment" "extra_policies" {

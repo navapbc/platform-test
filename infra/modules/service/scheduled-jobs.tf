@@ -87,7 +87,7 @@ resource "aws_scheduler_schedule" "scheduled_job" {
   }
 
   # TODO(https://github.com/navapbc/template-infra/issues/164) Encrypt with customer managed KMS key
-  # checkov:skip=CKV_AWS_158:Encrypt service logs with customer key in future work
+  # checkov:skip=CKV_AWS_297:Encrypt with customer key in future work
 
   name                         = "${var.service_name}-${each.value.name}"
   state                        = "ENABLED"

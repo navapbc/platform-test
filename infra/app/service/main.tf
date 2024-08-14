@@ -266,5 +266,5 @@ module "identity_provider_client" {
   logout_urls   = local.identity_provider_config.client.logout_urls
   name          = "${local.prefix}local.identity_provider_config.identity_provider_name"
 
-  user_pool_id = identity_provider_user_pool_id
+  user_pool_id = local.identity_provider_user_pool_id
 }

@@ -24,5 +24,9 @@ locals {
     # Note: Only used by the identity-provider service.
     reply_to_email = null
 
+    # Set this to `true` if the sender email address identity should be created in the
+    # region. To check, use the AWS Console to navigate to: Pinpoint > Email > Email
+    # Identities. Otherwise, set this to `false` to use the existing identity.
+    create_email_identity = false
   } : null
 }

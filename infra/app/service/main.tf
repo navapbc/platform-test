@@ -48,14 +48,18 @@ locals {
   network_config = module.project_config.network_configs[local.environment_config.network_name]
 
   # Notifications locals.
-  notifications_email_configuration_set_name = module.app_config.enable_notifications ? (
-    local.notifications_config.create_email_identity ? module.email_identity[0].email_configuration_set_name : module.existing_email_identity[0].email_configuration_set_name
+  # If notifications are enabled and the verification method is 'domain', then we
+  # construct the domain_name using the format: <terraform workspace><environment.<domain>
+  # For example: t-123456-dev.bar.com
+  notifications_sender_email_domain_name = module.app_config.enable_notifications ? (
+    local.notifications_config.email_verification_method == "email" ?
+    regex("@(.*)", local.notifications_config.sender_email)[0] :
+    "${prefix}${var.environment_name}.${local.service_config.domain_name}"
   ) : null
-  notifications_email_identity_arn = module.app_config.enable_notifications ? (
-    local.notifications_config.create_email_identity ? module.email_identity[0].email_identity_arn : module.existing_email_identity[0].email_identity_arn
-  ) : null
-  notifications_verified_email_identity_arn = module.app_config.enable_notifications ? (
-    local.notifications_config.create_email_identity ? module.email_identity[0].verified_email_identity_arn : module.existing_email_identity[0].verified_email_identity_arn
+  notifications_sender_email = module.app_config.enable_notifications ? (
+    local.notifications_config.email_verification_method == "email" ?
+    local.notifications_config.sender_email :
+    "${regex("(.*)@", local.notifications_config.sender_email)[0]}@${local.notifications_sender_email_domain_name}"
   ) : null
 }
 
@@ -230,33 +234,25 @@ module "storage" {
 }
 
 module "email_identity" {
-  count  = module.app_config.enable_notifications && local.notifications_config.create_email_identity ? 1 : 0
+  count  = module.app_config.enable_notifications ? 1 : 0
   source = "../../modules/email-identity/resources"
 
   email_verification_method = local.notifications_config.email_verification_method
   name                      = local.notifications_config.name
-  sender_email              = local.notifications_config.sender_email
-}
-
-module "existing_email_identity" {
-  count  = module.app_config.enable_notifications && !local.create_email_identity ? 1 : 0
-  source = "../../modules/email-identity/data"
-
-  email_verification_method = local.notifications_config.email_verification_method
-  name                      = local.notifications_config.name
-  sender_email              = local.notifications_config.sender_email
+  sender_email              = local.notifications_sender_email
+  sender_email_domain_name  = local.notifications_sender_email_domain_name
 }
 
 module "notifications" {
   count  = module.app_config.enable_notifications ? 1 : 0
   source = "../../modules/notifications"
 
-  email_configuration_set_name = local.notifications_email_configuration_set_name
-  email_identity_arn           = local.notifications_email_identity_arn
+  email_configuration_set_name = module.email_identity[0].email_configuration_set_name
+  email_identity_arn           = module.email_identity[0].email_identity_arn
 
   name                = "${local.prefix}${local.notifications_config.name}"
   sender_display_name = local.notifications_config.sender_display_name
-  sender_email        = local.notifications_config.sender_email
+  sender_email        = local.notifications_sender_email
 }
 
 module "identity_provider" {
@@ -270,10 +266,12 @@ module "identity_provider" {
   verification_email_message       = local.identity_provider_config.verification_email.verification_email_message
   verification_email_subject       = local.identity_provider_config.verification_email.verification_email_subject
 
-  email_identity_arn  = local.notifications_verified_email_identity_arn
-  sender_email        = module.app_config.enable_notifications ? local.notifications_config.sender_email : null
+  sender_email        = module.app_config.enable_notifications ? local.notifications_sender_email : null
   sender_display_name = module.app_config.enable_notifications ? local.notifications_config.sender_display_name : null
   reply_to_email      = module.app_config.enable_notifications ? local.notifications_config.reply_to_email : null
+
+  # This requires an email identity that has been verified for sending.
+  email_identity_arn = module.app_config.enable_notifications ? module.email_identity[0].verified_email_identity_arn : null
 }
 
 module "identity_provider_client" {

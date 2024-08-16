@@ -41,11 +41,6 @@ locals {
     prod    = module.prod_config
   }
 
-  build_repository_config = {
-    name   = "${local.project_name}-${local.app_name}"
-    region = module.project_config.default_region
-  }
-
   # The name of the network that contains the resources shared across all
   # application environments, such as the build repository.
   # The list of networks can be found in /infra/networks

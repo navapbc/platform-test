@@ -51,7 +51,7 @@ module "app_config" {
 }
 
 data "external" "account_ids_by_name" {
-  program = ["../../../bin/account-ids-by-name"]
+  program = ["${path.module}/../../../bin/account-ids-by-name"]
 }
 
 module "container_image_repository" {

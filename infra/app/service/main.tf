@@ -141,7 +141,8 @@ module "service" {
   source       = "../../modules/service"
   service_name = local.service_config.service_name
 
-  image_repository_name = local.build_repository_config.name
+  image_repository_arn = local.build_repository_config.repository_arn
+  image_repository_url = local.build_repository_config.repository_url
 
   image_tag = local.image_tag
 

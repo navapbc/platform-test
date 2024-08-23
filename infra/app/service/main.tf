@@ -116,8 +116,9 @@ data "aws_route53_zone" "zone" {
 }
 
 module "service" {
-  source       = "../../modules/service"
-  service_name = local.service_config.service_name
+  source           = "../../modules/service"
+  service_name     = local.service_config.service_name
+  environment_name = var.environment_name
 
   image_repository_name = module.app_config.image_repository_name
   image_tag             = local.image_tag
@@ -138,6 +139,7 @@ module "service" {
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
 
   file_upload_jobs = local.service_config.file_upload_jobs
+  scheduled_jobs   = local.environment_config.scheduled_jobs
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
@@ -151,8 +153,6 @@ module "service" {
       schema_name = local.database_config.schema_name
     }
   } : null
-
-  scheduled_jobs = local.environment_config.scheduled_jobs
 
   extra_environment_variables = merge(
     {
@@ -181,7 +181,6 @@ module "service" {
     {
       feature_flags_access = module.feature_flags.access_policy_arn,
       storage_access       = module.storage.access_policy_arn
-      scheduled_jobs       = module.scheduled_jobs.access_policy_arn
     },
     module.app_config.enable_identity_provider ? {
       identity_provider_access = module.identity_provider_client[0].access_policy_arn,
@@ -200,11 +199,6 @@ module "monitoring" {
   service_name                                = local.service_config.service_name
   load_balancer_arn_suffix                    = module.service.load_balancer_arn_suffix
   incident_management_service_integration_url = module.app_config.has_incident_management_service && !local.is_temporary ? data.aws_ssm_parameter.incident_management_service_integration_url[0].value : null
-}
-
-module "scheduled_jobs" {
-  source       = "../../modules/scheduled-jobs"
-  service_name = local.service_config.service_name
 }
 
 module "feature_flags" {

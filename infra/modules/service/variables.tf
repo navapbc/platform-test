@@ -56,6 +56,11 @@ variable "enable_command_execution" {
   description = "Whether the service should enable ECS Exec, such as for debugging"
 }
 
+variable "environment_name" {
+  type        = string
+  description = "name of the application environment"
+}
+
 variable "extra_environment_variables" {
   type        = map(string)
   description = "Additional environment variables to pass to the service container. Map from environment variable name to the value."
@@ -135,22 +140,10 @@ variable "public_subnet_ids" {
 }
 
 variable "scheduled_jobs" {
-  description = "Variable for configuration the AWS step functions scheduled job"
+  description = "Variable for configuration of the step functions scheduled job"
   type = map(object({
-    # A list of environment variables to add to your step function, for example: [name: "LOG_LEVEL", value: "INFO"]
-    environment = optional(list(object({
-      name  = string
-      value = string
-    })))
-    # The command you want you step function to run, for example: ["poetry", "run", "flask"]
-    command = list(string)
-    # The frequency that you want to run
-    # docs: https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html
+    task_command        = list(string)
     schedule_expression = string
-    # The timezone to use for the schedule expression
-    # docs: https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html#time-zones
-    schedule_expression_timezone = string
-    maximum_retry_attempts       = number
   }))
   default = {}
 }

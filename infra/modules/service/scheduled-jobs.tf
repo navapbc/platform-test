@@ -1,35 +1,13 @@
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group
-resource "aws_cloudwatch_log_group" "scheduled_job" {
-  for_each = {
-    for index, job in var.scheduled_jobs :
-    job.name => job
-  }
-
-  name_prefix = "/aws/vendedlogs/states/${var.service_name}-${each.value.name}"
-
-  # Conservatively retain logs for 5 years.
-  # Looser requirements may allow shorter retention periods
-  retention_in_days = 1827
-
-  # TODO(https://github.com/navapbc/template-infra/issues/164) Encrypt with customer managed KMS key
-  # checkov:skip=CKV_AWS_158:Encrypt service logs with customer key in future work
-}
-
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sfn_state_machine
 resource "aws_sfn_state_machine" "scheduled_job" {
-  for_each = {
-    for index, job in var.scheduled_jobs :
-    job.name => job
-  }
+  for_each = var.scheduled_jobs
 
   name     = "${var.service_name}-${each.value.name}"
   role_arn = aws_iam_role.app_service.arn
 
-
   definition = jsonencode({
-    "StartAt" : "ExecuteECSTask",
+    "StartAt" : "RunTask",
     "States" : {
-      "ExecuteECSTask" : {
+      "RunTask" : {
         "Type" : "Task",
         # docs: https://docs.aws.amazon.com/step-functions/latest/dg/connect-ecs.html
         "Resource" : "arn:aws:states:::ecs:runTask.sync",
@@ -47,7 +25,6 @@ resource "aws_sfn_state_machine" "scheduled_job" {
             "ContainerOverrides" : [
               {
                 "Name" : var.service_name,
-                "Environment" : each.value.environment
                 "Command" : each.value.command
               }
             ]
@@ -69,22 +46,14 @@ resource "aws_sfn_state_machine" "scheduled_job" {
   }
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/scheduler_schedule_group
 resource "aws_scheduler_schedule_group" "scheduled_job" {
-  for_each = {
-    for index, job in var.scheduled_jobs :
-    job.name => job
-  }
+  for_each = var.scheduled_jobs
 
   name = "${var.service_name}-${each.value.name}"
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/scheduler_schedule
 resource "aws_scheduler_schedule" "scheduled_job" {
-  for_each = {
-    for index, job in var.scheduled_jobs :
-    job.name => job
-  }
+  for_each = var.scheduled_jobs
 
   # TODO(https://github.com/navapbc/template-infra/issues/164) Encrypt with customer managed KMS key
   # checkov:skip=CKV_AWS_297:Encrypt with customer key in future work
@@ -108,4 +77,17 @@ resource "aws_scheduler_schedule" "scheduled_job" {
       maximum_retry_attempts = each.value.maximum_retry_attempts
     }
   }
+}
+
+resource "aws_cloudwatch_log_group" "scheduled_job" {
+  for_each = var.scheduled_jobs
+
+  name_prefix = "/aws/vendedlogs/states/${var.service_name}-${each.value.name}"
+
+  # Conservatively retain logs for 5 years.
+  # Looser requirements may allow shorter retention periods
+  retention_in_days = 1827
+
+  # TODO(https://github.com/navapbc/template-infra/issues/164) Encrypt with customer managed KMS key
+  # checkov:skip=CKV_AWS_158:Encrypt service logs with customer key in future work
 }

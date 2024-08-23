@@ -38,29 +38,6 @@ variable "db_vars" {
   default = null
 }
 
-variable "scheduled_jobs" {
-  description = "Variable for configuration the AWS step functions scheduled job"
-  type = list(object({
-    # The name of your step function cron job, for example: "copy-data"
-    name = string
-    # A list of environment variables to add to your step function, for example: [name: "LOG_LEVEL", value: "INFO"]
-    environment = optional(list(object({
-      name  = string
-      value = string
-    })))
-    # The command you want you step function to run, for example: ["poetry", "run", "flask"]
-    command = list(string)
-    # The frequency that you want to run
-    # docs: https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html
-    schedule_expression = string
-    # The timezone to use for the schedule expression
-    # docs: https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html#time-zones
-    schedule_expression_timezone = string
-    maximum_retry_attempts       = number
-  }))
-  default = []
-}
-
 variable "desired_instance_count" {
   type        = number
   description = "Number of instances of the task definition to place and keep running."
@@ -155,6 +132,29 @@ variable "private_subnet_ids" {
 variable "public_subnet_ids" {
   type        = list(any)
   description = "Public subnet ids in VPC"
+}
+
+variable "scheduled_jobs" {
+  description = "Variable for configuration the AWS step functions scheduled job"
+  type = map(object({
+    # The name of your step function cron job, for example: "copy-data"
+    name = string
+    # A list of environment variables to add to your step function, for example: [name: "LOG_LEVEL", value: "INFO"]
+    environment = optional(list(object({
+      name  = string
+      value = string
+    })))
+    # The command you want you step function to run, for example: ["poetry", "run", "flask"]
+    command = list(string)
+    # The frequency that you want to run
+    # docs: https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html
+    schedule_expression = string
+    # The timezone to use for the schedule expression
+    # docs: https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html#time-zones
+    schedule_expression_timezone = string
+    maximum_retry_attempts       = number
+  }))
+  default = {}
 }
 
 variable "secrets" {

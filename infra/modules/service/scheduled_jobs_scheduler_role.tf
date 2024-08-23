@@ -8,6 +8,11 @@ resource "aws_iam_policy" "scheduled_jobs_scheduler_policy" {
   policy = data.aws_iam_policy_document.scheduled_jobs_scheduler_policy.json
 }
 
+resource "aws_iam_role_policy_attachment" "scheduled_jobs_scheduler_policy_attachment" {
+  role       = aws_iam_role.scheduled_jobs_scheduler_role.name
+  policy_arn = aws_iam_policy.scheduled_jobs_scheduler_policy.arn
+}
+
 data "aws_iam_policy_document" "scheduled_jobs_scheduler_assume_role_policy" {
   statement {
     sid = "ECSTasksAssumeRole"

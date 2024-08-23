@@ -8,6 +8,13 @@ resource "aws_iam_policy" "scheduled_jobs_workflow_policy" {
   policy = data.aws_iam_policy_document.scheduled_jobs_workflow_policy.json
 }
 
+resource "aws_iam_role_policy_attachment" "scheduled_jobs_workflow_policy_attachment" {
+  role       = aws_iam_role.scheduled_jobs_workflow_role.name
+  policy_arn = aws_iam_policy.scheduled_jobs_workflow_policy.arn
+}
+
+# policy sourced via: https://docs.aws.amazon.com/step-functions/latest/dg/procedure-create-iam-role.html
+# TODO: limit by source account
 data "aws_iam_policy_document" "scheduled_jobs_workflow_assume_role_policy" {
   statement {
     sid = "ECSTasksAssumeRole"
@@ -53,7 +60,9 @@ data "aws_iam_policy_document" "scheduled_jobs_workflow_policy" {
       "events:PutRule",
       "events:DescribeRule",
     ]
-    resources = ["arn:aws:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/StepFunctionsGetEventsForECSTaskRule"]
+    resources = [
+      "arn:aws:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/StepFunctionsGetEventsForECSTaskRule",
+    ]
   }
 
   # policy sourced via: https://docs.aws.amazon.com/step-functions/latest/dg/ecs-iam.html
@@ -66,4 +75,13 @@ data "aws_iam_policy_document" "scheduled_jobs_workflow_policy" {
     ]
     resources = ["*"]
   }
+
+  statement {
+    sid = "PassRole"
+    actions = [
+      "iam:PassRole",
+    ]
+    resources = [aws_iam_role.task_executor.arn]
+  }
 }
+

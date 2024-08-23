@@ -25,6 +25,7 @@ data "aws_iam_policy_document" "scheduled_jobs_scheduler_assume_role_policy" {
 
 data "aws_iam_policy_document" "scheduled_jobs_scheduler_policy" {
 
+  # policy sourced via: https://docs.aws.amazon.com/step-functions/latest/dg/stepfunctions-iam.html
   statement {
     sid = "StepFunctionsEvents"
     actions = [

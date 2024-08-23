@@ -137,8 +137,6 @@ variable "public_subnet_ids" {
 variable "scheduled_jobs" {
   description = "Variable for configuration the AWS step functions scheduled job"
   type = map(object({
-    # The name of your step function cron job, for example: "copy-data"
-    name = string
     # A list of environment variables to add to your step function, for example: [name: "LOG_LEVEL", value: "INFO"]
     environment = optional(list(object({
       name  = string

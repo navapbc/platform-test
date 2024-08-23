@@ -19,7 +19,6 @@ resource "aws_iam_role_policy_attachment" "scheduled_jobs_workflow_policy_attach
 }
 
 # policy sourced via: https://docs.aws.amazon.com/step-functions/latest/dg/procedure-create-iam-role.html
-# TODO: limit by source account
 data "aws_iam_policy_document" "scheduled_jobs_workflow_assume_role_policy" {
   statement {
     sid = "ECSTasksAssumeRole"
@@ -30,6 +29,21 @@ data "aws_iam_policy_document" "scheduled_jobs_workflow_assume_role_policy" {
       type = "Service"
       identifiers = [
         "states.amazonaws.com",
+      ]
+    }
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+      values = [
+        "arn:${data.aws_partition.current.id}:states:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:stateMachine:*"
+      ]
+    }
+
+    condition {
+      test     = "StringLike"
+      variable = "aws:SourceAccount"
+      values = [
+        data.aws_caller_identity.current.account_id
       ]
     }
   }

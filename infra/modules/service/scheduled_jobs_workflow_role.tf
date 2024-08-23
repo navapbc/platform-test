@@ -81,7 +81,9 @@ data "aws_iam_policy_document" "scheduled_jobs_workflow_policy" {
     actions = [
       "iam:PassRole",
     ]
-    resources = [aws_iam_role.task_executor.arn]
+    resources = [
+      aws_iam_role.task_executor.arn,
+      aws_iam_role.app_service.arn,
+    ]
   }
 }
-

@@ -1,3 +1,8 @@
+#--------------------------------
+# Scheduler Workflow Manager Role
+#--------------------------------
+# This role and policy are used by the Step Functions state machine that manages the scheduled jobs workflow.
+
 resource "aws_iam_role" "scheduled_jobs_workflow_role" {
   name               = "${var.service_name}-scheduled-jobs-workflow"
   assume_role_policy = data.aws_iam_policy_document.scheduled_jobs_workflow_assume_role_policy.json

@@ -63,10 +63,7 @@ def document_upload():
     path = f"uploads/{datetime.now().date()}/${{filename}}"
     upload_url, fields = storage.create_upload_url(path)
     additional_fields = "".join(
-        [
-            f'<input type="hidden" name="{name}" value="{value}">'
-            for name, value in fields.items()
-        ]
+        [f'<input type="hidden" name="{name}" value="{value}">' for name, value in fields.items()]
     )
     # Note: Additional fields should come first before the file and submit button
     return f'<form method="post" action="{upload_url}" enctype="multipart/form-data">{additional_fields}<input type="file" name="file"><input type="submit"></form>'
@@ -87,6 +84,13 @@ def etl(input):
     output = input.replace("/input/", "/output/")
     data = storage.download_file(input)
     storage.upload_file(output, data)
+
+
+@app.cli.command("cron", help="Run cron job")
+def cron():
+    conn = get_db_connection()
+    conn.execute("SELECT 1")
+    print("Hello from cron job")
 
 
 if __name__ == "__main__":

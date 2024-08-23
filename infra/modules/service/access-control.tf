@@ -73,33 +73,10 @@ data "aws_iam_policy_document" "task_executor" {
   }
 }
 
-data "aws_iam_policy_document" "pass_role" {
-  statement {
-    sid = "PassRole"
-    actions = [
-      "iam:PassRole",
-    ]
-    resources = [
-      aws_iam_role.app_service.arn,
-      aws_iam_role.task_executor.arn,
-    ]
-  }
-}
-
-resource "aws_iam_policy" "pass_role" {
-  name   = "${var.service_name}-pass-role-policy"
-  policy = data.aws_iam_policy_document.pass_role.json
-}
-
 resource "aws_iam_role_policy" "task_executor" {
   name   = "${var.service_name}-task-executor-role-policy"
   role   = aws_iam_role.task_executor.id
   policy = data.aws_iam_policy_document.task_executor.json
-}
-
-resource "aws_iam_role_policy_attachment" "pass_role" {
-  role       = aws_iam_role.app_service.name
-  policy_arn = aws_iam_policy.pass_role.arn
 }
 
 resource "aws_iam_role_policy_attachment" "extra_policies" {

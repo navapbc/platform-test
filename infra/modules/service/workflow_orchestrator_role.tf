@@ -3,24 +3,14 @@
 #--------------------------------
 # This role and policy are used by the Step Functions state machine that manages the scheduled jobs workflow.
 
-resource "aws_iam_role" "workflow_" {
-  name                = "${var.service_name}-scheduled-jobs-workflow"
-  managed_policy_arns = []
-  assume_role_policy  = data.aws_iam_policy_document.scheduled_jobs_workflow_assume_role_policy.json
-}
-
-resource "aws_iam_policy" "scheduled_jobs_workflow_policy" {
-  name   = "${var.service_name}-scheduled-jobs-workflow"
-  policy = data.aws_iam_policy_document.scheduled_jobs_workflow_policy.json
-}
-
-resource "aws_iam_role_policy_attachment" "scheduled_jobs_workflow_policy_attachment" {
-  role       = aws_iam_role.scheduled_jobs_workflow_role.name
-  policy_arn = aws_iam_policy.scheduled_jobs_workflow_policy.arn
+resource "aws_iam_role" "workflow_orchestrator" {
+  name                = "${var.service_name}-workflow-orchestrator"
+  managed_policy_arns = [aws_iam_policy.orchestrate_workflows.arn]
+  assume_role_policy  = data.aws_iam_policy_document.workflow_orchestrator_assume_role.json
 }
 
 # policy sourced via: https://docs.aws.amazon.com/step-functions/latest/dg/procedure-create-iam-role.html
-data "aws_iam_policy_document" "scheduled_jobs_workflow_assume_role_policy" {
+data "aws_iam_policy_document" "workflow_orchestrator_assume_role" {
   statement {
     sid     = "ECSTasksAssumeRole"
     actions = ["sts:AssumeRole"]
@@ -44,8 +34,13 @@ data "aws_iam_policy_document" "scheduled_jobs_workflow_assume_role_policy" {
   }
 }
 
+resource "aws_iam_policy" "orchestrate_workflows" {
+  name   = "${var.service_name}-workflow-orchestrator"
+  policy = data.aws_iam_policy_document.orchestrate_workflows.json
+}
+
 #tfsec:ignore:aws-iam-no-policy-wildcards
-data "aws_iam_policy_document" "scheduled_jobs_workflow_policy" {
+data "aws_iam_policy_document" "orchestrate_workflows" {
   # checkov:skip=CKV_AWS_111:These permissions are scoped just fine
 
   # policy sourced via: https://docs.aws.amazon.com/step-functions/latest/dg/cw-logs.html
@@ -77,17 +72,6 @@ data "aws_iam_policy_document" "scheduled_jobs_workflow_policy" {
     resources = [
       "arn:aws:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/StepFunctionsGetEventsForECSTaskRule",
     ]
-  }
-
-  # policy sourced via: https://docs.aws.amazon.com/step-functions/latest/dg/ecs-iam.html
-  statement {
-    sid = "StepFunctionsRunTask"
-    actions = [
-      "ecs:RunTask",
-      "ecs:StopTask",
-      "ecs:DescribeTasks",
-    ]
-    resources = ["*"]
   }
 
   statement {

@@ -16,7 +16,7 @@ resource "aws_scheduler_schedule" "scheduled_jobs" {
   # target is the state machine
   target {
     arn      = aws_sfn_state_machine.scheduled_jobs[each.key].arn
-    role_arn = aws_iam_role.scheduled_jobs_scheduler_role.arn
+    role_arn = aws_iam_role.scheduler.arn
 
     retry_policy {
       maximum_retry_attempts = 0
@@ -28,7 +28,7 @@ resource "aws_sfn_state_machine" "scheduled_jobs" {
   for_each = var.scheduled_jobs
 
   name     = "${var.service_name}-${each.key}"
-  role_arn = aws_iam_role.scheduled_jobs_workflow_role.arn
+  role_arn = aws_iam_role.workflow_orchestrator.arn
 
   definition = jsonencode({
     "StartAt" : "RunTask",

@@ -4,7 +4,7 @@
 # This role and policy are used by EventBridge to manage the scheduled jobs.
 
 resource "aws_iam_role" "scheduler" {
-  name                = "${var.service_name}-scheduled-jobs-scheduler"
+  name                = "${var.service_name}-scheduler"
   managed_policy_arns = [aws_iam_policy.scheduled_jobs.arn]
   assume_role_policy  = data.aws_iam_policy_document.scheduler_assume_role.json
 }
@@ -21,7 +21,7 @@ data "aws_iam_policy_document" "scheduler_assume_role" {
 }
 
 resource "aws_iam_policy" "scheduled_jobs" {
-  name   = "${var.service_name}-scheduled-jobs"
+  name   = "${var.service_name}-scheduler"
   policy = data.aws_iam_policy_document.scheduled_jobs.json
 }
 

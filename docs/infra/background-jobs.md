@@ -19,4 +19,4 @@ File upload jobs use AWS EventBridge to listen to "Object Created" events when f
 
 ### Scheduled Jobs
 
-Scheduled jobs use AWS EventBridge to trigger AWS Step Functions jobs on a reoccurring basis. The trigger can use cron, or a rate (hourly, daily, etc) based syntax, via their `schedule_expression`. Similarly to the file upload jobs, the task uses the same container image and configuration, with the exception of the entry-point, which is specified by the job configuration's `task_command` setting.
+Scheduled jobs use AWS EventBridge to trigger AWS Step Functions jobs on a reoccurring basis. The trigger can use cron, or a rate (hourly, daily, etc) based syntax, via their `schedule_expression`. Similarly to the file upload jobs, the task uses the same container image and configuration, with the exception of the entry-point, which is specified by the job configuration's `task_command` setting. Scheduled jobs can be configured with retries, to trigger multiple jobs in a row, or to run in a certain timezone - although we do not configure any of these settings by default.

@@ -3,9 +3,10 @@
 #--------------------------------
 # This role and policy are used by the Step Functions state machine that manages the scheduled jobs workflow.
 
-resource "aws_iam_role" "scheduled_jobs_workflow_role" {
-  name               = "${var.service_name}-scheduled-jobs-workflow"
-  assume_role_policy = data.aws_iam_policy_document.scheduled_jobs_workflow_assume_role_policy.json
+resource "aws_iam_role" "workflow_" {
+  name                = "${var.service_name}-scheduled-jobs-workflow"
+  managed_policy_arns = []
+  assume_role_policy  = data.aws_iam_policy_document.scheduled_jobs_workflow_assume_role_policy.json
 }
 
 resource "aws_iam_policy" "scheduled_jobs_workflow_policy" {
@@ -21,22 +22,16 @@ resource "aws_iam_role_policy_attachment" "scheduled_jobs_workflow_policy_attach
 # policy sourced via: https://docs.aws.amazon.com/step-functions/latest/dg/procedure-create-iam-role.html
 data "aws_iam_policy_document" "scheduled_jobs_workflow_assume_role_policy" {
   statement {
-    sid = "ECSTasksAssumeRole"
-    actions = [
-      "sts:AssumeRole"
-    ]
+    sid     = "ECSTasksAssumeRole"
+    actions = ["sts:AssumeRole"]
     principals {
-      type = "Service"
-      identifiers = [
-        "states.amazonaws.com",
-      ]
+      type        = "Service"
+      identifiers = ["states.amazonaws.com"]
     }
     condition {
       test     = "ArnLike"
       variable = "aws:SourceArn"
-      values = [
-        "arn:aws:states:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:stateMachine:*"
-      ]
+      values   = ["arn:aws:states:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:stateMachine:*"]
     }
 
     condition {
@@ -94,6 +89,32 @@ data "aws_iam_policy_document" "scheduled_jobs_workflow_policy" {
     ]
     resources = ["*"]
   }
+
+  statement {
+    effect    = "Allow"
+    actions   = ["ecs:RunTask"]
+    resources = ["${aws_ecs_task_definition.app.arn_without_revision}:*"]
+    condition {
+      test     = "ArnLike"
+      variable = "ecs:cluster"
+      values   = [aws_ecs_cluster.cluster.arn]
+    }
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "ecs:StopTask",
+      "ecs:DescribeTasks",
+    ]
+    resources = ["arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:task/${var.service_name}/*"]
+    condition {
+      test     = "ArnLike"
+      variable = "ecs:cluster"
+      values   = [aws_ecs_cluster.cluster.arn]
+    }
+  }
+
 
   statement {
     sid = "PassRole"

@@ -3,37 +3,29 @@
 #----------------------
 # This role and policy are used by EventBridge to manage the scheduled jobs.
 
-resource "aws_iam_role" "scheduled_jobs_scheduler_role" {
-  name               = "${var.service_name}-scheduled-jobs-scheduler"
-  assume_role_policy = data.aws_iam_policy_document.scheduled_jobs_scheduler_assume_role_policy.json
+resource "aws_iam_role" "scheduler" {
+  name                = "${var.service_name}-scheduled-jobs-scheduler"
+  managed_policy_arns = [aws_iam_policy.scheduled_jobs.arn]
+  assume_role_policy  = data.aws_iam_policy_document.scheduler_assume_role.json
 }
 
-resource "aws_iam_policy" "scheduled_jobs_scheduler_policy" {
-  name   = "${var.service_name}-scheduled-jobs-scheduler"
-  policy = data.aws_iam_policy_document.scheduled_jobs_scheduler_policy.json
-}
-
-resource "aws_iam_role_policy_attachment" "scheduled_jobs_scheduler_policy_attachment" {
-  role       = aws_iam_role.scheduled_jobs_scheduler_role.name
-  policy_arn = aws_iam_policy.scheduled_jobs_scheduler_policy.arn
-}
-
-data "aws_iam_policy_document" "scheduled_jobs_scheduler_assume_role_policy" {
+data "aws_iam_policy_document" "scheduler_assume_role" {
   statement {
-    sid = "ECSTasksAssumeRole"
-    actions = [
-      "sts:AssumeRole"
-    ]
+    sid     = "ECSTasksAssumeRole"
+    actions = ["sts:AssumeRole"]
     principals {
-      type = "Service"
-      identifiers = [
-        "scheduler.amazonaws.com"
-      ]
+      type        = "Service"
+      identifiers = ["scheduler.amazonaws.com"]
     }
   }
 }
 
-data "aws_iam_policy_document" "scheduled_jobs_scheduler_policy" {
+resource "aws_iam_policy" "scheduled_jobs" {
+  name   = "${var.service_name}-scheduled-jobs"
+  policy = data.aws_iam_policy_document.scheduled_jobs.json
+}
+
+data "aws_iam_policy_document" "scheduled_jobs" {
 
   # policy sourced via: https://docs.aws.amazon.com/step-functions/latest/dg/stepfunctions-iam.html
   statement {
@@ -48,7 +40,7 @@ data "aws_iam_policy_document" "scheduled_jobs_scheduler_policy" {
 
   # policy sourced via: https://docs.aws.amazon.com/step-functions/latest/dg/stepfunctions-iam.html
   dynamic "statement" {
-    for_each = aws_sfn_state_machine.scheduled_job
+    for_each = aws_sfn_state_machine.scheduled_jobs
 
     content {
       actions = [
@@ -60,7 +52,7 @@ data "aws_iam_policy_document" "scheduled_jobs_scheduler_policy" {
 
   # policy sourced via: https://docs.aws.amazon.com/step-functions/latest/dg/stepfunctions-iam.html
   dynamic "statement" {
-    for_each = aws_sfn_state_machine.scheduled_job
+    for_each = aws_sfn_state_machine.scheduled_jobs
 
     content {
       actions = [

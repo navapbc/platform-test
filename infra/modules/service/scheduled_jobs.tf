@@ -1,4 +1,30 @@
-resource "aws_sfn_state_machine" "scheduled_job" {
+resource "aws_scheduler_schedule" "scheduled_jobs" {
+  for_each = var.scheduled_jobs
+
+  # TODO(https://github.com/navapbc/template-infra/issues/164) Encrypt with customer managed KMS key
+  # checkov:skip=CKV_AWS_297:Encrypt with customer key in future work
+
+  name                         = "${var.service_name}-${each.key}"
+  state                        = "ENABLED"
+  schedule_expression          = each.value.schedule_expression
+  schedule_expression_timezone = "Etc/UTC"
+
+  flexible_time_window {
+    mode = "OFF"
+  }
+
+  # target is the state machine
+  target {
+    arn      = aws_sfn_state_machine.scheduled_jobs[each.key].arn
+    role_arn = aws_iam_role.scheduled_jobs_scheduler_role.arn
+
+    retry_policy {
+      maximum_retry_attempts = 0
+    }
+  }
+}
+
+resource "aws_sfn_state_machine" "scheduled_jobs" {
   for_each = var.scheduled_jobs
 
   name     = "${var.service_name}-${each.key}"
@@ -36,7 +62,7 @@ resource "aws_sfn_state_machine" "scheduled_job" {
   })
 
   logging_configuration {
-    log_destination        = "${aws_cloudwatch_log_group.scheduled_job[each.key].arn}:*"
+    log_destination        = "${aws_cloudwatch_log_group.scheduled_jobs[each.key].arn}:*"
     include_execution_data = true
     level                  = "ERROR"
   }
@@ -46,33 +72,7 @@ resource "aws_sfn_state_machine" "scheduled_job" {
   }
 }
 
-resource "aws_scheduler_schedule" "scheduled_job" {
-  for_each = var.scheduled_jobs
-
-  # TODO(https://github.com/navapbc/template-infra/issues/164) Encrypt with customer managed KMS key
-  # checkov:skip=CKV_AWS_297:Encrypt with customer key in future work
-
-  name                         = "${var.service_name}-${each.key}"
-  state                        = "ENABLED"
-  schedule_expression          = each.value.schedule_expression
-  schedule_expression_timezone = "Etc/UTC"
-
-  flexible_time_window {
-    mode = "OFF"
-  }
-
-  # target is the state machine
-  target {
-    arn      = aws_sfn_state_machine.scheduled_job[each.key].arn
-    role_arn = aws_iam_role.scheduled_jobs_scheduler_role.arn
-
-    retry_policy {
-      maximum_retry_attempts = 0
-    }
-  }
-}
-
-resource "aws_cloudwatch_log_group" "scheduled_job" {
+resource "aws_cloudwatch_log_group" "scheduled_jobs" {
   for_each = var.scheduled_jobs
 
   name_prefix = "/aws/vendedlogs/states/${var.service_name}-${each.key}"

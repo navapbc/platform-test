@@ -5,11 +5,10 @@
 
 resource "aws_iam_role" "workflow_orchestrator" {
   name                = "${var.service_name}-workflow-orchestrator"
-  managed_policy_arns = [aws_iam_policy.orchestrate_workflows.arn]
+  managed_policy_arns = [aws_iam_policy.workflow_orchestrator.arn]
   assume_role_policy  = data.aws_iam_policy_document.workflow_orchestrator_assume_role.json
 }
 
-# policy sourced via: https://docs.aws.amazon.com/step-functions/latest/dg/procedure-create-iam-role.html
 data "aws_iam_policy_document" "workflow_orchestrator_assume_role" {
   statement {
     sid     = "ECSTasksAssumeRole"
@@ -34,16 +33,15 @@ data "aws_iam_policy_document" "workflow_orchestrator_assume_role" {
   }
 }
 
-resource "aws_iam_policy" "orchestrate_workflows" {
+resource "aws_iam_policy" "workflow_orchestrator" {
   name   = "${var.service_name}-workflow-orchestrator"
-  policy = data.aws_iam_policy_document.orchestrate_workflows.json
+  policy = data.aws_iam_policy_document.workflow_orchestrator.json
 }
 
 #tfsec:ignore:aws-iam-no-policy-wildcards
-data "aws_iam_policy_document" "orchestrate_workflows" {
+data "aws_iam_policy_document" "workflow_orchestrator" {
   # checkov:skip=CKV_AWS_111:These permissions are scoped just fine
 
-  # policy sourced via: https://docs.aws.amazon.com/step-functions/latest/dg/cw-logs.html
   statement {
     sid = "UnscopeLogsPermissions"
     actions = [
@@ -61,7 +59,6 @@ data "aws_iam_policy_document" "orchestrate_workflows" {
     resources = ["*"]
   }
 
-  # policy sourced via: https://docs.aws.amazon.com/step-functions/latest/dg/ecs-iam.html
   statement {
     sid = "StepFunctionsEvents"
     actions = [

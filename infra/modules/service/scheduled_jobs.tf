@@ -1,7 +1,7 @@
 resource "aws_sfn_state_machine" "scheduled_job" {
   for_each = var.scheduled_jobs
 
-  name     = "${var.service_name}-${var.environment_name}-${each.key}"
+  name     = "${var.service_name}-${each.key}"
   role_arn = aws_iam_role.scheduled_jobs_workflow_role.arn
 
   definition = jsonencode({
@@ -52,7 +52,7 @@ resource "aws_scheduler_schedule" "scheduled_job" {
   # TODO(https://github.com/navapbc/template-infra/issues/164) Encrypt with customer managed KMS key
   # checkov:skip=CKV_AWS_297:Encrypt with customer key in future work
 
-  name                         = "${var.service_name}-${var.environment_name}-${each.key}"
+  name                         = "${var.service_name}-${each.key}"
   state                        = "ENABLED"
   schedule_expression          = each.value.schedule_expression
   schedule_expression_timezone = "Etc/UTC"
@@ -75,7 +75,7 @@ resource "aws_scheduler_schedule" "scheduled_job" {
 resource "aws_cloudwatch_log_group" "scheduled_job" {
   for_each = var.scheduled_jobs
 
-  name_prefix = "/aws/vendedlogs/states/${var.service_name}-${var.environment_name}-${each.key}"
+  name_prefix = "/aws/vendedlogs/states/${var.service_name}-${each.key}"
 
   # Conservatively retain logs for 5 years.
   # Looser requirements may allow shorter retention periods

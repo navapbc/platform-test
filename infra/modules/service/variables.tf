@@ -56,11 +56,6 @@ variable "enable_command_execution" {
   description = "Whether the service should enable ECS Exec, such as for debugging"
 }
 
-variable "environment_name" {
-  type        = string
-  description = "name of the application environment"
-}
-
 variable "extra_environment_variables" {
   type        = map(string)
   description = "Additional environment variables to pass to the service container. Map from environment variable name to the value."

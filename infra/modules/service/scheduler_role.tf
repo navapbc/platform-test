@@ -11,7 +11,6 @@ resource "aws_iam_role" "scheduler" {
 
 data "aws_iam_policy_document" "scheduler_assume_role" {
   statement {
-    sid     = "ECSTasksAssumeRole"
     actions = ["sts:AssumeRole"]
     principals {
       type        = "Service"

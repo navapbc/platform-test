@@ -11,7 +11,6 @@ resource "aws_iam_role" "workflow_orchestrator" {
 
 data "aws_iam_policy_document" "workflow_orchestrator_assume_role" {
   statement {
-    sid     = "ECSTasksAssumeRole"
     actions = ["sts:AssumeRole"]
     principals {
       type        = "Service"

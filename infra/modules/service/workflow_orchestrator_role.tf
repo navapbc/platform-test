@@ -19,7 +19,7 @@ data "aws_iam_policy_document" "workflow_orchestrator_assume_role" {
     condition {
       test     = "ArnLike"
       variable = "aws:SourceArn"
-      values   = [for job_name in keys(var.scheduled_jobs) : "arn:aws:states:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:stateMachine:${var.service_name}-${job_name}"]
+      values   = ["arn:aws:states:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:stateMachine:*"]
     }
 
     condition {

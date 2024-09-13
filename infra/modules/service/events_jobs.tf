@@ -49,9 +49,9 @@ resource "aws_cloudwatch_event_target" "document_upload_jobs" {
       object_key  = "$.detail.object.key",
     }
 
-    # When triggering the ECS task, override the command to run in the container to the
-    # command specified by the file_upload_job config. To do this define an input_template
-    # that transforms the input S3 event:
+    # When triggering the ECS task (via step functions), override the command to run in
+    # the container to the command specified by the file_upload_job config. To do this
+    # define an input_template that transforms the input S3 event:
     #   {
     #     detail: {
     #       bucket: { name: "mybucket" },
@@ -119,6 +119,21 @@ resource "aws_sfn_state_machine" "file_upload_jobs" {
           "Overrides" : {
             "ContainerOverrides" : [
               {
+                # Pull the task command out of the input data, which is shaped like so:
+                #
+                # {
+                #   "containerOverrides": [
+                #     {
+                #       "command": [
+                #         "<task_command_arg_1>"
+                #         "<task_command_arg_2>"
+                #         ...
+                #       ]
+                #     }
+                #   ]
+                # }
+                #
+                # The syntax for parsing the input data comes from JSONPath.
                 "Name" : local.container_name,
                 "Command.$" : "$.containerOverrides[0].command[*]"
               }

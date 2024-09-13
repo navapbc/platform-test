@@ -120,7 +120,7 @@ resource "aws_sfn_state_machine" "file_upload_jobs" {
             "ContainerOverrides" : [
               {
                 "Name" : local.container_name,
-                "Command.$" : "$.Overrides.ContainerOverrides[0].Command[*]"
+                "Command" : "$.Overrides.ContainerOverrides[0].Command[*]"
               }
             ]
           }

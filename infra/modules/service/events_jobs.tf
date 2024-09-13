@@ -84,9 +84,9 @@ resource "aws_cloudwatch_event_target" "document_upload_jobs" {
     # (see https://developer.hashicorp.com/terraform/language/functions/jsonencode and
     # https://github.com/hashicorp/terraform/pull/18871)
     input_template = replace(replace(jsonencode({
-      containerOverrides = [
+      ContainerOverrides = [
         {
-          command = each.value.task_command
+          Command = each.value.task_command
         }
       ]
     }), "\\u003c", "<"), "\\u003e", ">")
@@ -120,7 +120,7 @@ resource "aws_sfn_state_machine" "file_upload_jobs" {
             "ContainerOverrides" : [
               {
                 "Name" : local.container_name,
-                "Command.$" : "States.Array($.Overrides.ContainerOverrides[0].Command[*])"
+                "Command.$" : "$.Overrides.ContainerOverrides[0].Command[*]"
               }
             ]
           }

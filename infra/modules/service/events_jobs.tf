@@ -75,6 +75,7 @@ resource "aws_cloudwatch_event_target" "document_upload_jobs" {
     # "U+003Cbucket_nameU+003E" and "<object_key>" to turn into "U+003Cobject_keyU+003E",
     # we need to replace the unicode characters U+003C and U+003E with < and > to reverse
     # the encoding.
+    #
     # (see https://developer.hashicorp.com/terraform/language/functions/jsonencode and
     # https://github.com/hashicorp/terraform/pull/18871)
     input_template = replace(replace(jsonencode({

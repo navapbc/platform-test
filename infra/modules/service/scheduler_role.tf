@@ -39,7 +39,7 @@ data "aws_iam_policy_document" "scheduler" {
   statement {
     sid = "StepFunctionsExecution"
     actions = [
-      "states:StartExecution",
+      "states:StartExecution"
     ]
     resources = [for job in keys(var.scheduled_jobs) : "arn:aws:states:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:stateMachine:${var.service_name}-${job}"]
   }
@@ -48,7 +48,7 @@ data "aws_iam_policy_document" "scheduler" {
     sid = "StepFunctionsDescribeStop"
     actions = [
       "states:DescribeExecution",
-      "states:StopExecution",
+      "states:StopExecution"
     ]
     resources = [for job in keys(var.scheduled_jobs) : "arn:aws:states:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:stateMachine:${var.service_name}-${job}:*"]
   }

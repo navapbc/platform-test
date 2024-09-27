@@ -60,10 +60,7 @@ resource "aws_cloudwatch_event_target" "document_upload_jobs" {
     #   }
     # to match the Amazon ECS RunTask TaskOverride structure:
     #   {
-    #     containerOverrides: [{
-    #       name: "container_name",
-    #       command: ["command", "to", "run"]
-    #     }]
+    #     task_command = ["command", "to", "run"]
     #   }
     # (see https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-targets.html#targets-specifics-ecs-task
     # and https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_TaskOverride.html)
@@ -71,10 +68,7 @@ resource "aws_cloudwatch_event_target" "document_upload_jobs" {
     # The task command can optionally use the bucket name or the object key in the command
     # by including the placeholder values "<bucket_name>" or "<object_key>", e.g.
     #   {
-    #     containerOverrides: [{
-    #       name: "container_name",
-    #       command: ["process_file.sh", "--bucket", "<bucket_name>", "--object", "<object_key>"]
-    #     }]
+    #     task_command: ["process_file.sh", "--bucket", "<bucket_name>", "--object", "<object_key>"]
     #   }
     #
     # Since jsonencode will cause the string "<bucket_name>" to turn into
@@ -85,11 +79,7 @@ resource "aws_cloudwatch_event_target" "document_upload_jobs" {
     # (see https://developer.hashicorp.com/terraform/language/functions/jsonencode and
     # https://github.com/hashicorp/terraform/pull/18871)
     input_template = replace(replace(jsonencode({
-      containerOverrides = [
-        {
-          command = each.value.task_command
-        }
-      ]
+      task_command = each.value.task_command
     }), "\\u003c", "<"), "\\u003e", ">")
   }
 }
@@ -120,23 +110,8 @@ resource "aws_sfn_state_machine" "file_upload_jobs" {
           "Overrides" : {
             "ContainerOverrides" : [
               {
-                # Pull the task command out of the input data, which is shaped like so:
-                #
-                # {
-                #   "containerOverrides": [
-                #     {
-                #       "command": [
-                #         "<task_command_arg_1>"
-                #         "<task_command_arg_2>"
-                #         ...
-                #       ]
-                #     }
-                #   ]
-                # }
-                #
-                # The syntax for parsing the input data comes from JSONPath.
                 "Name" : local.container_name,
-                "Command.$" : "$.containerOverrides[0].command[*]"
+                "Command.$" : "$.task_command"
               }
             ]
           }

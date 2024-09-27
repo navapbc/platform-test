@@ -135,7 +135,7 @@ resource "aws_sfn_state_machine" "file_upload_jobs" {
 resource "aws_cloudwatch_log_group" "file_upload_jobs" {
   for_each = var.file_upload_jobs
 
-  name_prefix = "/aws/vendedlogs/states/${var.service_name}-${each.key}"
+  name_prefix = "/aws/vendedlogs/states/${var.service_name}-${each.key}/file-upload-jobs/"
 
   # Conservatively retain logs for 5 years.
   # Looser requirements may allow shorter retention periods

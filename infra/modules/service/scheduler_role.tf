@@ -36,20 +36,26 @@ data "aws_iam_policy_document" "scheduler" {
     resources = ["arn:aws:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/StepFunctionsGetEventsForStepFunctionsExecutionRule"]
   }
 
-  statement {
-    sid = "StepFunctionsExecution"
-    actions = [
-      "states:StartExecution",
-    ]
-    resources = [for job in keys(var.scheduled_jobs) : "arn:aws:states:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:stateMachine:${var.service_name}-${job}"]
+  dynamic "statement" {
+    for_each = aws_sfn_state_machine.scheduled_jobs
+
+    content {
+      actions = [
+        "states:StartExecution",
+      ]
+      resources = [statement.value.arn]
+    }
   }
 
-  statement {
-    sid = "StepFunctionsDescribeStop"
-    actions = [
-      "states:DescribeExecution",
-      "states:StopExecution",
-    ]
-    resources = [for job in keys(var.scheduled_jobs) : "arn:aws:states:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:stateMachine:${var.service_name}-${job}:*"]
+  dynamic "statement" {
+    for_each = aws_sfn_state_machine.scheduled_jobs
+
+    content {
+      actions = [
+        "states:DescribeExecution",
+        "states:StopExecution",
+      ]
+      resources = ["${statement.value.arn}:*"]
+    }
   }
 }

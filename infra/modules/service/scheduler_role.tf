@@ -40,7 +40,7 @@ data "aws_iam_policy_document" "scheduler" {
     actions = [
       "states:StartExecution",
     ]
-    resources = [for job in scheduled_jobs.file_upload_jobs : "${job.arn}"]
+    resources = [for job in aws_sfn_state_machine.scheduled_jobs : "${job.arn}"]
   }
 
   statement {
@@ -48,6 +48,6 @@ data "aws_iam_policy_document" "scheduler" {
       "states:DescribeExecution",
       "states:StopExecution",
     ]
-    resources = [for job in scheduled_jobs.file_upload_jobs : "${job.arn}:*"]
+    resources = [for job in aws_sfn_state_machine.scheduled_jobs : "${job.arn}:*"]
   }
 }

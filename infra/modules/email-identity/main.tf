@@ -48,30 +48,30 @@ resource "aws_sesv2_email_identity_policy" "sender" {
   email_identity = aws_sesv2_email_identity.sender.email_identity
   policy_name    = "PinpointEmail"
 
-  policy = <<EOF
-{
-  "Version": "2008-10-17",
-  "Statement": [
+  policy = jsonencode(
     {
-      "Sid": "PinpointEmail",
-      "Effect": "Allow",
-      "Principal":{
-        "Service": "pinpoint.amazonaws.com"
-      },
-      "Action": "ses:*",
-      "Resource": "${aws_sesv2_email_identity.sender.arn}",
-      "Condition": {
-        "StringEquals": {
-          "aws:SourceAccount": "${data.aws_caller_identity.current.account_id}"
-        },
-        "StringLike": {
-          "aws:SourceArn": "arn:aws:mobiletargeting:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:apps/*"
+      Version = "2008-10-17",
+      Statement = [
+        {
+          Sid    = "PinpointEmail",
+          Effect = "Allow",
+          Principal = {
+            Service = "pinpoint.amazonaws.com"
+          },
+          Action   = "ses:*",
+          Resource = "${aws_sesv2_email_identity.sender.arn}",
+          Condition = {
+            StringEquals = {
+              "aws:SourceAccount" = "${data.aws_caller_identity.current.account_id}"
+            },
+            StringLike = {
+              "aws:SourceArn" = "arn:aws:mobiletargeting:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:apps/*"
+            }
+          }
         }
-      }
+      ]
     }
-  ]
-}
-EOF
+  )
 }
 
 # If email_verification_method is "domain", create a Route53 hosted zone for the sending

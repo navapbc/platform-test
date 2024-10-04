@@ -38,10 +38,6 @@ output "enable_notifications" {
   value = local.enable_notifications
 }
 
-output "image_repository_name" {
-  value = local.image_repository_name
-}
-
 output "shared_network_name" {
   value = local.shared_network_name
 }

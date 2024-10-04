@@ -52,14 +52,21 @@ locals {
   network_config = module.project_config.network_configs[local.environment_config.network_name]
 
   # Notifications locals.
-  # If notifications are enabled and the verification method is 'domain', then we
-  # construct the domain_name using the format: <terraform workspace><environment.<domain>
-  # For example: t-123456-dev.bar.com
+  #
+  # 1. If notifications are enabled and the verification method is 'email', then we
+  #   extract the domain_name from the sender_email. For example:
+  #   example.com from sender_email: coilysiren@example.com
+  #
+  # 2. If notifications are enabled and the verification method is 'domain', then we
+  #   construct the domain_name using the format: <terraform workspace><environment.<domain>
+  #   For example: t-123456-dev.bar.com
+
   notifications_sender_email_domain_name = module.app_config.enable_notifications ? (
     local.notifications_config.email_verification_method == "email" ?
     regex("@(.*)", local.notifications_config.sender_email)[0] :
     "${prefix}${var.environment_name}.${local.service_config.domain_name}"
   ) : null
+
   notifications_sender_email = module.app_config.enable_notifications ? (
     local.notifications_config.email_verification_method == "email" ?
     local.notifications_config.sender_email :

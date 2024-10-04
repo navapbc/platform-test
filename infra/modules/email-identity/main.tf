@@ -1,5 +1,4 @@
 # This module manages an SESv2 email identity.
-# Docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sesv2_email_identity
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
@@ -8,8 +7,8 @@ locals {
   # Only used if the sender identity verification method is domain verification.
   dkim_dns_verification_records = var.email_verification_method == "domain" ? [
     for token in data.aws_sesv2_email_identity.sender.dkim_signing_attributes[0].tokens : {
-      type  = "CNAME"
-      name  = "${token}._domainkey"
+      type   = "CNAME"
+      name   = "${token}._domainkey"
       record = "${token}.dkim.amazonses.com"
     }
   ] : []

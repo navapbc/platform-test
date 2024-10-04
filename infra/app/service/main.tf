@@ -64,7 +64,7 @@ locals {
   notifications_sender_email_domain_name = module.app_config.enable_notifications ? (
     local.notifications_config.email_verification_method == "email" ?
     regex("@(.*)", local.notifications_config.sender_email)[0] :
-    "${prefix}${var.environment_name}.${local.service_config.domain_name}"
+    "${local.prefix}${var.environment_name}.${local.service_config.domain_name}"
   ) : null
 
   notifications_sender_email = module.app_config.enable_notifications ? (

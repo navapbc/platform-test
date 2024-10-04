@@ -257,7 +257,7 @@ module "storage" {
 
 module "email_identity" {
   count  = module.app_config.enable_notifications ? 1 : 0
-  source = "../../modules/email-identity/resources"
+  source = "../../modules/email-identity"
 
   email_verification_method = local.notifications_config.email_verification_method
   name                      = local.notifications_config.name

@@ -7,5 +7,5 @@ output "email_identity_arn" {
 }
 
 output "verified_email_identity_arn" {
-  value = aws_sesv2_email_identity.sender.verified_for_sending_status ? data.aws_sesv2_email_identity.sender.arn : null
+  value = aws_sesv2_email_identity.sender.verified_for_sending_status ? aws_sesv2_email_identity.sender.arn : null
 }

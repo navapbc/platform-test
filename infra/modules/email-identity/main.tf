@@ -84,36 +84,12 @@ resource "aws_route53_zone" "zone" {
 
 # DNS records for email identity verification if email_verification_method is "domain"
 resource "aws_route53_record" "verification0" {
-  count = var.email_verification_method == "domain" ? 1 : 0
+  count = length(local.dkim_dns_verification_records)
 
   allow_overwrite = true
-  zone_id         = aws_route53_zone.zone[0].zone_id
-  name            = local.dkim_dns_verification_records[0].name
-  type            = local.dkim_dns_verification_records[0].type
-  records         = [local.dkim_dns_verification_records[0].record]
-  ttl             = 60
-}
-
-# DNS records for email identity verification if email_verification_method is "domain"
-resource "aws_route53_record" "verification1" {
-  count = var.email_verification_method == "domain" ? 1 : 0
-
-  allow_overwrite = true
-  zone_id         = aws_route53_zone.zone[0].zone_id
-  name            = local.dkim_dns_verification_records[1].name
-  type            = local.dkim_dns_verification_records[1].type
-  records         = [local.dkim_dns_verification_records[1].record]
-  ttl             = 60
-}
-
-# DNS records for email identity verification if email_verification_method is "domain"
-resource "aws_route53_record" "verification2" {
-  count = var.email_verification_method == "domain" ? 1 : 0
-
-  allow_overwrite = true
-  zone_id         = aws_route53_zone.zone[0].zone_id
-  name            = local.dkim_dns_verification_records[2].name
-  type            = local.dkim_dns_verification_records[2].type
-  records         = [local.dkim_dns_verification_records[2].record]
+  zone_id         = aws_route53_zone.zone[count.index].zone_id
+  name            = local.dkim_dns_verification_records[count.index].name
+  type            = local.dkim_dns_verification_records[count.index].type
+  records         = [local.dkim_dns_verification_records[count.index].record]
   ttl             = 60
 }

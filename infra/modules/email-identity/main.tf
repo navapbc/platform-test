@@ -8,7 +8,7 @@ locals {
   stripped_domain_name = replace(var.sender_email_domain_name, "/[.]$/", "")
 
   stripped_mail_from_domain        = replace(var.sender_email, "/^.*@/", "")
-  stripped_stripped_last_subdomain = replace(aws_sesv2_email_identity.sender.email_identity, "/^[^.]*./", "")
+  stripped_stripped_last_subdomain = replace(local.stripped_mail_from_domain, "/^[^.]*./", "")
   dash_domain                      = replace(var.sender_email_domain_name, ".", "-")
 }
 
@@ -80,6 +80,13 @@ resource "aws_route53_zone" "zone" {
   # checkov:skip=CKV2_AWS_38:TODO(https://github.com/navapbc/template-infra/issues/560) enable DNSSEC
 }
 
+resource "aws_sesv2_email_identity_mail_from_attributes" "sender" {
+  email_identity   = aws_sesv2_email_identity.sender.email_identity
+  mail_from_domain = local.stripped_stripped_last_subdomain
+
+  depends_on = [aws_sesv2_email_identity.sender]
+}
+
 # DNS records for email identity verification if email_verification_method is "domain"
 resource "aws_route53_record" "dkim" {
   count = var.email_verification_method == "domain" ? 3 : 0
@@ -90,13 +97,6 @@ resource "aws_route53_record" "dkim" {
   zone_id         = aws_route53_zone.zone[0].zone_id
   name            = "${aws_sesv2_email_identity.sender.dkim_signing_attributes[0].tokens[count.index]}._domainkey"
   records         = ["${aws_sesv2_email_identity.sender.dkim_signing_attributes[0].tokens[count.index]}.dkim.amazonses.com"]
-
-  depends_on = [aws_sesv2_email_identity.sender]
-}
-
-resource "aws_sesv2_email_identity_mail_from_attributes" "sender" {
-  email_identity   = aws_sesv2_email_identity.sender.email_identity
-  mail_from_domain = local.stripped_mail_from_domain
 
   depends_on = [aws_sesv2_email_identity.sender]
 }
@@ -133,3 +133,13 @@ resource "aws_route53_record" "mx_receive" {
   zone_id         = aws_route53_zone.zone[0].zone_id
   records         = ["10 inbound-smtp.${data.aws_region.current.name}.amazonaws.com"]
 }
+
+# resource "aws_route53_record" "txt_dmarc" {
+#   count = var.email_verification_method == "domain" ? 1 : 0
+
+#   zone_id = var.route53_zone_id
+#   name    = "_dmarc.${var.domain_name}"
+#   type    = "TXT"
+#   ttl     = "600"
+#   records = ["v=DMARC1; p=${var.dmarc_p}; rua=mailto:${var.dmarc_rua};"]
+# }

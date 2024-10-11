@@ -95,8 +95,8 @@ resource "aws_route53_record" "dkim" {
 }
 
 resource "aws_sesv2_email_identity_mail_from_attributes" "sender" {
-  email_identity   = aws_sesv2_email_identity.sender.email_identity
-  mail_from_domain = local.stripped_stripped_last_subdomain
+  email_identity   = local.stripped_stripped_last_subdomain
+  mail_from_domain = aws_sesv2_email_identity.sender.email_identity
 
   depends_on = [aws_sesv2_email_identity.sender]
 }

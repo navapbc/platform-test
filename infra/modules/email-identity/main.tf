@@ -7,8 +7,9 @@ locals {
   # so use a replace function to strip it out
   stripped_domain_name = replace(var.sender_email_domain_name, "/[.]$/", "")
 
-  stripped_mail_from_domain = replace(var.sender_email, "/^.*@/", "")
-  dash_domain               = replace(var.sender_email_domain_name, ".", "-")
+  stripped_mail_from_domain        = replace(var.sender_email, "/^.*@/", "")
+  stripped_stripped_last_subdomain = replace(local.stripped_mail_from_domain, "/^[^.]*./", "")
+  dash_domain                      = replace(var.sender_email_domain_name, ".", "-")
 }
 
 # Verify email sender identity.
@@ -94,8 +95,8 @@ resource "aws_route53_record" "dkim" {
 }
 
 resource "aws_sesv2_email_identity_mail_from_attributes" "sender" {
-  email_identity   = "mail.${aws_sesv2_email_identity.sender.email_identity}"
-  mail_from_domain = local.stripped_mail_from_domain
+  email_identity   = aws_sesv2_email_identity.sender.email_identity
+  mail_from_domain = local.stripped_stripped_last_subdomain
 
   depends_on = [aws_sesv2_email_identity.sender]
 }

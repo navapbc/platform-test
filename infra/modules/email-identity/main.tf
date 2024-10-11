@@ -3,19 +3,15 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 locals {
-  # some ses resources don't allow for the terminating '.' in the domain name
-  # so use a replace function to strip it out
-  stripped_domain_name = replace(var.sender_email_domain_name, "/[.]$/", "")
-
-  stripped_mail_from_domain        = replace(var.sender_email, "/^.*@/", "")
-  stripped_stripped_last_subdomain = replace(local.stripped_mail_from_domain, "/^[^.]*./", "")
-  dash_domain                      = replace(var.sender_email_domain_name, ".", "-")
+  stripped_mail_from_domain = replace(var.sender_email, "/^.*@/", "")
+  stripped_domain_name      = replace(local.stripped_mail_from_domain, "/^[^.]*./", "")
+  dash_domain               = replace(var.sender_email_domain_name, ".", "-")
 }
 
 # Verify email sender identity.
 # Docs: https://docs.aws.amazon.com/pinpoint/latest/userguide/channels-email-manage-verify.html
 resource "aws_sesv2_email_identity" "sender" {
-  email_identity         = var.email_verification_method == "email" ? var.sender_email : var.sender_email_domain_name
+  email_identity         = var.email_verification_method == "email" ? var.sender_email : local.stripped_domain_name
   configuration_set_name = aws_sesv2_configuration_set.email.configuration_set_name
 }
 
@@ -82,7 +78,7 @@ resource "aws_route53_zone" "zone" {
 
 resource "aws_sesv2_email_identity_mail_from_attributes" "sender" {
   email_identity   = aws_sesv2_email_identity.sender.email_identity
-  mail_from_domain = local.stripped_stripped_last_subdomain
+  mail_from_domain = local.stripped_mail_from_domain
 
   depends_on = [aws_sesv2_email_identity.sender]
 }

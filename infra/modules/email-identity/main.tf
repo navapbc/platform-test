@@ -4,6 +4,7 @@ data "aws_region" "current" {}
 
 locals {
   stripped_mail_from_domain = replace(var.sender_email, "/^.*@/", "")
+  stripped_domain_name      = replace(local.stripped_mail_from_domain, "/^[^.]*./", "")
   dash_domain               = replace(var.sender_email_domain_name, ".", "-")
 }
 
@@ -77,7 +78,7 @@ resource "aws_route53_zone" "zone" {
 
 resource "aws_sesv2_email_identity_mail_from_attributes" "sender" {
   email_identity   = aws_sesv2_email_identity.sender.email_identity
-  mail_from_domain = local.stripped_mail_from_domain
+  mail_from_domain = local.stripped_domain_name
 
   depends_on = [aws_sesv2_email_identity.sender]
 }

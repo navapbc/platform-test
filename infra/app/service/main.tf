@@ -61,12 +61,12 @@ locals {
   #   construct the domain_name using the format: <terraform workspace><environment.<domain>
   #   For example: t-123456-dev.bar.com
 
-  mail_from_domain = "${local.prefix}${var.environment_name}.${local.service_config.domain_name}"
+  mail_from_domain = "mail.${local.prefix}${var.environment_name}.${local.service_config.domain_name}"
 
   notifications_sender_email_domain_name = module.app_config.enable_notifications ? (
     local.notifications_config.email_verification_method == "email" ?
     regex("@(.*)", local.notifications_config.sender_email)[0] :
-    "mail.${local.prefix}${var.environment_name}.${local.service_config.domain_name}"
+    "${local.prefix}${var.environment_name}.${local.service_config.domain_name}"
   ) : null
 
   notifications_sender_email = module.app_config.enable_notifications ? (

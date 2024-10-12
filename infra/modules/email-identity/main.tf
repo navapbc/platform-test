@@ -4,14 +4,14 @@ data "aws_region" "current" {}
 
 locals {
   stripped_mail_from_domain = replace(var.sender_email, "/^.*@/", "")
-  stripped_domain_name      = replace(local.stripped_mail_from_domain, "/^[^.]*./", "")
   dash_domain               = replace(var.sender_email_domain_name, ".", "-")
+  # stripped_domain_name      = replace(local.stripped_mail_from_domain, "/^[^.]*./", "")
 }
 
 # Verify email sender identity.
 # Docs: https://docs.aws.amazon.com/pinpoint/latest/userguide/channels-email-manage-verify.html
 resource "aws_sesv2_email_identity" "sender" {
-  email_identity         = var.email_verification_method == "email" ? var.sender_email : local.stripped_domain_name
+  email_identity         = var.email_verification_method == "email" ? var.sender_email : local.stripped_mail_from_domain
   configuration_set_name = aws_sesv2_configuration_set.email.configuration_set_name
 }
 

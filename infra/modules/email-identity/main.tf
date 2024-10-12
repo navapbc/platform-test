@@ -125,7 +125,7 @@ resource "aws_route53_record" "mx_receive" {
   allow_overwrite = true
   type            = "MX"
   ttl             = "600"
-  name            = var.sender_email_domain_name
+  name            = var.mail_from_domain
   zone_id         = aws_route53_zone.zone[0].zone_id
   records         = ["10 inbound-smtp.${data.aws_region.current.name}.amazonaws.com"]
 }

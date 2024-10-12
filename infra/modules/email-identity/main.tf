@@ -3,9 +3,9 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 locals {
-  stripped_mail_from_domain = replace(var.sender_email, "/^.*@/", "")
-  dash_domain               = replace(var.mail_from_domain, ".", "-")
-  stripped_domain_name      = replace(local.stripped_mail_from_domain, "/^[^.]*./", "")
+  stripped_domain_name      = replace(var.domain_name, "/[.]$/", "")
+  stripped_mail_from_domain = replace(var.mail_from_domain, "/[.]$/", "")
+  dash_domain               = replace(var.domain_name, ".", "-")
 }
 
 # Verify email sender identity.

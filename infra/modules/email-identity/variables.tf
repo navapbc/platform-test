@@ -18,6 +18,11 @@ variable "sender_email" {
   description = "Email address to use to send notification emails"
 }
 
+variable "domain_name" {
+  description = "The domain name to configure SES."
+  type        = string
+}
+
 variable "mail_from_domain" {
   type        = string
   description = "Subdomain (of the route53 zone) which is to be used as MAIL FROM address"

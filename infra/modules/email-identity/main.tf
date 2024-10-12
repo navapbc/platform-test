@@ -11,7 +11,7 @@ locals {
 # Verify email sender identity.
 # Docs: https://docs.aws.amazon.com/pinpoint/latest/userguide/channels-email-manage-verify.html
 resource "aws_sesv2_email_identity" "sender" {
-  email_identity         = var.email_verification_method == "email" ? var.sender_email : local.stripped_mail_from_domain
+  email_identity         = var.email_verification_method == "email" ? var.sender_email : local.stripped_domain_nameg
   configuration_set_name = aws_sesv2_configuration_set.email.configuration_set_name
 }
 

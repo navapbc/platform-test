@@ -5,7 +5,6 @@ data "aws_region" "current" {}
 locals {
   stripped_mail_from_domain = replace(var.sender_email, "/^.*@/", "")
   dash_domain               = replace(var.sender_email_domain_name, ".", "-")
-  # stripped_domain_name      = replace(local.stripped_mail_from_domain, "/^[^.]*./", "")
 }
 
 # Verify email sender identity.

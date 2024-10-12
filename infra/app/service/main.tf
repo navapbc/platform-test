@@ -70,7 +70,7 @@ locals {
   notifications_sender_email = module.app_config.enable_notifications ? (
     local.notifications_config.email_verification_method == "email" ?
     local.notifications_config.sender_email :
-    "${regex("(.*)@", local.notifications_config.sender_email)[0]}@outbound.${local.notifications_sender_email_domain_name}"
+    "${regex("(.*)@", local.notifications_config.sender_email)[0]}@${local.notifications_sender_email_domain_name}"
   ) : null
 
   # Identity provider locals.
@@ -262,7 +262,7 @@ module "email_identity" {
   email_verification_method = local.notifications_config.email_verification_method
   name                      = local.notifications_config.name
   sender_email              = local.notifications_sender_email
-  sender_email_domain_name  = local.notifications_sender_email_domain_name
+  mail_from_domain          = local.notifications_sender_email_domain_name
 }
 
 module "notifications" {

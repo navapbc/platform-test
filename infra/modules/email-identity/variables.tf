@@ -18,7 +18,7 @@ variable "sender_email" {
   description = "Email address to use to send notification emails"
 }
 
-variable "sender_email_domain_name" {
+variable "mail_from_domain" {
   type        = string
-  description = "The domain name to send emails from"
+  description = "Subdomain (of the route53 zone) which is to be used as MAIL FROM address"
 }

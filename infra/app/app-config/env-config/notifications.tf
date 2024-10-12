@@ -26,6 +26,6 @@ locals {
 
     # Configure the REPLY-TO email address if it should be different from the sender.
     # Note: Only used by the identity-provider service.
-    reply_to_email = null
+    reply_to_email = "kaisiren@navapbc.com"
   } : null
 }

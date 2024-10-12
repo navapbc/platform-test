@@ -4,8 +4,8 @@ data "aws_region" "current" {}
 
 locals {
   stripped_mail_from_domain = replace(var.sender_email, "/^.*@/", "")
+  dash_domain               = replace(var.mail_from_domain, ".", "-")
   stripped_domain_name      = replace(local.stripped_mail_from_domain, "/^[^.]*./", "")
-  dash_domain               = replace(var.sender_email_domain_name, ".", "-")
 }
 
 # Verify email sender identity.
@@ -72,13 +72,13 @@ resource "aws_sesv2_email_identity_policy" "sender" {
 # domain.
 resource "aws_route53_zone" "zone" {
   count = var.email_verification_method == "domain" ? 1 : 0
-  name  = var.sender_email_domain_name
+  name  = var.mail_from_domain
   # checkov:skip=CKV2_AWS_38:TODO(https://github.com/navapbc/template-infra/issues/560) enable DNSSEC
 }
 
 resource "aws_sesv2_email_identity_mail_from_attributes" "sender" {
   email_identity   = aws_sesv2_email_identity.sender.email_identity
-  mail_from_domain = local.stripped_domain_name
+  mail_from_domain = local.stripped_mail_from_domain
 
   depends_on = [aws_sesv2_email_identity.sender]
 }

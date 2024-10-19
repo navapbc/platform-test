@@ -74,14 +74,6 @@ resource "aws_sesv2_email_identity_policy" "sender" {
   )
 }
 
-# If email_verification_method is "domain", create a Route53 hosted zone for the sending
-# domain.
-resource "aws_route53_zone" "zone" {
-  count = var.email_verification_method == "domain" ? 1 : 0
-  name  = var.domain_name
-  # checkov:skip=CKV2_AWS_38:TODO(https://github.com/navapbc/template-infra/issues/560) enable DNSSEC
-}
-
 resource "aws_sesv2_email_identity_mail_from_attributes" "sender" {
   email_identity   = aws_sesv2_email_identity.sender.email_identity
   mail_from_domain = local.stripped_mail_from_domain

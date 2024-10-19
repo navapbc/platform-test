@@ -51,6 +51,16 @@ locals {
 
   network_config = module.project_config.network_configs[local.environment_config.network_name]
 
+  # Notifications locals.
+  #
+  # 1. If notifications are enabled and the verification method is 'email', then we
+  #   extract the domain_name from the sender_email. For example:
+  #   example.com from sender_email: coilysiren@example.com
+  #
+  # 2. If notifications are enabled and the verification method is 'domain', then we
+  #   construct the domain_name using the format: <terraform workspace><environment.<domain>
+  #   For example: t-123456-dev.bar.com
+
   # Identity provider locals.
   # If this is a temporary environment, re-use an existing Cognito user pool.
   # Otherwise, create a new one.
@@ -234,6 +244,40 @@ module "storage" {
 }
 
 # If the app has `enable_identity_provider` set to true AND this is not a temporary
+# environment, then create a email notification identity.
+module "notifications" {
+  # count  = module.app_config.enable_notifications && !local.is_temporary ? 1 : 0
+  count  = terraform.workspace == "p-140" ? 1 : 0 # force creation to test this PR environment
+  source = "../../modules/notifications/resources"
+
+  email_verification_method = local.notifications_config.email_verification_method
+
+  name                = "${local.prefix}${local.notifications_config.name}"
+  domain_name         = local.service_config.domain_name
+  sender_email        = local.notifications_config.sender_email
+  sender_display_name = local.notifications_config.sender_display_name
+}
+
+# # If the app has `enable_identity_provider` set to true AND this *is* a temporary
+# # environment, then create a email notification identity.
+# module "existing_notifications" {
+#   count  = module.app_config.enable_notifications && local.is_temporary ? 1 : 0
+#   source = "../../modules/notifications/data"
+
+#   name = local.notifications_config.name
+# }
+
+# # If the app has `enable_identity_provider` set to true, create a new email notification
+# # identity client for the service. A new client is created for all environments, including
+# # temporary environments.
+# module "notifications_client" {
+#   count  = module.app_config.enable_notifications ? 1 : 0
+#   source = "../../modules/notifications/client"
+
+#   email_identity_arn = module.app_config.enable_notifications ? module.notifications[0].email_identity_arn : null
+# }
+
+# If the app has `enable_identity_provider` set to true AND this is not a temporary
 # environment, then create a new identity provider.
 module "identity_provider" {
   count  = module.app_config.enable_identity_provider && !local.is_temporary ? 1 : 0
@@ -247,9 +291,11 @@ module "identity_provider" {
   verification_email_message       = local.identity_provider_config.verification_email.verification_email_message
   verification_email_subject       = local.identity_provider_config.verification_email.verification_email_subject
 
-  sender_email        = local.notifications_config == null ? null : local.notifications_config.sender_email
-  sender_display_name = local.notifications_config == null ? null : local.notifications_config.sender_display_name
-  reply_to_email      = local.notifications_config == null ? null : local.notifications_config.reply_to_email
+  sender_email        = local.notifications_config.sender_email
+  sender_display_name = local.notifications_config.sender_display_name
+
+  # This requires an email identity that has been verified for sending.
+  email_identity_arn = module.app_config.enable_notifications ? module.notifications[0].verified_email_identity_arn : null
 }
 
 # If the app has `enable_identity_provider` set to true AND this *is* a temporary

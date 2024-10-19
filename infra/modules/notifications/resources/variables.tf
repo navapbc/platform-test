@@ -1,20 +1,10 @@
-variable "email_configuration_set_name" {
-  type        = string
-  description = "The name of the SESv2 configuration set to apply to the pinpoint email channel"
-}
-
-variable "email_identity_arn" {
-  type        = string
-  description = "The arn for the SESv2 email identity to use to send emails"
-}
-
 variable "email_verification_method" {
   type        = string
   description = "The method to use to verify the sender email address"
-  default     = "email"
+  default     = "domain"
   validation {
-    condition     = can(regex("^(email|domain)$", var.email_verification_method))
-    error_message = "email_verification_method must be either 'email' or 'domain'"
+    condition     = can(regex("^(domain)$", var.email_verification_method))
+    error_message = "email_verification_method must be either or 'domain'"
   }
 }
 

@@ -15,17 +15,17 @@ locals {
 
     # Configure the name that users see in the "From" section of their inbox, so that it's
     # clearer who the email is from.
-    sender_display_name = "coilysiren"
+    sender_display_name = "Kai Siren"
 
     # Set to the email address to be used when sending emails.
     # - If enable_notifications is true, this is required.
     # - If email_verification_method is set to 'domain', make sure the domain name of the
     #   sender_email matches the domain provided in the env-config.
     # Docs: https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-email.html
-    sender_email = "kaisiren@navapbc.com"
+    sender_email = "coilysiren@platform-test-dev.navapbc.com"
 
     # Configure the REPLY-TO email address if it should be different from the sender.
     # Note: Only used by the identity-provider service.
-    reply_to_email = "kaisiren@navapbc.com"
+    reply_to_email = "coilysiren@platform-test-dev.navapbc.com"
   } : null
 }

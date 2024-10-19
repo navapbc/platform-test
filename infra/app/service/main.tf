@@ -247,7 +247,7 @@ module "storage" {
 # environment, then create a email notification identity.
 module "notifications" {
   # count  = module.app_config.enable_notifications && !local.is_temporary ? 1 : 0
-  count  = 1 # force creation to test this PR environment
+  count  = terraform.workspace == "p-140" # force creation to test this PR environment
   source = "../../modules/notifications/resources"
 
   email_verification_method = local.notifications_config.email_verification_method

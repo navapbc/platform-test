@@ -1,8 +1,3 @@
-variable "domain_name" {
-  description = "The domain name to configure SES."
-  type        = string
-}
-
 variable "name" {
   type        = string
   description = "Name of the notifications project/application"

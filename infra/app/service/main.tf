@@ -50,27 +50,6 @@ locals {
   notifications_config                           = local.environment_config.notifications_config
 
   network_config = module.project_config.network_configs[local.environment_config.network_name]
-
-  # Notifications locals.
-  #
-  # 1. If notifications are enabled and the verification method is 'email', then we
-  #   extract the domain_name from the sender_email. For example:
-  #   example.com from sender_email: coilysiren@example.com
-  #
-  # 2. If notifications are enabled and the verification method is 'domain', then we
-  #   construct the domain_name using the format: <terraform workspace><environment.<domain>
-  #   For example: t-123456-dev.bar.com
-
-  # Identity provider locals.
-  # If this is a temporary environment, re-use an existing Cognito user pool.
-  # Otherwise, create a new one.
-  identity_provider_user_pool_id = module.app_config.enable_identity_provider ? (
-    local.is_temporary ? module.existing_identity_provider[0].user_pool_id : module.identity_provider[0].user_pool_id
-  ) : null
-  identity_provider_environment_variables = module.app_config.enable_identity_provider ? {
-    COGNITO_USER_POOL_ID = local.identity_provider_user_pool_id,
-    COGNITO_CLIENT_ID    = module.identity_provider_client[0].client_id
-  } : {}
 }
 
 terraform {

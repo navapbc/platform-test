@@ -1,4 +1,4 @@
-output "email_configuration_set_name" {
+output "email_identity_config" {
   value = aws_sesv2_configuration_set.email.configuration_set_name
 }
 

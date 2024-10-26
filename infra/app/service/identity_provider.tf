@@ -1,7 +1,5 @@
 locals {
-  # Identity provider locals.
-  # If this is a temporary environment, re-use an existing Cognito user pool.
-  # Otherwise, create a new one.
+  # If this is a temporary environment, re-use an existing Cognito user pool. Otherwise, create a new one.
   identity_provider_user_pool_id = module.app_config.enable_identity_provider ? (
     local.is_temporary ? module.existing_identity_provider[0].user_pool_id : module.identity_provider[0].user_pool_id
   ) : null

@@ -16,6 +16,7 @@ locals {
     PINPOINT_APP_ID = module.notifications_app[0].app_id,
     PINPOINT_SENDER = local.notifications_config.sender_email
   } : {}
+  notifications_app_name = local.prefix + local.notifications_config.name
 }
 
 # If the app has `enable_notifications` set to true AND this is not a temporary
@@ -49,7 +50,7 @@ module "notifications_app" {
   count  = module.app_config.enable_notifications ? 1 : 0
   source = "../../modules/notifications-app/resources"
 
-  name                  = local.notifications_config.name
+  name                  = local.notifications_app_name
   email_identity_arn    = local.email_identity_arn
   email_identity_config = local.email_identity_config
   sender_display_name   = local.notifications_config.sender_display_name

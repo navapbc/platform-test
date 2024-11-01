@@ -10,9 +10,9 @@ locals {
 
     # Set to the email address to be used when sending emails.
     # If enable_notifications is true, this is required.
-    sender_email = "coilysiren@${domain_name}"
+    sender_email = "coilysiren@${var.domain_name}"
 
     # Configure the REPLY-TO email address if it should be different from the sender.
-    reply_to_email = "coilysiren@${domain_name}"
+    reply_to_email = "coilysiren@${var.domain_name}"
   } : null
 }

@@ -20,7 +20,6 @@ module "notifications" {
   source = "../../modules/notifications/resources"
 
   domain_name         = local.service_config.domain_name
-  name                = local.notifications_config.name
   sender_email        = local.notifications_config.sender_email
   sender_display_name = local.notifications_config.sender_display_name
 }
@@ -31,7 +30,6 @@ module "existing_notifications" {
   count  = module.app_config.enable_notifications && local.is_temporary ? 1 : 0
   source = "../../modules/notifications/data"
 
-  name        = local.notifications_config.name
   domain_name = local.service_config.domain_name
 }
 

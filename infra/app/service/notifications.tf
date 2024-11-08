@@ -7,8 +7,8 @@ locals {
     !local.is_temporary ? module.notifications[0].email_identity_config : module.existing_notifications[0].email_identity_config
   ) : null
   notifications_environment_variables = module.app_config.enable_notifications ? {
-    PINPOINT_APP_ID = module.notifications_app[0].app_id,
-    PINPOINT_SENDER = local.notifications_config.sender_email
+    AWS_PINPOINT_APP_ID       = module.notifications_app[0].app_id,
+    AWS_PINPOINT_SENDER_EMAIL = local.notifications_config.sender_email
   } : {}
   notifications_app_name = "${local.prefix}${local.notifications_config.name}"
 }

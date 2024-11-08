@@ -17,7 +17,7 @@ resource "aws_sesv2_email_identity" "sender" {
 
 # The configuration set applied to messages that is sent through this email channel.
 resource "aws_sesv2_configuration_set" "email" {
-  configuration_set_name = var.name
+  configuration_set_name = local.dash_domain
 
   delivery_options {
     tls_policy = "REQUIRE"

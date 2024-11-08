@@ -23,7 +23,7 @@
 # environment, then create a email notification identity.
 module "notifications" {
   # count  = module.app_config.enable_notifications && !local.is_temporary ? 1 : 0
-  count  = terraform.workspace == "p-140" ? 1 : 0 # test in particular PR environment
+  count  = 1
   source = "../../modules/notifications/resources"
 
   domain_name         = local.service_config.domain_name

@@ -11,6 +11,11 @@ variable "name" {
 variable "sender_email" {
   type        = string
   description = "Email address to use to send notification emails"
+
+  validation {
+    condition     = regex("^.+@${var.domain_name}$", var.sender_email)
+    error_message = "The sender_email value must be an email address from the configured domain."
+  }
 }
 
 variable "sender_display_name" {

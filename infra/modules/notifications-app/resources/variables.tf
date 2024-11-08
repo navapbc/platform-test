@@ -14,9 +14,9 @@ variable "sender_display_name" {
   default     = null
 }
 
-variable "email_identity_arn" {
+variable "domain_identity_arn" {
   type        = string
-  description = "The ARN of the email identity to use for sending emails"
+  description = "The ARN of the domain identity to use for sending emails"
 }
 
 variable "email_identity_config" {

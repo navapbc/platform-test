@@ -1,7 +1,7 @@
 locals {
   # If this is a temporary environment, re-use an existing email identity. Otherwise, create a new one.
-  email_identity_arn = module.app_config.enable_notifications ? (
-    !local.is_temporary ? module.notifications[0].email_identity_arn : module.existing_notifications[0].email_identity_arn
+  domain_identity_arn = module.app_config.enable_notifications ? (
+    !local.is_temporary ? module.notifications[0].domain_identity_arn : module.existing_notifications[0].domain_identity_arn
   ) : null
   email_identity_config = module.app_config.enable_notifications ? (
     !local.is_temporary ? module.notifications[0].email_identity_config : module.existing_notifications[0].email_identity_config
@@ -43,7 +43,7 @@ module "notifications_app" {
   source = "../../modules/notifications-app/resources"
 
   name                  = local.notifications_app_name
-  email_identity_arn    = local.email_identity_arn
+  domain_identity_arn   = local.domain_identity_arn
   email_identity_config = local.email_identity_config
   sender_display_name   = local.notifications_config.sender_display_name
   sender_email          = local.notifications_config.sender_email

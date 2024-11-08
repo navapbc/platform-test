@@ -11,13 +11,13 @@ locals {
 # Verify email sender identity.
 # Docs: https://docs.aws.amazon.com/pinpoint/latest/userguide/channels-email-manage-verify.html
 resource "aws_sesv2_email_identity" "sender" {
-  email_identity         = var.domain_name
+  email_identity         = local.dash_domain
   configuration_set_name = aws_sesv2_configuration_set.email.configuration_set_name
 }
 
 # The configuration set applied to messages that is sent through this email channel.
 resource "aws_sesv2_configuration_set" "email" {
-  configuration_set_name = var.name
+  configuration_set_name = local.dash_domain
 
   delivery_options {
     tls_policy = "REQUIRE"

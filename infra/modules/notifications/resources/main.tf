@@ -4,7 +4,6 @@ data "aws_region" "current" {}
 
 locals {
   mail_from_domain          = "mail.${var.domain_name}"
-  stripped_domain_name      = replace(var.domain_name, "/[.]$/", "")
   stripped_mail_from_domain = replace(local.mail_from_domain, "/[.]$/", "")
   dash_domain               = replace(var.domain_name, ".", "-")
 }
@@ -12,7 +11,7 @@ locals {
 # Verify email sender identity.
 # Docs: https://docs.aws.amazon.com/pinpoint/latest/userguide/channels-email-manage-verify.html
 resource "aws_sesv2_email_identity" "sender" {
-  email_identity         = local.dash_domain
+  email_identity         = var.domain_name
   configuration_set_name = aws_sesv2_configuration_set.email.configuration_set_name
 }
 

@@ -18,8 +18,3 @@ variable "domain_identity_arn" {
   type        = string
   description = "The ARN of the domain identity to use for sending emails"
 }
-
-variable "email_identity_config" {
-  type        = string
-  description = "The name of the email configuration set to use for sending emails"
-}

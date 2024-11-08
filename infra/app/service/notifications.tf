@@ -3,9 +3,6 @@ locals {
   domain_identity_arn = module.app_config.enable_notifications ? (
     !local.is_temporary ? module.notifications[0].domain_identity_arn : module.existing_notifications[0].domain_identity_arn
   ) : null
-  email_identity_config = module.app_config.enable_notifications ? (
-    !local.is_temporary ? module.notifications[0].email_identity_config : module.existing_notifications[0].email_identity_config
-  ) : null
   notifications_environment_variables = module.app_config.enable_notifications ? {
     AWS_PINPOINT_APP_ID       = module.notifications_app[0].app_id,
     AWS_PINPOINT_SENDER_EMAIL = local.notifications_config.sender_email
@@ -40,9 +37,8 @@ module "notifications_app" {
   count  = module.app_config.enable_notifications ? 1 : 0
   source = "../../modules/notifications-app/resources"
 
-  name                  = local.notifications_app_name
-  domain_identity_arn   = local.domain_identity_arn
-  email_identity_config = local.email_identity_config
-  sender_display_name   = local.notifications_config.sender_display_name
-  sender_email          = local.notifications_config.sender_email
+  name                = local.notifications_app_name
+  domain_identity_arn = local.domain_identity_arn
+  sender_display_name = local.notifications_config.sender_display_name
+  sender_email        = local.notifications_config.sender_email
 }

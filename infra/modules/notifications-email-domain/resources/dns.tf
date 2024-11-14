@@ -20,7 +20,7 @@ resource "aws_route53_record" "spf_mail_from" {
   ttl             = "600"
   type            = "TXT"
   zone_id         = data.aws_route53_zone.zone.zone_id
-  name            = aws_sesv2_email_identity_mail_from_attributes.sender.mail_from_domain
+  name            = aws_sesv2_email_identity_mail_from_attributes.sender_domain.mail_from_domain
   records         = ["v=spf1 include:amazonses.com ~all"]
 }
 

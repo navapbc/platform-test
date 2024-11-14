@@ -1,3 +1,3 @@
-output "domain_identity_arn" {
-  value = aws_sesv2_email_identity.sender.arn
+output "app_id" {
+  value = aws_pinpoint_app.app.application_id
 }

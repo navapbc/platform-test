@@ -1,40 +1,9 @@
-# This module manages an SESv2 email identity.
-data "aws_caller_identity" "current" {}
-data "aws_region" "current" {}
-
-locals {
-  mail_from_domain          = "mail.${var.domain_name}"
-  stripped_mail_from_domain = replace(local.mail_from_domain, "/[.]$/", "")
-  dash_domain               = replace(var.domain_name, ".", "-")
+resource "aws_pinpoint_app" "app" {
+  name = var.name
 }
 
-# Verify email sender identity.
-# Docs: https://docs.aws.amazon.com/pinpoint/latest/userguide/channels-email-manage-verify.html
-resource "aws_sesv2_email_identity" "sender" {
-  email_identity         = local.dash_domain
-  configuration_set_name = aws_sesv2_configuration_set.email.configuration_set_name
-}
-
-# The configuration set applied to messages that is sent through this email channel.
-resource "aws_sesv2_configuration_set" "email" {
-  configuration_set_name = local.dash_domain
-
-  delivery_options {
-    tls_policy = "REQUIRE"
-  }
-
-  reputation_options {
-    reputation_metrics_enabled = true
-  }
-
-  sending_options {
-    sending_enabled = true
-  }
-}
-
-resource "aws_sesv2_email_identity_mail_from_attributes" "sender" {
-  email_identity   = aws_sesv2_email_identity.sender.email_identity
-  mail_from_domain = local.stripped_mail_from_domain
-
-  depends_on = [aws_sesv2_email_identity.sender]
+resource "aws_pinpoint_email_channel" "app" {
+  application_id = aws_pinpoint_app.app.application_id
+  from_address   = var.sender_email != null ? (var.sender_display_name != null ? "${var.sender_display_name} <${var.sender_email}>" : var.sender_email) : null
+  identity       = var.domain_identity_arn
 }

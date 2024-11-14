@@ -12,9 +12,9 @@ locals {
 
 # If the app has `enable_notifications` set to true AND this is not a temporary
 # environment, then create a email notification identity.
-module "notifications" {
+module "notifications_email_domain" {
   count  = module.app_config.enable_notifications && !local.is_temporary ? 1 : 0
-  source = "../../modules/notifications/resources"
+  source = "../../modules/notifications-email-domain/resources"
 
   domain_name         = local.service_config.domain_name
   sender_email        = local.notifications_config.sender_email
@@ -23,9 +23,9 @@ module "notifications" {
 
 # If the app has `enable_notifications` set to true AND this *is* a temporary
 # environment, then create a email notification identity.
-module "existing_notifications" {
+module "existing_notifications_email_domain" {
   count  = module.app_config.enable_notifications && local.is_temporary ? 1 : 0
-  source = "../../modules/notifications/data"
+  source = "../../modules/notifications-email-domain/data"
 
   domain_name = local.service_config.domain_name
 }
@@ -33,9 +33,9 @@ module "existing_notifications" {
 # If the app has `enable_notifications` set to true, create a new email notification
 # AWS Pinpoint app for the service. A new app is created for all environments, including
 # temporary environments.
-module "notifications_app" {
+module "notifications" {
   count  = module.app_config.enable_notifications ? 1 : 0
-  source = "../../modules/notifications-app/resources"
+  source = "../../modules/notifications/resources"
 
   name                = local.notifications_app_name
   domain_identity_arn = local.domain_identity_arn

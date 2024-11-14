@@ -1,7 +1,7 @@
 # Allow AWS Pinpoint to send email on behalf of this email identity.
 # Docs: https://docs.aws.amazon.com/pinpoint/latest/developerguide/security_iam_id-based-policy-examples.html#security_iam_resource-based-policy-examples-access-ses-identities
 resource "aws_sesv2_email_identity_policy" "sender" {
-  email_identity = aws_sesv2_email_identity.sender.email_identity
+  email_identity = aws_sesv2_email_identity.sender_domain.email_identity
   policy_name    = "PinpointEmail"
 
   policy = jsonencode(
@@ -15,7 +15,7 @@ resource "aws_sesv2_email_identity_policy" "sender" {
             Service = "pinpoint.amazonaws.com"
           },
           Action   = "ses:*",
-          Resource = aws_sesv2_email_identity.sender.arn,
+          Resource = aws_sesv2_email_identity.sender_domain.arn,
           Condition = {
             StringEquals = {
               "aws:SourceAccount" = data.aws_caller_identity.current.account_id

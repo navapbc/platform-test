@@ -9,10 +9,10 @@ resource "aws_route53_record" "dkim" {
   ttl             = 60
   type            = "CNAME"
   zone_id         = data.aws_route53_zone.zone.zone_id
-  name            = "${aws_sesv2_email_identity.sender.dkim_signing_attributes[0].tokens[count.index]}._domainkey"
-  records         = ["${aws_sesv2_email_identity.sender.dkim_signing_attributes[0].tokens[count.index]}.dkim.amazonses.com"]
+  name            = "${aws_sesv2_email_identity.sender_domain.dkim_signing_attributes[0].tokens[count.index]}._domainkey"
+  records         = ["${aws_sesv2_email_identity.sender_domain.dkim_signing_attributes[0].tokens[count.index]}.dkim.amazonses.com"]
 
-  depends_on = [aws_sesv2_email_identity.sender]
+  depends_on = [aws_sesv2_email_identity.sender_domain]
 }
 
 resource "aws_route53_record" "spf_mail_from" {

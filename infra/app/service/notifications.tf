@@ -1,7 +1,7 @@
 locals {
   # If this is a temporary environment, re-use an existing email identity. Otherwise, create a new one.
   domain_identity_arn = module.app_config.enable_notifications ? (
-    !terraform.workspace == "p-140" ?
+    !(terraform.workspace == "p-140") ?
     module.notifications_email_domain[0].domain_identity_arn :
     module.existing_notifications_email_domain[0].domain_identity_arn
   ) : null

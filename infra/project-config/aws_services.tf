@@ -19,7 +19,7 @@ locals {
     "kms",
     "lambda",
     "logs",
-    "mobiletargeting",
+    "mobiletargeting", # this is pinpoint
     "pipes",
     "rds",
     "route53",

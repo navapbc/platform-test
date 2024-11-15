@@ -18,9 +18,7 @@ module "notifications_email_domain" {
   count  = module.app_config.enable_notifications && !local.is_temporary ? 1 : 0
   source = "../../modules/notifications-email-domain/resources"
 
-  domain_name         = local.service_config.domain_name
-  sender_email        = local.notifications_config.sender_email
-  sender_display_name = local.notifications_config.sender_display_name
+  domain_name = local.service_config.domain_name
 }
 
 # If the app has `enable_notifications` set to true AND this *is* a temporary

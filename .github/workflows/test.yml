@@ -2,6 +2,7 @@ name: Test system notification
 
 on:
   pull_request:
+  workflow_dispatch:
 
 jobs:
   test:

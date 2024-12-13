@@ -65,5 +65,5 @@ jobs:
           method: chat.postMessage
           token: ${{ env.SLACK_BOT_TOKEN }}
           payload: |
-            channel: "D19KQSF1N"
+            channel: ${{ env.SLACK_CHANNEL_ID }}
             text: ${{ inputs.message }}

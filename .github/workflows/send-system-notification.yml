@@ -63,7 +63,7 @@ jobs:
         uses: slackapi/slack-github-action@v2.0.0
         with:
           method: chat.postMessage
-          token: ${{ secrets.SYSTEM_NOTIFICATIONS_SLACK_BOT_TOKEN }}
+          token: ${{ secrets['SYSTEM_NOTIFICATIONS_SLACK_BOT_TOKEN'] }}
           payload: |
-            channel: ${{ secrets.SYSTEM_NOTIFICATIONS_SLACK_CHANNEL_ID }}
+            channel: ${{ secrets['SYSTEM_NOTIFICATIONS_SLACK_CHANNEL_ID'] }}
             text: ${{ inputs.message }}

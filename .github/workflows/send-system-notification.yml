@@ -5,17 +5,21 @@ on:
     inputs:
       channel:
         description: "Name of channel to use. Must be defined in /infra/project-config"
+        required: true
         type: string
       message:
         description: "Message to send"
+        required: true
         type: string
   workflow_call:
     inputs:
       channel:
         description: "Name of channel to use. Must be defined in /infra/project-config"
+        required: true
         type: string
       message:
         description: "Message to send"
+        required: true
         type: string
 
 jobs:

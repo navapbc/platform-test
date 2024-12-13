@@ -14,12 +14,4 @@ locals {
       }
     }
   }
-  # - name: Post to a Slack channel
-  # uses: slackapi/slack-github-action@v2.0.0
-  # with:
-  #   method: chat.postMessage
-  #   token: ${{ secrets.SLACK_BOT_TOKEN }}
-  #   payload: |
-  #     channel: ${{ secrets.SLACK_CHANNEL_ID }}
-  #     text: "howdy <@channel>!"
 }

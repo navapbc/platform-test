@@ -1,5 +1,9 @@
 #!/bin/bash
 # -----------------------------------------------------------------------------
+# This script checks for orphaned PR environments by listing all PR workspaces
+# and checking if the associated PR is closed. If the PR is closed the
+# resources in the workspace should have been destroyed and the workspace
+# deleted, so existing workspaces for closed PRs are considered orphaned.
 # -----------------------------------------------------------------------------
 set -euo pipefail
 

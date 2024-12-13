@@ -65,5 +65,5 @@ jobs:
           method: chat.postMessage
           token: ${{ secrets.SYSTEM_NOTIFICATIONS_SLACK_BOT_TOKEN }}
           payload: |
-            channel: ${{ env.SYSTEM_NOTIFICATIONS_SLACK_CHANNEL_ID }}
+            channel: ${{ secrets.SYSTEM_NOTIFICATIONS_SLACK_CHANNEL_ID }}
             text: ${{ inputs.message }}

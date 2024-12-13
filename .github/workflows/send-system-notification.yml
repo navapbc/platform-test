@@ -46,7 +46,7 @@ jobs:
             slack_token_secret_name="$(echo "${channel_config}" | jq -r ".slack_token_secret_name")"
             echo "Slack token secret name: ${slack_token_secret_name}"
             echo "SLACK_TOKEN_SECRET_NAME=${slack_token_secret_name}" >> "$GITHUB_ENV"
-          else
+          fi
         shell: bash
 
       - name: Get Slack credentials

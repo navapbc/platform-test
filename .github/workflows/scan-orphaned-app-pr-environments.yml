@@ -1,0 +1,15 @@
+# This workflow scans for orphaned PR environments
+name: Scan orphaned PR environments
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Run every day at 07:30 UTC (3:30am ET, 12:30am PT) after engineers are likely done with work
+    - cron: "30 7 * * *"
+
+jobs:
+  scan:
+    name: Scan
+    uses: ./.github/workflows/scan-orphaned-pr-environments.yml
+    with:
+      app_name: "app"

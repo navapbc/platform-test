@@ -1,0 +1,45 @@
+# This workflow scans for orphaned PR environments
+name: Scan orphaned PR environments
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        description: "name of application folder under infra directory"
+        required: true
+        type: string
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.8.3
+          terraform_wrapper: false
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: ${{ inputs.app_name }}
+          environment: dev
+
+      - name: List PR workspaces
+        run: |
+          echo "::group::Initialize Terraform"
+          echo terraform -chdir="infra/${{ inputs.app_name }}/service" init -input=false -reconfigure -backend-config="dev.s3.tfbackend"
+          terraform -chdir="infra/${{ inputs.app_name }}/service" init -input=false -reconfigure -backend-config="dev.s3.tfbackend"
+          echo "::endgroup::"
+
+          echo "::group::List PR workspaces"
+          echo terraform -chdir="infra/${{ inputs.app_name }}/service" workspace list | grep "p-"
+          terraform -chdir="infra/${{ inputs.app_name }}/service" workspace list | grep "p-"
+          echo "::endgroup::"
+        env:
+          TF_IN_AUTOMATION: "true"

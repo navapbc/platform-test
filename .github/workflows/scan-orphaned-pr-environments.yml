@@ -32,14 +32,6 @@ jobs:
 
       - name: List PR workspaces
         run: |
-          echo "::group::Initialize Terraform"
-          echo terraform -chdir="infra/${{ inputs.app_name }}/service" init -input=false -reconfigure -backend-config="dev.s3.tfbackend"
-          terraform -chdir="infra/${{ inputs.app_name }}/service" init -input=false -reconfigure -backend-config="dev.s3.tfbackend"
-          echo "::endgroup::"
-
-          echo "::group::List PR workspaces"
-          echo terraform -chdir="infra/${{ inputs.app_name }}/service" workspace list
-          terraform -chdir="infra/${{ inputs.app_name }}/service" workspace list | grep "p-"
-          echo "::endgroup::"
+          bin/scan-orphaned-pr-environments ${{ inputs.app_name }}
         env:
           TF_IN_AUTOMATION: "true"

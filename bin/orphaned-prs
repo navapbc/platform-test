@@ -34,9 +34,10 @@ for pr_num in $pr_nums; do
 done
 echo "::endgroup::"
 
-echo "Orphaned PR environments: ${closed_prs[*]}"
-
 # if closed_prs is not empty exit with 1 otherwise exit with 0
 if [ ${#closed_prs[@]} -gt 0 ]; then
+  echo "Orphaned PR environments: ${closed_prs[*]}"
   exit 1
 fi
+
+echo "No orphaned PR environments"

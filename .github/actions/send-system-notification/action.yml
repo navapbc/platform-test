@@ -47,7 +47,7 @@ runs:
       shell: bash
 
     - name: Send Slack message
-      if: ${{ steps.get-channel-type.outputs.channel_type == "slack" }}
+      if: ${{ steps.get-channel-type.outputs.channel_type == 'slack' }}
       uses: slackapi/slack-github-action@v2.0.0
       with:
         method: chat.postMessage

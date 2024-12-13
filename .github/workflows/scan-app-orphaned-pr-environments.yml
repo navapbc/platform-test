@@ -8,8 +8,8 @@ on:
     - cron: "30 7 * * *"
 
 jobs:
-  scan:
-    name: Scan
+  orphaned-prs:
+    name: Orphaned PRs
     uses: ./.github/workflows/scan-orphaned-pr-environments.yml
     with:
       app_name: "app"

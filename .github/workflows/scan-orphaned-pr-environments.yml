@@ -10,8 +10,8 @@ on:
         type: string
 
 jobs:
-  orphaned-prs:
-    name: Orphaned PRs
+  scan:
+    name: Scan
     runs-on: ubuntu-latest
 
     permissions:

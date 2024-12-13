@@ -1,17 +1,25 @@
 name: "Send system notification"
-# "Send a system notification to a chat application |
-# like Slack or Microsoft Teams. |
-# The available notification channels are defined in the infra/project-config/ |
-# Terraform module in system-notifications.tf."
 
 on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: "Name of channel to use. Must be defined in /infra/project-config"
+        required: true
+        type: string
+      message:
+        description: "Message to send"
+        required: true
+        type: string
   workflow_call:
     inputs:
       channel:
         description: "Name of channel to use. Must be defined in /infra/project-config"
+        required: true
         type: string
       message:
         description: "Message to send"
+        required: true
         type: string
 
 jobs:

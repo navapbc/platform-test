@@ -49,15 +49,6 @@ jobs:
           fi
         shell: bash
 
-      - name: Get Slack credentials
-        id: get-slack-credentials
-        if: ${{ steps.get-channel-type.outputs.channel_type == 'slack' }}
-        run: |
-          echo "Setting env vars SLACK_BOT_TOKEN and SLACK_CHANNEL_ID..."
-          echo "SLACK_BOT_TOKEN='${{ secrets[env.SLACK_TOKEN_SECRET_NAME] }}'" >> "$GITHUB_ENV"
-          echo "SLACK_CHANNEL_ID='${{ secrets[env.CHANNEL_ID_SECRET_NAME] }}'" >> "$GITHUB_ENV"
-        shell: bash
-
       - name: Send Slack message
         if: ${{ steps.get-channel-type.outputs.channel_type == 'slack' }}
         uses: slackapi/slack-github-action@v2.0.0

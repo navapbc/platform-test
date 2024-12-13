@@ -17,6 +17,7 @@ on:
       message:
         description: "Message to send"
         type: string
+  pull_request:
 
 jobs:
   notify:

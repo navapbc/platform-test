@@ -32,6 +32,6 @@ jobs:
 
       - name: List PR workspaces
         run: |
-          bin/scan-orphaned-pr-environments ${{ inputs.app_name }}
+          ./bin/orphaned-prs ${{ inputs.app_name }}
         env:
           TF_IN_AUTOMATION: "true"

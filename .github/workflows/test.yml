@@ -4,14 +4,10 @@ on:
   pull_request:
 
 jobs:
-  deploy:
-    name: Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Send system notification
-        uses: ./.github/actions/send-system-notification
-        with:
-          channel: "workflow-failures"
-          message: "Test message"
+  test:
+    name: Send system notification
+    uses: ./.github/workflows/send-system-notification.yml
+    with:
+      channel: "workflow-failures"
+      message: "Test message"
+    secrets: inherit

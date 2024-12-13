@@ -38,7 +38,7 @@ jobs:
           echo "::endgroup::"
 
           echo "::group::List PR workspaces"
-          echo terraform -chdir="infra/${{ inputs.app_name }}/service" workspace list | grep "p-"
+          echo terraform -chdir="infra/${{ inputs.app_name }}/service" workspace list
           terraform -chdir="infra/${{ inputs.app_name }}/service" workspace list | grep "p-"
           echo "::endgroup::"
         env:

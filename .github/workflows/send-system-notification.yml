@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Get channel configuration
-        id: get-channel-type
+        id: get-channel-config
         run: |
           echo "Get channel type for channel=${{ inputs.channel }}"
 
@@ -41,11 +41,11 @@ jobs:
           if [[ "${channel_type}" == "slack" ]]; then
             channel_id_secret_name="$(echo "${channel_config}" | jq -r ".channel_id_secret_name")"
             echo "Channel ID secret name: ${channel_id_secret_name}"
-            echo "CHANNEL_ID_SECRET_NAME=${channel_id_secret_name}" >> "$GITHUB_ENV"
+            echo "CHANNEL_ID_SECRET_NAME=${channel_id_secret_name}" >> "$GITHUB_OUTPUT"
 
             slack_token_secret_name="$(echo "${channel_config}" | jq -r ".slack_token_secret_name")"
             echo "Slack token secret name: ${slack_token_secret_name}"
-            echo "SLACK_TOKEN_SECRET_NAME=${slack_token_secret_name}" >> "$GITHUB_ENV"
+            echo "SLACK_TOKEN_SECRET_NAME=${slack_token_secret_name}" >> "$GITHUB_OUTPUT"
           fi
         shell: bash
 
@@ -54,7 +54,7 @@ jobs:
         uses: slackapi/slack-github-action@v2.0.0
         with:
           method: chat.postMessage
-          token: ${{ secrets[env.SLACK_TOKEN_SECRET_NAME] }}
+          token: ${{ secrets[steps.get-channel-config.outputs.SLACK_TOKEN_SECRET_NAME] }}
           payload: |
-            channel: ${{ secrets[env.CHANNEL_ID_SECRET_NAME] }}
+            channel: ${{ secrets[steps.get-channel-config.outputs.CHANNEL_ID_SECRET_NAME] }}
             text: ${{ inputs.message }}

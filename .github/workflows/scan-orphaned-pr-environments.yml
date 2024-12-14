@@ -40,6 +40,7 @@ jobs:
 
   notify:
     name: Notify
+    needs: scan
     if: failure()
     uses: ./.github/workflows/send-system-notification.yml
     with:

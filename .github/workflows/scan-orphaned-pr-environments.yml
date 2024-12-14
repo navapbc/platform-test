@@ -1,0 +1,49 @@
+# This workflow scans for orphaned PR environments
+name: Scan orphaned PR environments
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        description: "name of application folder under infra directory"
+        required: true
+        type: string
+
+jobs:
+  scan:
+    name: Scan
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.8.3
+          terraform_wrapper: false
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: ${{ inputs.app_name }}
+          environment: dev
+
+      - name: List PR workspaces
+        run: |
+          ./bin/orphaned-prs ${{ inputs.app_name }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TF_IN_AUTOMATION: "true"
+
+  notify:
+    name: Notify
+    needs: scan
+    if: failure()
+    uses: ./.github/workflows/send-system-notification.yml
+    with:
+      channel: "workflow-failures"
+      message: "🧹 [Orphaned PR environments for ${{ github.repository }} ${{ inputs.app_name }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+    secrets: inherit

@@ -54,7 +54,7 @@ jobs:
 
             # Convert Markdown links in message [text](url) to Slack format <url|text>
             echo "Convert message from Markdown to Slack format"
-            echo "SLACK_MESSAGE=$(echo "${{ inputs.message }}" | 's/\[(.+)\]\((.+)\)/<\2|\1>/g')" >> "$GITHUB_ENV"
+            echo "SLACK_MESSAGE=$(echo "${{ inputs.message }}" | sed -E 's/\[(.+)\]\((.+)\)/<\2|\1>/g')" >> "$GITHUB_ENV"
           fi
         shell: bash
 

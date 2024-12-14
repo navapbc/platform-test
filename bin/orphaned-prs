@@ -7,37 +7,45 @@
 # -----------------------------------------------------------------------------
 set -euo pipefail
 
-app_name="$1"
+# shellcheck source=bin/infra-utils.bash
+source bin/infra-utils.bash
 
-echo "::group::Initialize Terraform"
-echo terraform -chdir="infra/${app_name}/service" init -input=false -reconfigure -backend-config="dev.s3.tfbackend"
-terraform -chdir="infra/${app_name}/service" init -input=false -reconfigure -backend-config="dev.s3.tfbackend"
-echo "::endgroup::"
+orphaned_prs=()
+for app_name in $(get_app_names); do
+  echo "Checking orphaned PR environments for ${app_name}"
 
-echo "::group::List PRs with PR environments"
-echo terraform -chdir="infra/${app_name}/service" workspace list
-workspaces="$(terraform -chdir="infra/${app_name}/service" workspace list)"
-pr_nums="$(echo "${workspaces}" | grep -o 'p-[0-9]\+' | sed 's/p-//')"
-echo "PRs"
-echo "${pr_nums}"
-echo "::endgroup::"
+  echo "::group::Initialize Terraform"
+  echo terraform -chdir="infra/${app_name}/service" init -input=false -reconfigure -backend-config="dev.s3.tfbackend"
+  terraform -chdir="infra/${app_name}/service" init -input=false -reconfigure -backend-config="dev.s3.tfbackend"
+  echo "::endgroup::"
 
-echo "::group::Check status of each PR"
-closed_prs=()
-for pr_num in $pr_nums; do
-  pr_status="$(gh pr view "$pr_num" --json state --jq ".state")"
-  echo "PR ${pr_num}: ${pr_status}"
+  echo "::group::List PRs with PR environments"
+  echo terraform -chdir="infra/${app_name}/service" workspace list
+  workspaces="$(terraform -chdir="infra/${app_name}/service" workspace list)"
+  pr_nums="$(echo "${workspaces}" | grep -o 'p-[0-9]\+' | sed 's/p-//')"
+  echo "PRs"
+  echo "${pr_nums}"
+  echo "::endgroup::"
 
-  if [ "$pr_status" == "CLOSED" ]; then
-    closed_prs+=("$pr_num")
-  fi
+  echo "::group::Check status of each PR"
+  for pr_num in $pr_nums; do
+    pr_status="$(gh pr view "$pr_num" --json state --jq ".state")"
+    echo "PR ${pr_num}: ${pr_status}"
+
+    if [ "$pr_status" == "CLOSED" ]; then
+      orphaned_prs+=("$pr_num")
+    fi
+  done
+  echo "::endgroup::"
+
+  echo "${orphaned_prs[@]}"
 done
-echo "::endgroup::"
 
-# if closed_prs is not empty exit with 1 otherwise exit with 0
-if [ ${#closed_prs[@]} -gt 0 ]; then
-  echo "Orphaned PR environments: ${closed_prs[*]}"
-  echo "Orphaned PR environments: ${closed_prs[*]}" >> "${GITHUB_STEP_SUMMARY}"
+
+# if orphaned_prs is not empty exit with 1 otherwise exit with 0
+if [ ${#orphaned_prs[@]} -gt 0 ]; then
+  echo "Orphaned PR environments: ${orphaned_prs[*]}"
+  echo "Orphaned PR environments: ${orphaned_prs[*]}" >> "${GITHUB_STEP_SUMMARY}"
   exit 1
 fi
 

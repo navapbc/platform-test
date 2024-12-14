@@ -46,3 +46,4 @@ jobs:
     with:
       channel: "workflow-failures"
       message: "🧹 <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Orphaned PR environments for ${{ github.repository }} ${{ inputs.app_name }}>"
+    secrets: inherit

@@ -6,7 +6,7 @@ locals {
 
   system_notifications_config = {
     channels = {
-      "workflow-failures" = {
+      workflow-failures = {
         "type" = "slack" # or "teams"
         # Name of the secret in GitHub
         "channel_id_secret_name"  = "SYSTEM_NOTIFICATIONS_SLACK_CHANNEL_ID"

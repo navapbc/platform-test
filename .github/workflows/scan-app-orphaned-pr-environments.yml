@@ -13,3 +13,4 @@ jobs:
     uses: ./.github/workflows/scan-orphaned-pr-environments.yml
     with:
       app_name: "app"
+    secrets: inherit

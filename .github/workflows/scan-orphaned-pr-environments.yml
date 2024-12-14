@@ -37,3 +37,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TF_IN_AUTOMATION: "true"
+
+  notify:
+    name: Notify
+    if: failure()
+    uses: ./.github/workflows/send-system-notification.yml
+    with:
+      channel: "workflow-failures"
+      message: "🧹 <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Orphaned PR environments for ${{ github.repository }} ${{ inputs.app_name }}>"

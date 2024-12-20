@@ -6,7 +6,6 @@ on:
   schedule:
     # Run every day at 07:30 UTC (3:30am ET, 12:30am PT) after engineers are likely done with work
     - cron: "30 7 * * *"
-  pull_request:
 
 jobs:
   collect-app-names:

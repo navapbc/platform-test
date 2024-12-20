@@ -8,15 +8,15 @@ on:
     - cron: "30 7 * * *"
 
 jobs:
-  collect-app-names:
-    name: Get App names
+  get-app-names:
+    name: Get app names
     runs-on: ubuntu-latest
     outputs:
-      app_names: ${{ steps.app-names.outputs.app_names }}
+      app_names: ${{ steps.get-app-names.outputs.app_names }}
     steps:
       - uses: actions/checkout@v4
       - name: Get app names
-        id: app-names
+        id: get-app-names
         run: |
           source bin/util.bash
           app_names="$(get_app_names)"
@@ -28,10 +28,11 @@ jobs:
   scan:
     name: Scan
     runs-on: ubuntu-latest
+    needs: get-app-names
 
     strategy:
       matrix:
-        app_name: ${{ fromJson(needs.collect-app-names.outputs.app_names) }}
+        app_name: ${{ fromJson(needs.get-app-names.outputs.app_names) }}
 
     permissions:
       contents: read

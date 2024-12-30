@@ -21,7 +21,7 @@ jobs:
           source bin/util.bash
           app_names="$(get_app_names)"
           # turn app_names into a json list using jq
-          app_names="$(echo "$(get_app_names)" | jq -R -s -c 'split("\n")[:-1]')"
+          app_names="$(echo "${app_names}" | jq -R -s -c 'split("\n")[:-1]')"
           echo "App names retrieved: ${app_names}"
           echo "app_names=${app_names}" >> "$GITHUB_OUTPUT"
         shell: bash

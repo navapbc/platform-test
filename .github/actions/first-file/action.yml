@@ -10,12 +10,14 @@ inputs:
 outputs:
   found_file:
     description: "Path of first file found."
+    value: ${{ steps.find-file.outputs.found_file }}
 
 
 runs:
   using: "composite"
   steps:
     - name: Checks for files
+      id: find-file
       shell: bash
       run: |
         for f in ${{ inputs.files }}; do

@@ -25,4 +25,5 @@ runs:
           fi
         done
 
+        echo "found_file=${found_file}"
         echo "found_file=${found_file}" >> "$GITHUB_OUTPUT"

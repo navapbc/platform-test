@@ -1,0 +1,28 @@
+name: "Return first file that exists"
+description: "Check given list of files in order and return first on that exists."
+
+inputs:
+  files:
+    type: string
+    description: "Space-separated list of files to check in order"
+    required: true
+
+outputs:
+  found_file:
+    description: "Path of first file found."
+
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checks for files
+      shell: bash
+      run: |
+        for f in ${{ inputs.files }}; do
+          if [[ -e "${f}" ]]; then
+            found_file="${f}"
+            break
+          fi
+        done
+
+        echo "found_file=${found_file}" >> "$GITHUB_OUTPUT"

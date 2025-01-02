@@ -19,6 +19,8 @@ runs:
       id: file-list
       shell: bash
       run: |
+        # Get file list
+        # https://github.com/actions/runner/issues/1877
         files=$(printf %s "${{ inputs.files }}" | tr '\n' ' ')
         echo "Will search: ${files}"
         echo "files=${files}" >> "$GITHUB_OUTPUT"
@@ -27,6 +29,8 @@ runs:
       id: find-file
       shell: bash
       run: |
+        # Check file list
+        # https://github.com/actions/runner/issues/1877
         for f in ${{ steps.file-list.outputs.files }}; do
           if [[ -e "${f}" ]]; then
             found_file="${f}"

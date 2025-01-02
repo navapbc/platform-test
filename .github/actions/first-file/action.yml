@@ -15,14 +15,19 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Checks for files
-      id: find-file
+    - name: Get file list
+      id: file-list
       shell: bash
       run: |
         files=$(printf %s "${{ inputs.files }}" | tr '\n' ' ')
         echo "Will search: ${files}"
+        echo "files=${files}" >> "$GITHUB_OUTPUT"
 
-        for f in ${files}; do
+    - name: Check file list
+      id: find-file
+      shell: bash
+      run: |
+        for f in ${{ steps.file-list.outputs.files }}; do
           if [[ -e "${f}" ]]; then
             found_file="${f}"
             break

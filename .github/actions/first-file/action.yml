@@ -12,7 +12,6 @@ outputs:
     description: "Path of first file found."
     value: ${{ steps.find-file.outputs.found_file }}
 
-
 runs:
   using: "composite"
   steps:

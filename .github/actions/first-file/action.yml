@@ -19,7 +19,7 @@ runs:
       id: find-file
       shell: bash
       run: |
-        for f in ${{ inputs.files }}; do
+        for f in $(printf %s "${{ inputs.files }}" | tr '\n' ' '); do
           if [[ -e "${f}" ]]; then
             found_file="${f}"
             break

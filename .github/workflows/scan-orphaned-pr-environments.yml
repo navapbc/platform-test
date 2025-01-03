@@ -18,7 +18,7 @@ jobs:
       - name: Get app names
         id: get-app-names
         run: |
-          source bin/util.bash
+          source bin/util.sh
           app_names="$(get_app_names)"
           # turn app_names into a json list using jq
           app_names="$(echo "${app_names}" | jq -R -s -c 'split("\n")[:-1]')"

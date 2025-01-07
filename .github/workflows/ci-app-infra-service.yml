@@ -1,3 +1,6 @@
+# This workflow runs end to end infrastructure tests for the service layer
+# of the app using Terratest.
+
 name: CI Infra Service Checks - app
 
 on:
@@ -45,3 +48,13 @@ jobs:
 
       - name: Run Terratest
         run: make infra-test-service APP_NAME=app
+
+  notify:
+    name: Notify
+    needs: infra-test-e2e
+    if: failure() && github.event_name == 'push'
+    uses: ./.github/workflows/send-system-notification.yml
+    with:
+      channel: "workflow-failures"
+      message: "❌ [Service layer infra tests for app failed](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+    secrets: inherit

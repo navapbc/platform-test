@@ -1,3 +1,6 @@
+# This workflow handles the deployment of the application to different
+# environments.
+
 name: Deploy app
 # Need to set a default value for when the workflow is triggered from a git push
 # which bypasses the default configuration for inputs
@@ -35,3 +38,12 @@ jobs:
       app_name: "app"
       environment: ${{ inputs.environment || 'dev' }}
       version: ${{ inputs.version || 'main' }}
+  notify:
+    name: Notify
+    needs: deploy
+    if: failure() && github.event_name == 'push'
+    uses: ./.github/workflows/send-system-notification.yml
+    with:
+      channel: "workflow-failures"
+      message: "❌ [Deploy of app to ${{ inputs.environment || 'dev' }} failed](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+    secrets: inherit

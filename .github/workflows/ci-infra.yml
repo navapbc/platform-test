@@ -1,3 +1,6 @@
+# This workflow runs various checks for infrastructure code, including
+# linting, Terraform format checks, and compliance checks.
+
 name: CI Infra Checks
 
 on:
@@ -93,3 +96,12 @@ jobs:
         uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
         with:
           github_token: ${{ github.token }}
+  notify:
+    name: Notify
+    needs: [lint-github-actions, lint-scripts, check-terraform-format, validate-terraform, check-compliance-with-checkov, check-compliance-with-tfsec]
+    if: failure() && github.event_name == 'push'
+    uses: ./.github/workflows/send-system-notification.yml
+    with:
+      channel: "workflow-failures"
+      message: "❌ [Infra checks failed](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+    secrets: inherit

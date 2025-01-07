@@ -1,3 +1,5 @@
+# This workflow runs CI checks for documentation, including linting markdown files.
+
 name: CI Documentation Checks
 
 on:
@@ -17,3 +19,13 @@ jobs:
         with:
           use-quiet-mode: "yes" # errors only.
           config-file: ".github/workflows/markdownlint-config.json"
+
+  notify:
+    name: Notify
+    needs: lint-markdown
+    if: failure() && github.event_name == 'push'
+    uses: ./.github/workflows/send-system-notification.yml
+    with:
+      channel: "workflow-failures"
+      message: "⚠️ [Documentation checks failed](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+    secrets: inherit

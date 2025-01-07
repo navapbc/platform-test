@@ -72,7 +72,7 @@ jobs:
   notify:
     name: Notify
     needs: check
-    if: failure()
+    if: failure() && github.event_name == 'schedule'
     uses: ./.github/workflows/send-system-notification.yml
     with:
       channel: "workflow-failures"

@@ -16,6 +16,7 @@ on:
       - bin/**
       - infra/**
       - .github/workflows/**
+  workflow_dispatch:
 
 jobs:
   lint-github-actions:

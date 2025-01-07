@@ -41,7 +41,7 @@ jobs:
   notify:
     name: Notify
     needs: deploy
-    if: failure() && github.event_name == 'push'
+    if: failure()
     uses: ./.github/workflows/send-system-notification.yml
     with:
       channel: "workflow-failures"

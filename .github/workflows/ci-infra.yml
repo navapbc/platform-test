@@ -100,7 +100,7 @@ jobs:
   notify:
     name: Notify
     needs: [lint-github-actions, lint-scripts, check-terraform-format, validate-terraform, check-compliance-with-checkov, check-compliance-with-tfsec]
-    if: failure()
+    if: failure() && github.event_name == 'push'
     uses: ./.github/workflows/send-system-notification.yml
     with:
       channel: "workflow-failures"

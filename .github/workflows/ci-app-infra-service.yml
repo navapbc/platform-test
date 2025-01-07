@@ -52,7 +52,7 @@ jobs:
   notify:
     name: Notify
     needs: infra-test-e2e
-    if: failure()
+    if: failure() && github.event_name == 'push'
     uses: ./.github/workflows/send-system-notification.yml
     with:
       channel: "workflow-failures"

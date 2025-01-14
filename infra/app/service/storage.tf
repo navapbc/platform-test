@@ -1,6 +1,6 @@
 locals {
-  storage_config                                 = local.environment_config.storage_config
-  bucket_name                                    = "${local.prefix}${local.storage_config.bucket_name}"
+  storage_config = local.environment_config.storage_config
+  bucket_name    = "${local.prefix}${local.storage_config.bucket_name}"
 }
 
 module "storage" {

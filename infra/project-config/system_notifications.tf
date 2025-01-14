@@ -32,9 +32,10 @@ locals {
     # }
     channels = {
       workflow-failures = {
-        "type"                    = "slack"
-        "channel_id_secret_name"  = "SYSTEM_NOTIFICATIONS_SLACK_CHANNEL_ID"
-        "slack_token_secret_name" = "SYSTEM_NOTIFICATIONS_SLACK_BOT_TOKEN"
+        # Uncomment if you want to send workflow failure notifications to Slack
+        # "type" = "slack"
+        # "channel_id_secret_name"  = "SYSTEM_NOTIFICATIONS_SLACK_CHANNEL_ID"
+        # "slack_token_secret_name" = "SYSTEM_NOTIFICATIONS_SLACK_BOT_TOKEN"
       }
     }
   }

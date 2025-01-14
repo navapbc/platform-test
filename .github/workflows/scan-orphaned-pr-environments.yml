@@ -31,12 +31,14 @@ jobs:
     needs: get-app-names
 
     strategy:
+      fail-fast: false
       matrix:
         app_name: ${{ fromJson(needs.get-app-names.outputs.app_names) }}
 
     permissions:
       contents: read
       id-token: write
+      pull-requests: read
 
     steps:
       - uses: actions/checkout@v4

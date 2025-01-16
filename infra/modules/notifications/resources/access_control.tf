@@ -8,10 +8,12 @@ resource "aws_iam_policy" "access" {
       {
         Effect = "Allow"
         Action = [
+          "ses:SendEmail",
           "mobiletargeting:SendMessages",
           "mobiletargeting:SendUsersMessages"
         ]
-        Resource = "${aws_pinpoint_app.app.arn}/messages"
+        Resource = "*"
+        # Resource = "${aws_pinpoint_app.app.arn}/messages"
       }
     ]
   })

@@ -64,20 +64,14 @@ def document_upload():
     return f'<form method="post" action="{upload_url}" enctype="multipart/form-data">{additional_fields}<input type="file" name="file"><input type="submit"></form>'
 
 
-@app.get("/notifications")
-def notifications_get():
+@app.route("/email-notifications", methods=["GET", "POST"])
+def email_notifications():
+    if request.method == "POST":
+        to = request.form["to"]
+        subject = "Test notification"
+        message = "This is a system generated test notification. If you received this email in error, please ignore it."
+        notifications.send_email(to, subject, message)
     return f'<form method="post">Send test email to:<input type="email" name="to"><input type="submit"></form>'
-
-
-@app.post("/notifications")
-def notifications_post():
-    pinpoint_app_id = os.environ["AWS_PINPOINT_APP_ID"]
-    sender_email = os.environ["AWS_PINPOINT_SENDER_EMAIL"]
-    to = request.form["to"]
-    subject = "Test notification"
-    message = "This is a system generated test notification. If you received this email in error, please ignore it."
-    notifications.send_email(to, subject, message)
-    return redirect("/notifications", code=303)
 
 
 @app.route("/secrets")

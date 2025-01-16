@@ -12,8 +12,7 @@ resource "aws_iam_policy" "access" {
           "mobiletargeting:SendMessages",
           "mobiletargeting:SendUsersMessages"
         ]
-        Resource = "*"
-        # Resource = "${aws_pinpoint_app.app.arn}/messages"
+        Resource = "${aws_pinpoint_app.app.arn}/messages"
       }
     ]
   })

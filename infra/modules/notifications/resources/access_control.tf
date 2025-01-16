@@ -19,7 +19,8 @@ resource "aws_iam_policy" "access" {
           "ses:SendEmail",
           "ses:SendRawEmail",
         ]
-        Resource = var.domain_identity_arn
+        # Resource = var.domain_identity_arn
+        Resource = "*"
       }
     ]
   })

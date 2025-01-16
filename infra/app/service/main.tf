@@ -1,26 +1,3 @@
-data "aws_vpc" "network" {
-  tags = {
-    project      = module.project_config.project_name
-    network_name = local.environment_config.network_name
-  }
-}
-
-data "aws_subnets" "public" {
-  tags = {
-    project      = module.project_config.project_name
-    network_name = local.environment_config.network_name
-    subnet_type  = "public"
-  }
-}
-
-data "aws_subnets" "private" {
-  tags = {
-    project      = module.project_config.project_name
-    network_name = local.environment_config.network_name
-    subnet_type  = "private"
-  }
-}
-
 locals {
   # The prefix is used to create uniquely named resources per terraform workspace, which
   # are needed in CI/CD for preview environments and tests.
@@ -43,15 +20,10 @@ locals {
   build_repository_config  = module.app_config.build_repository_config
   environment_config       = module.app_config.environment_configs[var.environment_name]
   service_config           = local.environment_config.service_config
-  database_config          = local.environment_config.database_config
   identity_provider_config = local.environment_config.identity_provider_config
   notifications_config     = local.environment_config.notifications_config
 
-  network_config = module.project_config.network_configs[local.environment_config.network_name]
-
-  service_name   = "${local.prefix}${local.service_config.service_name}"
-  domain_name    = local.service_config.domain_name
-  hosted_zone_id = local.domain_name != null ? data.aws_route53_zone.zone[0].zone_id : null
+  service_name = "${local.prefix}${local.service_config.service_name}"
 }
 
 terraform {
@@ -82,43 +54,6 @@ module "project_config" {
 
 module "app_config" {
   source = "../app-config"
-}
-
-data "aws_rds_cluster" "db_cluster" {
-  count              = module.app_config.has_database ? 1 : 0
-  cluster_identifier = local.database_config.cluster_name
-}
-
-data "aws_iam_policy" "app_db_access_policy" {
-  count = module.app_config.has_database ? 1 : 0
-  name  = local.database_config.app_access_policy_name
-}
-
-data "aws_iam_policy" "migrator_db_access_policy" {
-  count = module.app_config.has_database ? 1 : 0
-  name  = local.database_config.migrator_access_policy_name
-}
-
-data "aws_security_groups" "aws_services" {
-  filter {
-    name   = "group-name"
-    values = ["${module.project_config.aws_services_security_group_name_prefix}*"]
-  }
-
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.network.id]
-  }
-}
-
-data "aws_acm_certificate" "certificate" {
-  count  = local.service_config.enable_https ? 1 : 0
-  domain = local.domain_name
-}
-
-data "aws_route53_zone" "zone" {
-  count = local.domain_name != null ? 1 : 0
-  name  = local.network_config.domain_config.hosted_zone
 }
 
 module "service" {

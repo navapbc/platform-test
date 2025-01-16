@@ -199,6 +199,10 @@ module "service" {
   )
 
   is_temporary = local.is_temporary
+
+  # Template Divergent Variables
+  container_read_only = false
+  healthcheck_type    = "curl"
 }
 
 module "monitoring" {

@@ -70,6 +70,7 @@ def email_notifications():
         to = request.form["to"]
         subject = "Test notification"
         message = "This is a system generated test notification. If you received this email in error, please ignore it."
+        logger.info("Sending test email to %s", to)
         notifications.send_email(to, subject, message)
     return f'<form method="post">Send test email to:<input type="email" name="to"><input type="submit"></form>'
 

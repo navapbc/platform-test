@@ -33,5 +33,6 @@ def send_email(to: str, subject: str, message: str):
             }
         }
     )
+    print(response)
 
     return response

@@ -1,5 +1,5 @@
 resource "aws_iam_policy" "access" {
-  name        = "${var.name}-access"
+  name        = "${var.name}-notifications-access"
   description = "Policy for calling SendMessages and SendUsersMessages on Pinpoint app ${var.name}"
 
   policy = jsonencode({
@@ -11,7 +11,7 @@ resource "aws_iam_policy" "access" {
           "mobiletargeting:SendMessages",
           "mobiletargeting:SendUsersMessages"
         ]
-        Resource = aws_pinpoint_app.app.arn
+        Resource = "${aws_pinpoint_app.app.arn}/messages"
       }
     ]
   })

@@ -5,6 +5,7 @@ resource "aws_iam_policy" "access" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
+      # From https://docs.aws.amazon.com/pinpoint/latest/developerguide/permissions-actions.html#permissions-actions-apiactions-messages
       {
         Effect = "Allow"
         Action = [
@@ -13,6 +14,8 @@ resource "aws_iam_policy" "access" {
         ]
         Resource = "${aws_pinpoint_app.app.arn}/messages"
       },
+
+      # From https://docs.aws.amazon.com/pinpoint/latest/developerguide/permissions-ses.html
       {
         Effect = "Allow"
         Action = [

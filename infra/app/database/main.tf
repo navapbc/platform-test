@@ -75,7 +75,7 @@ data "aws_security_groups" "aws_services" {
 }
 
 module "database" {
-  source = "../../modules/database"
+  source = "../../modules/database/resources"
 
   name                        = "${local.prefix}${local.database_config.cluster_name}"
   app_access_policy_name      = "${local.prefix}${local.database_config.app_access_policy_name}"

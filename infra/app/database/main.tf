@@ -76,16 +76,7 @@ data "aws_security_groups" "aws_services" {
 
 module "database" {
   source = "../../modules/database/resources"
-
-  name                        = "${local.prefix}${local.database_config.cluster_name}"
-  app_access_policy_name      = "${local.prefix}${local.database_config.app_access_policy_name}"
-  migrator_access_policy_name = "${local.prefix}${local.database_config.migrator_access_policy_name}"
-
-  # The following are not AWS infra resources and therefore do not need to be
-  # isolated via the terraform workspace prefix
-  app_username      = local.database_config.app_username
-  migrator_username = local.database_config.migrator_username
-  schema_name       = local.database_config.schema_name
+  name   = "${local.prefix}${local.database_config.cluster_name}"
 
   vpc_id                         = data.aws_vpc.network.id
   database_subnet_group_name     = local.network_config.database_subnet_group_name

@@ -17,11 +17,9 @@ locals {
   # Examples: pull request preview environments are temporary.
   is_temporary = terraform.workspace != "default"
 
-  build_repository_config  = module.app_config.build_repository_config
-  environment_config       = module.app_config.environment_configs[var.environment_name]
-  service_config           = local.environment_config.service_config
-  identity_provider_config = local.environment_config.identity_provider_config
-  notifications_config     = local.environment_config.notifications_config
+  build_repository_config = module.app_config.build_repository_config
+  environment_config      = module.app_config.environment_configs[var.environment_name]
+  service_config          = local.environment_config.service_config
 
   service_name = "${local.prefix}${local.service_config.service_name}"
 }

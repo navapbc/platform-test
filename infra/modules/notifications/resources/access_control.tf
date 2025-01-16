@@ -1,6 +1,6 @@
 resource "aws_iam_policy" "access" {
-  name        = "pinpoint_policy"
-  description = "Policy for calling SendMessages and SendUsersMessages on Pinpoint app"
+  name        = "${var.name}-access"
+  description = "Policy for calling SendMessages and SendUsersMessages on Pinpoint app ${var.name}"
 
   policy = jsonencode({
     Version = "2012-10-17"

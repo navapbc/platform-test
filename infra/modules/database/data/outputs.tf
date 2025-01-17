@@ -1,9 +1,9 @@
-output "app_username" {
-  value = module.interface.app_username
-}
-
 output "app_access_policy_arn" {
   value = data.aws_iam_policy.app_db_access_policy.arn
+}
+
+output "app_username" {
+  value = module.interface.app_username
 }
 
 output "db_name" {

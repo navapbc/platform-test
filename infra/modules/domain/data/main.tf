@@ -1,6 +1,5 @@
 locals {
-  domain_name    = local.service_config.domain_name
-  hosted_zone_id = local.domain_name != null ? data.aws_route53_zone.zone[0].zone_id : null
+  domain_name = var.domain_name
 }
 
 data "aws_acm_certificate" "certificate" {
@@ -9,5 +8,6 @@ data "aws_acm_certificate" "certificate" {
 }
 
 data "aws_route53_zone" "zone" {
-  name = var.hosted_zone
+  count = var.hosted_zone != null ? 1 : 0
+  name  = var.hosted_zone
 }

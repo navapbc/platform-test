@@ -67,7 +67,7 @@ module "service" {
   public_subnet_ids  = module.network.public_subnet_ids
   private_subnet_ids = module.network.private_subnet_ids
 
-  domain_name     = local.domain_config.domain_name
+  domain_name     = module.domain.domain_name
   hosted_zone_id  = module.domain.hosted_zone_id
   certificate_arn = module.domain.certificate_arn
 
@@ -76,7 +76,7 @@ module "service" {
   desired_instance_count   = local.service_config.desired_instance_count
   enable_command_execution = local.service_config.enable_command_execution
 
-  aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
+  aws_services_security_group_id = module.network.aws_services_security_group_id
 
   file_upload_jobs = local.service_config.file_upload_jobs
   scheduled_jobs   = local.environment_config.scheduled_jobs

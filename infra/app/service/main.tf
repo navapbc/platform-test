@@ -67,7 +67,7 @@ module "service" {
   public_subnet_ids  = module.network.public_subnet_ids
   private_subnet_ids = module.network.private_subnet_ids
 
-  domain_name     = local.domain_name
+  domain_name     = local.domain_config.domain_name
   hosted_zone_id  = module.domain.hosted_zone_id
   certificate_arn = module.domain.certificate_arn
 

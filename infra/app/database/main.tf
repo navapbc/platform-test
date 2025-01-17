@@ -46,18 +46,6 @@ module "app_config" {
   source = "../app-config"
 }
 
-data "aws_security_groups" "aws_services" {
-  filter {
-    name   = "group-name"
-    values = ["${module.project_config.aws_services_security_group_name_prefix}*"]
-  }
-
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.network.id]
-  }
-}
-
 module "database" {
   source = "../../modules/database"
 
@@ -71,9 +59,9 @@ module "database" {
   migrator_username = local.database_config.migrator_username
   schema_name       = local.database_config.schema_name
 
-  vpc_id                         = data.aws_vpc.network.id
-  database_subnet_group_name     = local.network_config.database_subnet_group_name
-  private_subnet_ids             = data.aws_subnets.database.ids
-  aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
+  vpc_id                         = module.network.vpc_id
+  database_subnet_group_name     = module.network.database_subnet_group_name
+  private_subnet_ids             = module.network.database_subnet_ids
+  aws_services_security_group_id = module.network.aws_services_security_group_id
   is_temporary                   = local.is_temporary
 }

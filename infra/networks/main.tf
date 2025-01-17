@@ -81,7 +81,7 @@ module "network" {
 }
 
 module "domain" {
-  source              = "../modules/domain"
+  source              = "../modules/domain/resources"
   name                = local.domain_config.hosted_zone
   manage_dns          = local.domain_config.manage_dns
   certificate_configs = local.domain_config.certificate_configs

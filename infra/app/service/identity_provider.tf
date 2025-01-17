@@ -25,7 +25,6 @@ module "identity_provider" {
   verification_email_message       = local.identity_provider_config.verification_email.verification_email_message
   verification_email_subject       = local.identity_provider_config.verification_email.verification_email_subject
   domain_name                      = local.domain_name
-  domain_identity_arn              = local.notifications_config == null ? null : local.domain_identity_arn
   sender_email                     = local.notifications_config == null ? null : local.notifications_config.sender_email
   sender_display_name              = local.notifications_config == null ? null : local.notifications_config.sender_display_name
   reply_to_email                   = local.notifications_config == null ? null : local.notifications_config.reply_to_email

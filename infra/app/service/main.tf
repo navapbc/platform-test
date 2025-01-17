@@ -68,8 +68,8 @@ module "service" {
   private_subnet_ids = module.network.private_subnet_ids
 
   domain_name     = local.domain_name
-  hosted_zone_id  = local.hosted_zone_id
-  certificate_arn = local.service_config.enable_https ? data.aws_acm_certificate.certificate[0].arn : null
+  hosted_zone_id  = module.domain.hosted_zone_id
+  certificate_arn = module.domain.certificate_arn
 
   cpu                      = local.service_config.cpu
   memory                   = local.service_config.memory

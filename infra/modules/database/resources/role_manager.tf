@@ -74,7 +74,11 @@ data "aws_secretsmanager_secret" "db_password" {
 resource "aws_iam_role" "role_manager" {
   name               = "${var.name}-manager"
   assume_role_policy = data.aws_iam_policy_document.role_manager_assume_role.json
-  managed_policy_arns = [
+}
+
+resource "aws_iam_role_policy_attachments_exclusive" "role_manager" {
+  role_name = aws_iam_role.role_manager.name
+  policy_arns = [
     data.aws_iam_policy.lambda_vpc_access.arn,
 
     # Grant the role manager access to the DB as app and migrator users
@@ -84,8 +88,6 @@ resource "aws_iam_role" "role_manager" {
     aws_iam_policy.migrator_db_access.arn
   ]
 }
-
-
 
 resource "aws_iam_role_policy" "role_manager_access_to_db_password" {
   name = "${var.name}-role-manager-ssm-access"

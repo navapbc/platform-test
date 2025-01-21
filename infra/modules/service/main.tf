@@ -33,6 +33,10 @@ locals {
   )
 }
 
+module "project_config" {
+  source = "../../project-config"
+}
+
 #-------------------
 # Service Execution
 #-------------------
@@ -53,7 +57,7 @@ resource "aws_ecs_service" "app" {
 
   network_configuration {
     assign_public_ip = false
-    subnets          = var.private_subnet_ids
+    subnets          = module.network.private_subnet_ids
     security_groups  = [aws_security_group.app.id]
   }
 

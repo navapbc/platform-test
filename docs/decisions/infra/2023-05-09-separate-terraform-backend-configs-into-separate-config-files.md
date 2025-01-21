@@ -1,8 +1,8 @@
 # Separate tfbackend configs into separate files
 
-* Status: accepted
-* Deciders: @lorenyu @shawnvanderjagt @kyeah @bneutra
-* Date: 2023-05-09
+- Status: accepted
+- Deciders: @lorenyu @shawnvanderjagt @kyeah @bneutra
+- Date: 2023-05-09
 
 ## Context
 
@@ -21,16 +21,16 @@ Another alternative is to go back to the old way of bootstrapping an account i.e
 
 ## Benefits of separate tfvars and tfbackend files
 
-* **Reduce risk of differences between environments** – When different environments have their own root modules, development teams have historically sometimes added one-off resources to specific environments without adding those resources to the template module and without realizing that they're violating an important goal of having multiple environments – that environments are isolated from each other but function identically. This creates differences between environments that are more than just configuration differences. By forcing the differences to be limited to the `.tfvars` (-var) file, it limits how badly someone can get an environment out of skew.
-* **DRY backend configuration** – With only a single module, there is less duplication of infrastructure code in the `main.tf` file. In particular, provider configurations, shared partial backend configuration, and certain other top-level local variables and data resources no longer need to be duplicated across environments, and provider versions can also be forced to be consistent.
-* **Make receiving updates from template-infra more robust** – Previously, in order for a project to receive updates from the template-infra repo, the project would copy over template files but then revert files that the project has changed. Currently, the many `main.tf` root module files in the template are expected to be changed by the project since they define project specific backend configurations. With the separation of config files, projects are no longer expected to change the `main.tf` files, so the `main.tf` files in `infra/app/build-repository/`, `infra/project-config/`, `infra/app/app-config/`, etc. can be safely copied over from template-infra without needing to be reverted.
-* **Reduce the cost of introducing additional infrastructure layers** – In the future, we may want to add new infrastructure layers that are created and updated independently of the application layer. Examples include a network layer or a database layer. We may want to keep them separate so that changes to the application infrastructure are isolated from changes to the database infrastructure, which should occur much less frequently. Previously, to add a new layer such as the database layer, we would need two additional folders: a `db-env-template` module and a `db-envs` folder with separate root modules for each environment. This mirrors the same structure that we have for the application. With separate backend config and tfvar files, we would only need a single `db` module with separate `.tfbackend` and `.tfvars` files for each environment.
+- **Reduce risk of differences between environments** – When different environments have their own root modules, development teams have historically sometimes added one-off resources to specific environments without adding those resources to the template module and without realizing that they're violating an important goal of having multiple environments – that environments are isolated from each other but function identically. This creates differences between environments that are more than just configuration differences. By forcing the differences to be limited to the `.tfvars` (-var) file, it limits how badly someone can get an environment out of skew.
+- **DRY backend configuration** – With only a single module, there is less duplication of infrastructure code in the `main.tf` file. In particular, provider configurations, shared partial backend configuration, and certain other top-level local variables and data resources no longer need to be duplicated across environments, and provider versions can also be forced to be consistent.
+- **Make receiving updates from template-infra more robust** – Previously, in order for a project to receive updates from the template-infra repo, the project would copy over template files but then revert files that the project has changed. Currently, the many `main.tf` root module files in the template are expected to be changed by the project since they define project specific backend configurations. With the separation of config files, projects are no longer expected to change the `main.tf` files, so the `main.tf` files in `infra/app/build-repository/`, `infra/project-config/`, `infra/app/app-config/`, etc. can be safely copied over from template-infra without needing to be reverted.
+- **Reduce the cost of introducing additional infrastructure layers** – In the future, we may want to add new infrastructure layers that are created and updated independently of the application layer. Examples include a network layer or a database layer. We may want to keep them separate so that changes to the application infrastructure are isolated from changes to the database infrastructure, which should occur much less frequently. Previously, to add a new layer such as the database layer, we would need two additional folders: a `db-env-template` module and a `db-envs` folder with separate root modules for each environment. This mirrors the same structure that we have for the application. With separate backend config and tfvar files, we would only need a single `db` module with separate `.tfbackend` and `.tfvars` files for each environment.
 
 ## Cons of separate tfvars and tfbackend files
 
-* **Extra layer of abstraction** – The modules themselves aren't as simple to understand since the configuration is spread out across multiple files, the `main.tf` file and the corresponding `.tfvars` and `.tfbackend` file, rather than all in one `main.tf` file.
-* **Requires additional parameters when running terraform** – Due to the configuration being separated into `.tfvars` and `.tfbackend` files, terraform commands now require a `-var-file` and `-backend-config` command line options. The added complexity may require a wrapper script, introducing yet another layer of abstraction.
+- **Extra layer of abstraction** – The modules themselves aren't as simple to understand since the configuration is spread out across multiple files, the `main.tf` file and the corresponding `.tfvars` and `.tfbackend` file, rather than all in one `main.tf` file.
+- **Requires additional parameters when running terraform** – Due to the configuration being separated into `.tfvars` and `.tfbackend` files, terraform commands now require a `-var-file` and `-backend-config` command line options. The added complexity may require a wrapper script, introducing yet another layer of abstraction.
 
 ## Links
 
-* Refined by [ADR-0008](./0008-consolidate-infra-config-from-tfvars-files-into-config-module.md)
+- Refined by [ADR-2023-09-07](./2023-09-07-consolidate-infra-config-from-tfvars-files-into-config-module.md)

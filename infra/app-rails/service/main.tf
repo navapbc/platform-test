@@ -1,26 +1,3 @@
-data "aws_vpc" "network" {
-  tags = {
-    project      = module.project_config.project_name
-    network_name = local.environment_config.network_name
-  }
-}
-
-data "aws_subnets" "public" {
-  tags = {
-    project      = module.project_config.project_name
-    network_name = local.environment_config.network_name
-    subnet_type  = "public"
-  }
-}
-
-data "aws_subnets" "private" {
-  tags = {
-    project      = module.project_config.project_name
-    network_name = local.environment_config.network_name
-    subnet_type  = "private"
-  }
-}
-
 locals {
   # The prefix is used to create uniquely named resources per terraform workspace, which
   # are needed in CI/CD for preview environments and tests.
@@ -40,19 +17,11 @@ locals {
   # Examples: pull request preview environments are temporary.
   is_temporary = terraform.workspace != "default"
 
-  build_repository_config                        = module.app_config.build_repository_config
-  environment_config                             = module.app_config.environment_configs[var.environment_name]
-  service_config                                 = local.environment_config.service_config
-  database_config                                = local.environment_config.database_config
-  incident_management_service_integration_config = local.environment_config.incident_management_service_integration
-  identity_provider_config                       = local.environment_config.identity_provider_config
-  notifications_config                           = local.environment_config.notifications_config
+  build_repository_config = module.app_config.build_repository_config
+  environment_config      = module.app_config.environment_configs[var.environment_name]
+  service_config          = local.environment_config.service_config
 
-  network_config = module.project_config.network_configs[local.environment_config.network_name]
-
-  service_name   = "${local.prefix}${local.service_config.service_name}"
-  domain_name    = local.service_config.domain_name
-  hosted_zone_id = local.domain_name != null ? data.aws_route53_zone.zone[0].zone_id : null
+  service_name = "${local.prefix}${local.service_config.service_name}"
 }
 
 terraform {
@@ -85,50 +54,6 @@ module "app_config" {
   source = "../app-config"
 }
 
-data "aws_rds_cluster" "db_cluster" {
-  count              = module.app_config.has_database ? 1 : 0
-  cluster_identifier = local.database_config.cluster_name
-}
-
-data "aws_iam_policy" "app_db_access_policy" {
-  count = module.app_config.has_database ? 1 : 0
-  name  = local.database_config.app_access_policy_name
-}
-
-data "aws_iam_policy" "migrator_db_access_policy" {
-  count = module.app_config.has_database ? 1 : 0
-  name  = local.database_config.migrator_access_policy_name
-}
-
-# Retrieve url for external incident management tool (e.g. Pagerduty, Splunk-On-Call)
-
-data "aws_ssm_parameter" "incident_management_service_integration_url" {
-  count = module.app_config.has_incident_management_service ? 1 : 0
-  name  = local.incident_management_service_integration_config.integration_url_param_name
-}
-
-data "aws_security_groups" "aws_services" {
-  filter {
-    name   = "group-name"
-    values = ["${module.project_config.aws_services_security_group_name_prefix}*"]
-  }
-
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.network.id]
-  }
-}
-
-data "aws_acm_certificate" "certificate" {
-  count  = local.service_config.enable_https ? 1 : 0
-  domain = local.domain_name
-}
-
-data "aws_route53_zone" "zone" {
-  count = local.domain_name != null ? 1 : 0
-  name  = local.network_config.domain_config.hosted_zone
-}
-
 module "service" {
   source       = "../../modules/service"
   service_name = local.service_name
@@ -138,34 +63,33 @@ module "service" {
 
   image_tag = local.image_tag
 
-  vpc_id             = data.aws_vpc.network.id
-  public_subnet_ids  = data.aws_subnets.public.ids
-  private_subnet_ids = data.aws_subnets.private.ids
+  vpc_id                         = module.network.vpc_id
+  public_subnet_ids              = module.network.public_subnet_ids
+  private_subnet_ids             = module.network.private_subnet_ids
+  aws_services_security_group_id = module.network.aws_services_security_group_id
 
-  domain_name     = local.domain_name
-  hosted_zone_id  = local.hosted_zone_id
-  certificate_arn = local.service_config.enable_https ? data.aws_acm_certificate.certificate[0].arn : null
+  domain_name     = module.domain.domain_name
+  hosted_zone_id  = module.domain.hosted_zone_id
+  certificate_arn = module.domain.certificate_arn
 
   cpu                      = local.service_config.cpu
   memory                   = local.service_config.memory
   desired_instance_count   = local.service_config.desired_instance_count
   enable_command_execution = local.service_config.enable_command_execution
 
-  aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
-
   file_upload_jobs = local.service_config.file_upload_jobs
   scheduled_jobs   = local.environment_config.scheduled_jobs
 
   db_vars = module.app_config.has_database ? {
-    security_group_ids         = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
-    app_access_policy_arn      = data.aws_iam_policy.app_db_access_policy[0].arn
-    migrator_access_policy_arn = data.aws_iam_policy.migrator_db_access_policy[0].arn
+    security_group_ids         = module.database[0].security_group_ids
+    app_access_policy_arn      = module.database[0].app_access_policy_arn
+    migrator_access_policy_arn = module.database[0].migrator_access_policy_arn
     connection_info = {
-      host        = data.aws_rds_cluster.db_cluster[0].endpoint
-      port        = data.aws_rds_cluster.db_cluster[0].port
-      user        = local.database_config.app_username
-      db_name     = data.aws_rds_cluster.db_cluster[0].database_name
-      schema_name = local.database_config.schema_name
+      host        = module.database[0].host
+      port        = module.database[0].port
+      user        = module.database[0].app_username
+      db_name     = module.database[0].db_name
+      schema_name = module.database[0].schema_name
     }
   } : null
 
@@ -195,7 +119,10 @@ module "service" {
     },
     module.app_config.enable_identity_provider ? {
       identity_provider_access = module.identity_provider_client[0].access_policy_arn,
-    } : {}
+    } : {},
+    module.app_config.enable_notifications ? {
+      notifications_access = module.notifications[0].access_policy_arn,
+    } : {},
   )
 
   is_temporary = local.is_temporary
@@ -203,15 +130,4 @@ module "service" {
   # Template Divergent Variables
   container_read_only = false
   healthcheck_type    = "curl"
-}
-
-module "monitoring" {
-  source = "../../modules/monitoring"
-  #Email subscription list:
-  #email_alerts_subscription_list = ["email1@email.com", "email2@email.com"]
-
-  # Module takes service and ALB names to link all alerts with corresponding targets
-  service_name                                = local.service_name
-  load_balancer_arn_suffix                    = module.service.load_balancer_arn_suffix
-  incident_management_service_integration_url = module.app_config.has_incident_management_service && !local.is_temporary ? data.aws_ssm_parameter.incident_management_service_integration_url[0].value : null
 }

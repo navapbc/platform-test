@@ -8,7 +8,7 @@ resource "aws_iam_role" "scheduler" {
   assume_role_policy = data.aws_iam_policy_document.scheduler_assume_role.json
 }
 
-resource "aws_iam_role_policy_attachments_exclusive" "example" {
+resource "aws_iam_role_policy_attachments_exclusive" "scheduler" {
   role_name   = aws_iam_role.scheduler.name
   policy_arns = [aws_iam_policy.scheduler.arn]
 }

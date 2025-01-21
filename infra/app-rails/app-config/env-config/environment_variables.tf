@@ -30,5 +30,10 @@ locals {
     #   manage_method     = "manual"
     #   secret_store_name = "/${var.app_name}-${var.environment}/secret-sauce"
     # }
+
+    SECRET_KEY_BASE = {
+      manage_method     = "generated"
+      secret_store_name = "/${var.app_name}-${var.environment}/rails-secret-key-base"
+    }
   }
 }

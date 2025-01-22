@@ -1,6 +1,6 @@
 # Separate the database infrastructure into a separate layer
 
-- Status: proposed
+- Status: accepted
 - Deciders: @lorenyu @kyeah @shawnvanderjagt @rocketnova
 - Date: 2023-05-25
 

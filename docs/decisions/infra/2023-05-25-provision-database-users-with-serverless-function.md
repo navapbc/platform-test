@@ -1,6 +1,6 @@
 # Provision database users with serverless function
 
-- Status: proposed
+- Status: accepted
 - Deciders: @lorenyu @kyeah @shawnvanderjagt @rocketnova
 - Date: 2023-05-25
 

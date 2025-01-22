@@ -1,6 +1,6 @@
 # Database Migration Infrastructure and Deployment
 
-- Status: proposed
+- Status: accepted
 - Deciders: @lorenyu, @daphnegold, @chouinar, @Nava-JoshLong, @addywolf-nava, @sawyerh, @acouch, @SammySteiner
 - Date: 2023-06-05
 

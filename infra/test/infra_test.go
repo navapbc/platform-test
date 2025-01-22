@@ -19,8 +19,6 @@ var workspaceName = fmt.Sprintf("t-%s", uniqueId)
 var testAppName = os.Getenv("APP_NAME")
 
 func TestService(t *testing.T) {
-	BuildAndPublish(t)
-
 	imageTag := shell.RunCommandAndGetOutput(t, shell.Command{
 		Command:    "git",
 		Args:       []string{"rev-parse", "HEAD"},
@@ -51,36 +49,6 @@ func TestService(t *testing.T) {
 
 	WaitForServiceToBeStable(t, workspaceName)
 	RunEndToEndTests(t, terraformOptions)
-}
-
-func BuildAndPublish(t *testing.T) {
-	fmt.Println("::group::Initialize build-repository module")
-	// terratest currently does not support passing a file as the -backend-config option
-	// so we need to manually call terraform rather than using terraform.Init
-	// see https://github.com/gruntwork-io/terratest/issues/517
-	// it looks like this PR would add functionality for this: https://github.com/gruntwork-io/terratest/pull/558
-	// after which we add BackendConfig: []string{"dev.s3.tfbackend": terraform.KeyOnly} to terraformOptions
-	// and replace the call to terraform.RunTerraformCommand with terraform.Init
-	TerraformInit(t, &terraform.Options{
-		TerraformDir: fmt.Sprintf("../%s/build-repository/", testAppName),
-	}, "shared.s3.tfbackend")
-	fmt.Println("::endgroup::")
-
-	fmt.Println("::group::Build release")
-	shell.RunCommand(t, shell.Command{
-		Command:    "make",
-		Args:       []string{"release-build", fmt.Sprintf("APP_NAME=%s", testAppName)},
-		WorkingDir: "../../",
-	})
-	fmt.Println("::endgroup::")
-
-	fmt.Println("::group::Publish release")
-	shell.RunCommand(t, shell.Command{
-		Command:    "make",
-		Args:       []string{"release-publish", fmt.Sprintf("APP_NAME=%s", testAppName)},
-		WorkingDir: "../../",
-	})
-	fmt.Println("::endgroup::")
 }
 
 func WaitForServiceToBeStable(t *testing.T, workspaceName string) {

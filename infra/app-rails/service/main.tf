@@ -6,6 +6,9 @@ locals {
   # terraform workspaces, see: /docs/infra/develop-and-test-infrastructure-in-isolation-using-workspaces.md
   prefix = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
 
+  # The subdomain for PR environments
+  subdomain = terraform.workspace == "default" ? "" : terraform.workspace
+
   # Add environment specific tags
   tags = merge(module.project_config.default_tags, {
     environment = var.environment_name
@@ -68,7 +71,7 @@ module "service" {
   private_subnet_ids             = module.network.private_subnet_ids
   aws_services_security_group_id = module.network.aws_services_security_group_id
 
-  domain_name     = module.domain.domain_name
+  domain_name     = "${subdomain}${module.domain.domain_name}"
   hosted_zone_id  = module.domain.hosted_zone_id
   certificate_arn = module.domain.certificate_arn
 

@@ -1,3 +1,10 @@
+// Package test contains infrastructure tests for testing the service layer.
+// Prerequisite: Ensure the container image for the current git hash has
+// been built and published to the container image repository.
+// When running in CI, use the build-and-publish workflow.
+// When running locally, run `make release-build` followed by
+// `make release-publish`.
+
 package test
 
 import (

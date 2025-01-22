@@ -4,20 +4,13 @@ name: Deploy app-rails
 run-name: Deploy ${{inputs.version || 'main' }} to app-rails ${{ inputs.environment || 'dev' }}
 
 on:
-  # !! Once you've set up the dev environment and are ready to enable continuous
-  # deployment, run:
-  #
-  # nava-platform infra update --answers-only --data app_has_dev_env_setup=true .
-  #
-  # to enable these lines. They are here as comments for context.
-  #
-  # push:
-  #   branches:
-  #     - "main"
-  #   paths:
-  #     - "app-rails/**"
-  #     - "bin/**"
-  #     - "infra/**"
+  push:
+    branches:
+      - "main"
+    paths:
+      - "app-rails/**"
+      - "bin/**"
+      - "infra/**"
   workflow_dispatch:
     inputs:
       environment:

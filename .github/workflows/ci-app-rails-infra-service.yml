@@ -1,27 +1,20 @@
 name: CI Infra Service Checks - app-rails
 
 on:
-  # !! Once you've set up the dev environment and are ready to enable automated
-  # infra tests, run:
-  #
-  # nava-platform infra update --answers-only --data app_has_dev_env_setup=true .
-  #
-  # to enable these lines. They are here as comments for context.
-  #
-  # push:
-  #   branches:
-  #     - main
-  #   paths:
-  #     - infra/app-rails/service/**
-  #     - infra/modules/**
-  #     - infra/test/**
-  #     - .github/workflows/ci-infra-service.yml
-  # pull_request:
-  #   paths:
-  #     - infra/app-rails/service/**
-  #     - infra/modules/**
-  #     - infra/test/**
-  #     - .github/workflows/ci-infra-service.yml
+  push:
+    branches:
+      - main
+    paths:
+      - infra/app-rails/service/**
+      - infra/modules/**
+      - infra/test/**
+      - .github/workflows/ci-app-rails-infra-service.yml
+  pull_request:
+    paths:
+      - infra/app-rails/service/**
+      - infra/modules/**
+      - infra/test/**
+      - .github/workflows/ci-app-rails-infra-service.yml
   workflow_dispatch:
 
 jobs:

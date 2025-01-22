@@ -30,7 +30,7 @@ jobs:
     uses: ./.github/workflows/build-and-publish.yml
     with:
       app_name: app
-      ref: ${{ inputs.version || github.event.pull_request.head.sha || 'main' }}
+      ref: ${{ inputs.version || github.ref }}
 
   infra-test-e2e:
     name: Test service

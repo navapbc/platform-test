@@ -3,11 +3,11 @@ import os
 from datetime import datetime
 
 import click
-from flask import Flask, render_template
+from flask import Flask, redirect, render_template, request
 
+import notifications
 import storage
 from db import get_db_connection
-from feature_flags import is_feature_enabled
 
 logging.basicConfig()
 logger = logging.getLogger()
@@ -50,14 +50,6 @@ def migrations():
         return f"Last migration on {last_migration_date}"
 
 
-@app.route("/feature-flags")
-def feature_flags():
-    foo_status = "enabled" if is_feature_enabled("foo") else "disabled"
-    bar_status = "enabled" if is_feature_enabled("bar") else "disabled"
-
-    return f"<p>Feature foo is {foo_status}</p><p>Feature bar is {bar_status}</p>"
-
-
 @app.route("/document-upload")
 def document_upload():
     path = f"uploads/{datetime.now().date()}/${{filename}}"
@@ -70,6 +62,17 @@ def document_upload():
     )
     # Note: Additional fields should come first before the file and submit button
     return f'<form method="post" action="{upload_url}" enctype="multipart/form-data">{additional_fields}<input type="file" name="file"><input type="submit"></form>'
+
+
+@app.route("/email-notifications", methods=["GET", "POST"])
+def email_notifications():
+    if request.method == "POST":
+        to = request.form["to"]
+        subject = "Test notification"
+        message = "This is a system generated test notification. If you received this email in error, please ignore it."
+        logger.info("Sending test email to %s", to)
+        notifications.send_email(to, subject, message)
+    return f'<form method="post">Send test email to:<input type="email" name="to"><input type="submit"></form>'
 
 
 @app.route("/secrets")

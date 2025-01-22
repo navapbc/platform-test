@@ -18,6 +18,9 @@ locals {
 
     # AWS services used by ECS Exec
     var.enable_command_execution ? ["ssmmessages"] : [],
+
+    # AWS services used by notifications
+    var.enable_notifications ? ["pinpoint", "email-smtp"] : [],
   )
 
   # S3 and DynamoDB use Gateway VPC endpoints. All other services use Interface VPC endpoints
@@ -69,7 +72,7 @@ locals {
 }
 
 resource "aws_security_group" "aws_services" {
-  name_prefix = var.aws_services_security_group_name_prefix
+  name_prefix = module.interface.aws_services_security_group_name_prefix
   description = "VPC endpoints to access AWS services from the VPCs private subnets"
   vpc_id      = module.aws_vpc.vpc_id
 }

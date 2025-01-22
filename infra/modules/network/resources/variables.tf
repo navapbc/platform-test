@@ -1,16 +1,12 @@
-variable "aws_services_security_group_name_prefix" {
-  type        = string
-  description = "Prefix for the name of the security group attached to VPC endpoints"
-}
-
-variable "database_subnet_group_name" {
-  type        = string
-  description = "Name of the database subnet group"
-}
-
 variable "enable_command_execution" {
   type        = bool
   description = "Whether the application(s) in this network need ECS Exec access. Determines whether to create VPC endpoints needed by ECS Exec."
+  default     = false
+}
+
+variable "enable_notifications" {
+  type        = bool
+  description = "Whether the application(s) in this network need AWS Pinpoint access."
   default     = false
 }
 

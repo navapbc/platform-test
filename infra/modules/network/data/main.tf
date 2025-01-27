@@ -3,34 +3,30 @@ module "interface" {
   name   = var.name
 }
 
-module "project_config" {
-  source = "../../../project-config"
-}
-
 data "aws_vpc" "network" {
   tags = {
-    project      = module.project_config.project_name
+    project      = var.project_name
     network_name = var.name
   }
 }
 
 data "aws_subnets" "public" {
   tags = merge(module.interface.public_subnet_tags, {
-    project      = module.project_config.project_name
+    project      = var.project_name
     network_name = var.name
   })
 }
 
 data "aws_subnets" "private" {
   tags = merge(module.interface.private_subnet_tags, {
-    project      = module.project_config.project_name
+    project      = var.project_name
     network_name = var.name
   })
 }
 
 data "aws_subnets" "database" {
   tags = merge(module.interface.database_subnet_tags, {
-    project      = module.project_config.project_name
+    project      = var.project_name
     network_name = var.name
   })
 }

@@ -3,8 +3,9 @@
 #-----------------------
 
 module "network" {
-  source = "../../modules/network/data"
-  name   = var.network_name
+  source       = "../../modules/network/data"
+  name         = var.network_name
+  project_name = var.project_name
 }
 
 resource "aws_security_group" "alb" {

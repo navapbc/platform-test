@@ -130,6 +130,11 @@ variable "network_name" {
 
 }
 
+variable "project_name" {
+  type        = string
+  description = "The name of the project"
+}
+
 variable "scheduled_jobs" {
   description = "Variable for configuration of the step functions scheduled job"
   type = map(object({

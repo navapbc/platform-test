@@ -63,7 +63,7 @@ module "service" {
 
   image_tag = local.image_tag
 
-  network_name = module.project_config.network_name
+  network_name = local.environment_config.network_name
   project_name = module.project_config.project_name
 
   domain_name     = module.domain.domain_name

@@ -32,6 +32,6 @@ resource "aws_route53_record" "dmarc" {
   ttl             = "600"
   type            = "TXT"
   zone_id         = var.hosted_zone_id
-  name            = aws_sesv2_email_identity_mail_from_attributes.sender_domain.mail_from_domain
+  name            = local.dmarc_domain
   records         = ["v=DMARC1; p=none;"]
 }

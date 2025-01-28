@@ -81,7 +81,7 @@ resource "aws_ecs_task_definition" "app" {
       cpu                    = var.cpu,
       networkMode            = "awsvpc",
       essential              = true,
-      readonlyRootFilesystem = !var.enable_command_execution,
+      readonlyRootFilesystem = var.container_read_only && !var.enable_command_execution,
 
       # Need to define all parameters in the healthCheck block even if we want
       # to use AWS's defaults, otherwise the terraform plan will show a diff
@@ -91,7 +91,7 @@ resource "aws_ecs_task_definition" "app" {
         retries  = 3,
         timeout  = 5,
         command = ["CMD-SHELL",
-          "wget --no-verbose --tries=1 --spider http://localhost:${var.container_port}/health || exit 1"
+          var.healthcheck_type == "curl" ? "curl --fail http://localhost:${var.container_port}/health || exit 1" : "wget --no-verbose --tries=1 --spider http://localhost:${var.container_port}/health || exit 1"
         ]
       },
       environment = local.environment_variables,

@@ -33,5 +33,5 @@ resource "aws_route53_record" "dmarc" {
   type            = "TXT"
   zone_id         = var.hosted_zone_id
   name            = local.dmarc_domain
-  records         = ["v=DMARC1; p=none;"]
+  records         = ["v=DMARC1; p=quarantine;"]
 }

@@ -10,7 +10,7 @@ runs:
     - name: Get Terraform version
       id: get-terraform-version
       run: |
-        terraform_version="$(cat ${{ inputs.version-file }})"
+        terraform_version="$(cat "${{ inputs.version-file }}")"
         echo "Terraform version: ${terraform_version}"
         echo "terraform_version=${terraform_version}" >> "$GITHUB_OUTPUT"
       shell: bash

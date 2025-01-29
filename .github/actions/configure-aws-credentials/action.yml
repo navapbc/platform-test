@@ -1,20 +1,20 @@
-name: 'Configure AWS Credentials'
-description: 'Configure AWS Credentials for an AWS account so that |
+name: "Configure AWS Credentials"
+description: "Configure AWS Credentials for an AWS account so that |
   the GitHub Actions workflow can access AWS resources. |
   This is a wrapper around https://github.com/aws-actions/configure-aws-credentials |
   that first determines the account, role, and region. |
   Chose one of the following three authentication options: |
   1. Authenticate by account_name |
   2. Authenticate by network_name |
-  3. Authenticate by app_name and environment.'
+  3. Authenticate by app_name and environment."
 
 inputs:
   account_name:
-    description: 'Name of account, must match <ACCOUNT_NAME> in <ACCOUNT_NAME>.<ACCOUNT_ID>.s3.tfbackend file in /infra/accounts'
+    description: "Name of account, must match <ACCOUNT_NAME> in <ACCOUNT_NAME>.<ACCOUNT_ID>.s3.tfbackend file in /infra/accounts"
   network_name:
-    description: 'Name of network, must match <NETWORK_NAME> in <NETWORK_NAME>.s3.tfbackend file in /infra/networks'
+    description: "Name of network, must match <NETWORK_NAME> in <NETWORK_NAME>.s3.tfbackend file in /infra/networks"
   app_name:
-    description: 'Name of application folder under /infra'
+    description: "Name of application folder under /infra"
   environment:
     description: 'Name of environment (dev, staging, prod) that AWS resources live in, or "shared" for resources that are shared across environments'
 runs:
@@ -30,9 +30,9 @@ runs:
         terraform -chdir="infra/${{ inputs.app_name }}/app-config" apply -auto-approve > /dev/null
 
         if [[ "${{ inputs.environment }}" == "shared" ]]; then
-          network_name=$(terraform -chdir="infra/${{ inputs.app_name }}/app-config" output -raw shared_network_name)
+          network_name="$(terraform -chdir="infra/${{ inputs.app_name }}/app-config" output -raw shared_network_name)"
         else
-          network_name=$(terraform -chdir="infra/${{ inputs.app_name }}/app-config" output -json environment_configs | jq -r ".${{ inputs.environment }}.network_name")
+          network_name="$(terraform -chdir="infra/${{ inputs.app_name }}/app-config" output -json environment_configs | jq -r ".${{ inputs.environment }}.network_name")"
         fi
 
         echo "Network name retrieved: ${network_name}"
@@ -48,7 +48,7 @@ runs:
 
         terraform -chdir="infra/project-config" init > /dev/null
         terraform -chdir="infra/project-config" apply -auto-approve > /dev/null
-        account_name=$(terraform -chdir="infra/project-config" output -json network_configs | jq -r ".[\"${network_name}\"].account_name")
+        account_name="$(terraform -chdir="infra/project-config" output -json network_configs | jq -r ".[\"${network_name}\"].account_name")"
 
         echo "Account name retrieved: ${account_name}"
         echo "account_name=${account_name}" >> "$GITHUB_OUTPUT"
@@ -66,9 +66,9 @@ runs:
 
         terraform -chdir="infra/project-config" init > /dev/null
         terraform -chdir="infra/project-config" apply -auto-approve > /dev/null
-        aws_region=$(terraform -chdir="infra/project-config" output -raw default_region)
+        aws_region="$(terraform -chdir="infra/project-config" output -raw default_region)"
         echo "aws_region=${aws_region}"
-        github_actions_role_name=$(terraform -chdir="infra/project-config" output -raw github_actions_role_name)
+        github_actions_role_name="$(terraform -chdir="infra/project-config" output -raw github_actions_role_name)"
         echo "github_actions_role_name=${github_actions_role_name}"
 
         # Get the account id associated with the account name extracting the
@@ -76,7 +76,7 @@ runs:
         # <ACCOUNT_NAME>.<ACCOUNT_ID>.s3.tfbackend.
         # The cut command splits the string with period as the delimiter and
         # extracts the second field.
-        account_id=$(ls infra/accounts/${account_name}.*.s3.tfbackend | cut -d. -f2)
+        account_id="$(ls infra/accounts/${account_name}.*.s3.tfbackend | cut -d. -f2)"
         echo "account_id=${account_id}"
 
         aws_role_to_assume="arn:aws:iam::${account_id}:role/${github_actions_role_name}"

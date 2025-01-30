@@ -1,3 +1,9 @@
+Aws.config.update(
+  region: 'us-east-1', # Change this if needed
+  credentials: Aws::Credentials.new('fake_access_key', 'fake_secret_key')
+)
+
+
 # frozen_string_literal: true
 
 # Use this hook to configure devise mailer, warden hooks and so forth.

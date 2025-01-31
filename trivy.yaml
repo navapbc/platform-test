@@ -1,0 +1,5 @@
+# Trivy configuration file
+
+# The trivy action doesn't let us use the yaml version of the ignore file. The YAML version
+# has more features, such as path ignore, expiring ignores, etc
+ignorefile: .trivyignore.yaml

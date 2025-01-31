@@ -1,0 +1,78 @@
+name: Image Security and Vulnerability Scan
+description: Run image vulnerability scans
+
+inputs:
+  image-tag:
+    required: true
+    type: string
+    description: The image tag that will be scanned
+  dockerfile:
+    required: true
+    type: string
+    description: The location of the Dockerfile that will be scanned
+
+# Version is pinned to keep the JSON format consistent. If this is updated, 
+# and the findings parsing fails, then you need to update the python file. 
+# Dependabot can be configured to monitor these versions so you can get automatic
+# PRs to update the version, and check that the changes don't break parsing
+
+runs:
+  # Running on composite so that we can build the image once, but run multiple tests on it
+  using: "composite"
+  steps:
+    # Scans Dockerfile for any bad practices or issues
+    - name: Scan app Dockerfile by hadolint
+      uses: hadolint/hadolint-action@v3.1.0
+      with:
+        dockerfile: ${{ inputs.dockerfile }}
+        format: json
+        failure-threshold: warning
+        output-file: hadolint.json
+
+    - name: Anchore - Scan the release image
+      if: always() # Runs even if there is a failure
+      uses: anchore/scan-action@v6.0.0
+      id: anchore-scan
+      with:
+        image: ${{ inputs.image-tag }}
+        severity-cutoff: negligible
+        output-format: json
+        output-file: anchore.json
+
+    - name: Get current date
+      id: date
+      shell: bash
+      run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+    - name: Check for Trivy cache
+      id: cache-check
+      uses: actions/cache@v4
+      with:
+        path: ${{ github.workspace }}/.cache/trivy
+        key: cache-trivy-${{ steps.date.outputs.date }}
+        restore-keys: cache-trivy-
+        lookup-only: true
+
+    - name: Trivy - Scan the release image
+      if: always() # Runs even if there is a failure
+      uses: aquasecurity/trivy-action@0.26.0
+      with:
+        scan-type: image # Scan type, image or fs
+        image-ref: ${{ inputs.image-tag }}
+        format: json # Can be table, json, sarif, or github
+        output: trivy.json
+        exit-code: 1 # Exit code to return if any vulnerabilities are found
+        ignore-unfixed: true # Ignore unpatched/unfixed vulnerabilities
+        vuln-type: os,library # Can be os or library, depending on the type of scan you want to run
+        scanners: vuln,secret,config
+        trivy-config: trivy.yaml
+        # Enables caching of trivy config file that is used to search for the
+        # vulnerabilities. We cache it since it only updates once every 6 hours,
+        # and the confg hosts can be down, causing failures
+        cache: 'true'
+      env:
+        # Set to skip since we cache the files in the vulnerability-update-cache
+        # workflow. The if else logic handles when the cache doesn't exist, it
+        # will cache the config file so we can skip in the future
+        TRIVY_SKIP_DB_UPDATE: ${{ steps.cache-check.outputs.cache-hit != 'true' && 'false' || 'true' }}
+        TRIVY_SKIP_JAVA_DB_UPDATE: ${{ steps.cache-check.outputs.cache-hit != 'true' && 'false' || 'true' }}

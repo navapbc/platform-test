@@ -1,0 +1,40 @@
+# https://aquasecurity.github.io/trivy/v0.56/docs/configuration/filtering/#trivyignoreyaml
+# Remove comment to add ignores for any vulnerabilities
+# vulnerabilities:
+  # List of vulnerabilities to ignore for the trivy scan
+  # Please add ignore in the following format to make it easier when checking
+  # Package/module name: URL to vulnerability for checking updates
+  #  Versions:     URL to the version history
+  #  Dependencies: Name of any other packages or modules that are dependent on this version
+  #                 Link to the dependencies for ease of checking for updates
+  #  Issue:         Why there is a finding and why this is here or not been removed
+  #  Last checked:  Date last checked in scans
+  #  - id: The-CVE-or-vuln-id # Remove comment at start of line
+  #     expire_at: YYYY-MM-DD # Optional: When to set this ignore to expire at and then it will be checked again
+  #     statment: Blah # Optional: Statement to why this is ignored, shows in logs
+  #     paths: /path/to/finding # Optional: Lets you scope the ignore down to a specific path so you aren't skipping it globally
+
+# Remove comment to add ignores for any misconfigurations
+# misconfigurations:
+  # Please add ignores in the following format to make it easier when checking
+  # Category: The category of the secret
+  # Issue: What the finding is and we are ignoring this finding
+  # Links: (If any) links to documentation
+
+# Remove comment to add ignores for any secrets
+# secrets:
+  # Adds ignores for what trivy thinks are secrets, but aren't really. If you add
+  # an ignore here, you MUST scope it down to the specific path or it will skip
+  # at a global level
+  # Please add ignores in the following format to make it easier when checking
+  # Category: The category of the secret
+  # Issue: What the finding is and we are ignoring this finding
+  # Links: (If any) links to documentation
+
+  # Example
+  # Category: JWT Token
+  # Issue: Trivy is finding the documentation for python_jose and thinks the "secret"
+  #        it found is an actual JWT, so we need to ignore it
+  # - id: jwt-token
+  #   paths:
+  #     - "/app/.venv/lib/python3.11/site-packages/python_jose-3.3.0.dist-info/METADATA"

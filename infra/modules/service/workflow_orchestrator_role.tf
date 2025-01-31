@@ -8,7 +8,7 @@ resource "aws_iam_role" "workflow_orchestrator" {
   assume_role_policy = data.aws_iam_policy_document.workflow_orchestrator_assume_role.json
 }
 
-resource "iam_role_policy_attachment" "workflow_orchestrator" {
+resource "aws_iam_role_policy_attachment" "workflow_orchestrator" {
   role       = aws_iam_role.workflow_orchestrator.name
   policy_arn = aws_iam_policy.workflow_orchestrator.arn
 }

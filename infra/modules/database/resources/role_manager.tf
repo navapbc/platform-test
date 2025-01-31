@@ -76,12 +76,12 @@ resource "aws_iam_role" "role_manager" {
   assume_role_policy = data.aws_iam_policy_document.role_manager_assume_role.json
 }
 
-resource "iam_role_policy_attachment" "role_manager_vpc_access" {
+resource "aws_iam_role_policy_attachment" "role_manager_vpc_access" {
   role       = aws_iam_role.role_manager.name
   policy_arn = data.aws_iam_policy.lambda_vpc_access.arn
 }
 
-resource "iam_role_policy_attachment" "role_manager_app_db_access" {
+resource "aws_iam_role_policy_attachment" "role_manager_app_db_access" {
   # Grants the role manager access to the DB as app and migrator users
   # so that it can performance database checks. This is needed by
   # the infra database tests
@@ -89,7 +89,7 @@ resource "iam_role_policy_attachment" "role_manager_app_db_access" {
   policy_arn = aws_iam_policy.app_db_access.arn
 }
 
-resource "iam_role_policy_attachment" "role_manager_migrator_db_access" {
+resource "aws_iam_role_policy_attachment" "role_manager_migrator_db_access" {
   # Grants the role manager access to the DB as app and migrator users
   # so that it can performance database checks. This is needed by
   # the infra database tests

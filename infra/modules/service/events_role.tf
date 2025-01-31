@@ -10,9 +10,9 @@ resource "aws_iam_role" "events" {
   assume_role_policy = data.aws_iam_policy_document.events_assume_role.json
 }
 
-resource "aws_iam_role_policy_attachments_exclusive" "events" {
-  role_name   = aws_iam_role.events.name
-  policy_arns = [aws_iam_policy.run_task.arn]
+resource "iam_role_policy_attachment" "events" {
+  role       = aws_iam_role.events.name
+  policy_arn = aws_iam_policy.run_task.arn
 }
 
 data "aws_iam_policy_document" "events_assume_role" {

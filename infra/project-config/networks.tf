@@ -11,6 +11,10 @@ locals {
           "platform-test-dev.navateam.com" = {
             source = "issued"
           }
+
+          "app-rails.platform-test-dev.navateam.com" = {
+            source = "issued"
+          }
         }
       }
     }

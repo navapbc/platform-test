@@ -33,10 +33,6 @@ locals {
   )
 }
 
-module "project_config" {
-  source = "../../project-config"
-}
-
 #-------------------
 # Service Execution
 #-------------------

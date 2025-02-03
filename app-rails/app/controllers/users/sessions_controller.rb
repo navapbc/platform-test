@@ -40,24 +40,35 @@ class Users::SessionsController < Devise::SessionsController
 
       auth_user(response[:user], response[:access_token])
     else
-      user_params = params.dig(:user) || params.dig(:users_new_session_form)
+          # Use a form object for consistency
+      permitted_params = params.require(:users_new_session_form).permit(:email, :password)
+      @form = Users::NewSessionForm.new(permitted_params)
+
+      Rails.logger.debug "Params received: #{params.inspect}"
+      Rails.logger.debug "Session state before authentication: #{session.to_hash.inspect}"
+
+      if @form.invalid?
+        flash[:alert] = "Invalid request. Please try again."
+        return render :new, status: :unprocessable_entity
+      end
+
+      # Extract and sanitize user params
+      user_params = { "email" => @form.email, "password" => @form.password }
+
+      user = User.find_by(email: user_params["email"])
+      
+      # Handle authentication failures
+      if user.nil? || !user.valid_password?(user_params["password"])
+        Rails.logger.debug "Login failed: invalid credentials for #{user_params['email']}"
+        flash[:alert] = "Invalid email or password"
+        return render :new, status: :unauthorized
+      end
+
+      # Authenticate user via Warden
       warden = request.env['warden']
-      user_params = params.require(:users_new_session_form).permit(:email, :password)
-      # Manually find the user before trying Warden
-      user = User.find_by(email: user_params[:email])
-
-      if user.nil?
-        flash[:alert] = "Invalid email or password"
-        render :new, status: :unauthorized
-        return
-      end
-
-      if !user.valid_password?(user_params[:password])
-        flash[:alert] = "Invalid email or password"
-        render :new, status: :unauthorized
-        return
-      end
       warden.set_user(user, scope: :user)
+
+      Rails.logger.debug "Login successful for #{user.email}"
       redirect_to root_path, notice: "Signed in successfully!"
     end
   end

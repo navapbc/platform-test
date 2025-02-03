@@ -97,9 +97,9 @@ RSpec.describe Users::SessionsController do
 
       post :create, params: {
         users_new_session_form: {
-          email: "test@example.com",
-          password: "password",
-          spam_trap: "I am a bot"
+          email: "test2@example.com",
+          password: "passwordpassword",
+          # spam_trap: "I am a bot"
         },
         locale: "en"
       }

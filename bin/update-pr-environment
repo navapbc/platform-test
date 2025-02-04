@@ -31,8 +31,8 @@ echo "::group::Apply changes to environment using image tag: ${image_tag}"
 terraform -chdir="infra/${app_name}/service" apply -input=false -auto-approve -var="environment_name=${environment}" -var="image_tag=${image_tag}"
 echo "::endgroup::"
 
-cluster_name="$(terraform -chdir="infra/$app_name/service" output -raw service_cluster_name)"
-service_name="${prefix}$(terraform -chdir="infra/$app_name/service" output -raw service_name)"
+cluster_name="$(terraform -chdir="infra/${app_name}/service" output -raw service_cluster_name)"
+service_name="${prefix}$(terraform -chdir="infra/${app_name}/service" output -raw service_name)"
 echo "Wait for service ${service_name} to become stable"
 aws ecs wait services-stable --cluster "${cluster_name}" --services "${service_name}"
 
@@ -49,13 +49,13 @@ EOF
 pr_body="$(gh pr view "${pr_number}" --json body | jq --raw-output .body)"
 
 # clean up older single-app section if present
-if [[ $pr_body == *"<!-- begin PR environment info -->"*"<!-- end PR environment info -->"* ]]; then
+if [[ "${pr_body}" == *"<!-- begin PR environment info -->"*"<!-- end PR environment info -->"* ]]; then
   pr_body="${pr_body//<!-- begin PR environment info -->*<!-- end PR environment info -->}"
 fi
 
 # update or add the environment info
-if [[ $pr_body == *"<!-- ${app_name} - begin PR environment info -->"*"<!-- ${app_name} - end PR environment info -->"* ]]; then
-  pr_body="${pr_body//<!-- ${app_name} - begin PR environment info -->*<!-- ${app_name} - end PR environment info -->/$pr_info}"
+if [[ "${pr_body}" == *"<!-- ${app_name} - begin PR environment info -->"*"<!-- ${app_name} - end PR environment info -->"* ]]; then
+  pr_body="${pr_body//<!-- ${app_name} - begin PR environment info -->*<!-- ${app_name} - end PR environment info -->/${pr_info}}"
 else
   pr_body="${pr_body}"$'\n\n'"${pr_info}"
 fi

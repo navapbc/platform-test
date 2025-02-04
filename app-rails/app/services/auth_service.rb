@@ -2,8 +2,6 @@
 
 class AuthService
   def initialize(auth_adapter = AuthServiceFactory.instance.auth_service)
-    pp auth_adapter
-    pp "^^^^^^^^^^^^"
     @auth_adapter = auth_adapter
   end
 
@@ -78,15 +76,25 @@ class AuthService
 
   private
 
-    def create_db_user(uid, email, provider, password, role = "applicant")
+    def create_db_user(uid, email, provider, password = nil, role = "applicant")
       Rails.logger.info "Creating User uid: #{uid}, and UserRole: #{role}"
 
-      user = User.create!(
-        uid: uid,
-        email: email,
-        password:,
-        provider: provider,
-      )
+      user = nil 
+      if Rails.env.development?
+        user = User.create!(
+          uid: uid,
+          email: email,
+          password:,
+          provider: provider,
+        )
+      else
+        user = User.create!(
+          uid: uid,
+          email: email,
+          provider: provider,
+        )
+      end
+
       user_role = UserRole.create!(user:, role:)
       user
     end

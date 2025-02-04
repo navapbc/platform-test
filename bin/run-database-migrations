@@ -31,20 +31,20 @@ echo "Step 0. Check if app has a database"
 
 terraform -chdir="infra/${app_name}/app-config" init > /dev/null
 terraform -chdir="infra/${app_name}/app-config" apply -auto-approve > /dev/null
-has_database=$(terraform -chdir="infra/${app_name}/app-config" output -raw has_database)
+has_database="$(terraform -chdir="infra/${app_name}/app-config" output -raw has_database)"
 if [ "${has_database}" = "false" ]; then
   echo "Application does not have a database, no migrations to run"
   exit 0
 fi
 
 ./bin/terraform-init "infra/${app_name}/service" "${environment}"
-db_migrator_user=$(terraform -chdir="infra/${app_name}/service" output -raw migrator_username)
-migrator_role_arn=$(terraform -chdir="infra/${app_name}/service" output -raw migrator_role_arn)
+db_migrator_user="$(terraform -chdir="infra/${app_name}/service" output -raw migrator_username)"
+migrator_role_arn="$(terraform -chdir="infra/${app_name}/service" output -raw migrator_role_arn)"
 
 echo
 echo "::group::Step 1. Update task definition without updating service"
 
-TF_CLI_ARGS_apply="-input=false -auto-approve -var=image_tag=${image_tag} 
+TF_CLI_ARGS_apply="-input=false -auto-approve -var=image_tag=${image_tag}
   -target=module.service.aws_ecs_task_definition.app
   -target=module.service.aws_iam_role_policy.task_executor" \
   make infra-update-app-service APP_NAME="${app_name}" ENVIRONMENT="${environment}"

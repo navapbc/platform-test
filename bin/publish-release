@@ -19,7 +19,7 @@ terraform -chdir="infra/${app_name}/app-config" init > /dev/null
 terraform -chdir="infra/${app_name}/app-config" apply -auto-approve > /dev/null
 image_repository_name="$(terraform -chdir="infra/${app_name}/app-config" output -json build_repository_config | jq -r ".name")"
 
-region=$(./bin/current-region)
+region="$(./bin/current-region)"
 read -r image_registry_id image_repository_url <<< "$(aws ecr describe-repositories --repository-names "${image_repository_name}" --query "repositories[0].[registryId,repositoryUri]" --output text)"
 image_registry="${image_registry_id}.dkr.ecr.${region}.amazonaws.com"
 
@@ -35,8 +35,8 @@ aws ecr get-login-password --region "${region}" \
 echo
 echo "Check if tag has already been published..."
 result=""
-result=$(aws ecr describe-images --repository-name "${image_repository_name}" --image-ids "imageTag=${image_tag}" --region "${region}" 2> /dev/null ) || true
-if [ -n "${result}" ];then
+result="$(aws ecr describe-images --repository-name "${image_repository_name}" --image-ids "imageTag=${image_tag}" --region "${region}" 2> /dev/null)" || true
+if [ -n "${result}" ]; then
   echo "Image with tag ${image_tag} already published"
   exit 0
 fi

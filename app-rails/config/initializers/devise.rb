@@ -19,8 +19,6 @@ Devise.setup do |config|
 
   config.warden do |manager|
     manager.failure_app = lambda do |env|
-      Rails.logger.debug "Warden failure: #{env['warden'].message}"
-      pp "Warden failure: #{env['warden'].message}"
       Devise::FailureApp.call(env)
     end
   end
@@ -29,7 +27,7 @@ Devise.setup do |config|
     # Ensure ActiveRecord is connected before loading Devise
     User.connection
 
-    # Now safely load Devise mappings
+    # Safely load Devise mappings
     Devise.mappings[:user]
   end
 

@@ -16,16 +16,19 @@ class Users::RegistrationsController < ApplicationController
 
   def create
     @form = Users::RegistrationForm.new(registration_params)
+
     if @form.invalid?
       flash.now[:errors] = @form.errors.full_messages
       return render :new, status: :unprocessable_entity
     end
+
     begin
       auth_service.register(@form.email, @form.password, @form.role)
     rescue Auth::Errors::BaseAuthError => e
       flash.now[:errors] = [ e.message ]
       return render :new, status: :unprocessable_entity
     end
+
     redirect_to users_verify_account_path
   end
 

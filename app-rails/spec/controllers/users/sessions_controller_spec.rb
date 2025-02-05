@@ -94,8 +94,6 @@ RSpec.describe Users::SessionsController do
 
     it "handles submission by bots" do
       create(:user, uid: uid)
-      puts Rails.env
-      puts "%%%%%%%%"
       post :create, params: {
         users_new_session_form: {
           email: "test@example.com",

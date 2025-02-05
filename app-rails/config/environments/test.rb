@@ -11,7 +11,6 @@ Rails.application.default_url_options[:host] = "localhost"
 Rails.application.configure do
   config.auth_provider = :cognito
 end
-puts "Test environment loaded - Auth Provider: #{Rails.application.config.auth_provider}"
 
 Rails.application.configure do
 

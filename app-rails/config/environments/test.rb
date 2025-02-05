@@ -9,6 +9,11 @@ require "active_support/core_ext/integer/time"
 Rails.application.default_url_options[:host] = "localhost"
 
 Rails.application.configure do
+  config.auth_provider = :cognito
+end
+
+Rails.application.configure do
+
   # Settings specified here will take precedence over those in config/application.rb.
 
   # While tests run files are not watched, reloading is not necessary.

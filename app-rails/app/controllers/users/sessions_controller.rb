@@ -3,39 +3,69 @@
 class Users::SessionsController < Devise::SessionsController
   layout "users"
   skip_after_action :verify_authorized
+  
+  # Disable CSRF for API requests
+  protect_from_forgery with: :null_session, if: -> { request.format.json? } 
+  respond_to :html, :json
 
   def new
     @form = Users::NewSessionForm.new
   end
 
   def create
-    @form = Users::NewSessionForm.new(new_session_params)
+    if Rails.application.config.auth_provider == :devise
+        permitted_params = params.require(:users_new_session_form).permit(:email, :password)
+        @form = Users::NewSessionForm.new(permitted_params)
 
-    if @form.invalid?
-      flash.now[:errors] = @form.errors.full_messages
-      return render :new, status: :unprocessable_entity
+        if @form.invalid?
+          flash[:alert] = "Invalid request. Please try again."
+          return render :new, status: :unprocessable_entity
+        end
+
+        user_params = { "email" => @form.email, "password" => @form.password }
+        user = User.find_by(email: user_params["email"])
+
+        if user.nil? || !user.valid_password?(user_params["password"])
+          Rails.logger.debug "Login failed: invalid credentials for #{user_params['email']}"
+          flash[:alert] = "Invalid email or password"
+          return render :new, status: :unauthorized
+        end
+
+        # Authenticate user via Warden
+        warden = request.env['warden']
+        warden.set_user(user, scope: :user)
+  
+        redirect_to root_path, notice: "Signed in successfully!"
+    else
+
+      @form = Users::NewSessionForm.new(new_session_params)
+
+      if @form.invalid?
+        flash.now[:errors] = @form.errors.full_messages
+        return render :new, status: :unprocessable_entity
+      end
+
+      begin
+        response = auth_service.initiate_auth(
+          @form.email,
+          @form.password
+        )
+      rescue Auth::Errors::UserNotConfirmed => e
+        return redirect_to users_verify_account_path
+      rescue Auth::Errors::BaseAuthError => e
+        flash.now[:errors] = [ e.message ]
+        return render :new, status: :unprocessable_entity
+      end
+
+      unless response[:user].present?
+        puts response.inspect
+        session[:challenge_session] = response[:session]
+        session[:challenge_email] = @form.email
+        return redirect_to session_challenge_path
+      end
+
+      auth_user(response[:user], response[:access_token])
     end
-
-    begin
-      response = auth_service.initiate_auth(
-        @form.email,
-        @form.password
-      )
-    rescue Auth::Errors::UserNotConfirmed => e
-      return redirect_to users_verify_account_path
-    rescue Auth::Errors::BaseAuthError => e
-      flash.now[:errors] = [ e.message ]
-      return render :new, status: :unprocessable_entity
-    end
-
-    unless response[:user].present?
-      puts response.inspect
-      session[:challenge_session] = response[:session]
-      session[:challenge_email] = @form.email
-      return redirect_to session_challenge_path
-    end
-
-    auth_user(response[:user], response[:access_token])
   end
 
   # Show MFA

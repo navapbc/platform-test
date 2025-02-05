@@ -1,3 +1,9 @@
+Aws.config.update(
+  region: 'us-east-1', # Change this if needed
+  credentials: Aws::Credentials.new('fake_access_key', 'fake_secret_key')
+)
+
+
 # frozen_string_literal: true
 
 # Use this hook to configure devise mailer, warden hooks and so forth.
@@ -11,6 +17,20 @@ Devise.setup do |config|
   # time the user will be asked for credentials again. Default is 30 minutes.
   config.timeout_in = 15.minutes
 
+  config.warden do |manager|
+    manager.failure_app = lambda do |env|
+      Devise::FailureApp.call(env)
+    end
+  end
+
+  Rails.application.config.to_prepare do
+    # Ensure ActiveRecord is connected before loading Devise
+    User.connection
+
+    # Safely load Devise mappings
+    Devise.mappings[:user]
+  end
+
   # ==> Navigation configuration
   # Lists the formats that should be treated as navigational. Formats like
   # :html should redirect to the sign in page when the user does not have
@@ -20,7 +40,7 @@ Devise.setup do |config|
   # should add them to the navigational formats lists.
   #
   # The "*/*" below is required to match Internet Explorer requests.
-  # config.navigational_formats = ['*/*', :html, :turbo_stream]
+  config.navigational_formats = ['*/*', :html, :turbo_stream]
 
   # The default HTTP method used to sign out a resource. Default is :delete.
   config.sign_out_via = :delete
@@ -125,10 +145,10 @@ Devise.setup do |config|
   # enable this with :database unless you are using a custom strategy.
   # The supported strategies are:
   # :database      = Support basic authentication with authentication key + password
-  # config.http_authenticatable = false
+  config.http_authenticatable = true
 
   # If 401 status code should be returned for AJAX requests. True by default.
-  # config.http_authenticatable_on_xhr = true
+  config.http_authenticatable_on_xhr = true
 
   # The realm used in Http Basic Authentication. 'Application' by default.
   # config.http_authentication_realm = 'Application'

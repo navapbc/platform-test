@@ -113,7 +113,7 @@ function main() {
   local root_module_configs
   root_module_configs="$(get_account_layer_configs)"
   root_module_configs+="$(get_network_layer_configs)"
-  for app_name in "$(get_app_names)"; do
+  for app_name in $(get_app_names); do
     root_module_configs+="$(get_app_configs "${app_name}")"
   done
   echo "${root_module_configs}" | jq -s -c .

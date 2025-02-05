@@ -51,6 +51,6 @@ module TemplateApplicationRails
     # Show a 403 Forbidden error page when Pundit raises a NotAuthorizedError
     config.action_dispatch.rescue_responses["Pundit::NotAuthorizedError"] = :forbidden
 
-    config.auth_provider = ENV['USE_DEVISE'] == 'true' ? :devise : :cognito
+    config.auth_provider = ENV["USE_DEVISE"] == "true" ? :devise : :cognito
   end
 end

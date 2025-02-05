@@ -79,7 +79,7 @@ class AuthService
     def create_db_user(uid, email, provider, password = nil, role = "applicant")
       Rails.logger.info "Creating User uid: #{uid}, and UserRole: #{role}"
 
-      user = nil 
+      user = nil
       if Rails.env.development?
         user = User.create!(
           uid: uid,

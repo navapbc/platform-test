@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:1
 
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version and Gemfile
-ARG RUBY_VERSION=3.3.1
+ARG RUBY_VERSION=3.3.7
 
 
 ##########################################################################################
@@ -27,8 +27,17 @@ EXPOSE 3100
 FROM base AS build
 
 # Install packages needed to build gems
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git libpq-dev libvips pkg-config npm
+RUN apt-get update -qq \
+    && apt-get install --no-install-recommends -y \
+        build-essential \
+        git \
+        libpq-dev \
+        libvips \
+        libyaml-dev \
+        pkg-config \
+        npm \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install npm packages
 COPY package.json package-lock.json ./
@@ -45,9 +54,12 @@ FROM build AS dev
 ENV RAILS_ENV="development"
 
 # Install packages needed for development
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y postgresql-client graphviz && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+RUN apt-get update -qq \
+    && apt-get install --no-install-recommends -y \
+        postgresql-client \
+        graphviz \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install application gems for development
 COPY Gemfile Gemfile.lock ./
@@ -57,7 +69,7 @@ RUN bundle config set --local without production && \
 
 # Install system-wide gems for development
 # This version must match Gemfile.lock. Otherwise, `rdbg` will fail.
-RUN gem install debug -v 1.9.2
+RUN gem install debug -v 1.10.0
 
 # Copy application code
 COPY . .
@@ -101,16 +113,10 @@ RUN apt-get update -qq \
     && apt-get install -y --no-install-recommends \
         curl \
         libvips \
+        libyaml-dev \
         postgresql-client \
-        python-is-python3 \
-        python3-venv \
-        unzip \
-        wget \
-    && rm -rf /var/lib/apt/lists /var/cache/apt/archives \
-    && curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip" \
-    && unzip awscli-bundle.zip \
-    && ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws \
-    && rm -rf ./awscli-bundle awscli-bundle.zip
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install custom db migrate script
 COPY bin/db-migrate /usr/bin/

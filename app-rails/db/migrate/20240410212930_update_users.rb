@@ -12,7 +12,6 @@ class UpdateUsers < ActiveRecord::Migration[7.1]
 
       ## Rememberable
       t.datetime :remember_created_at
-
     end
 
     add_index :users, :email,                unique: true

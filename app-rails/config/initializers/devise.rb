@@ -1,6 +1,6 @@
 Aws.config.update(
-  region: 'us-east-1', # Change this if needed
-  credentials: Aws::Credentials.new('fake_access_key', 'fake_secret_key')
+  region: "us-east-1", # Change this if needed
+  credentials: Aws::Credentials.new("fake_access_key", "fake_secret_key")
 )
 
 
@@ -40,7 +40,7 @@ Devise.setup do |config|
   # should add them to the navigational formats lists.
   #
   # The "*/*" below is required to match Internet Explorer requests.
-  config.navigational_formats = ['*/*', :html, :turbo_stream]
+  config.navigational_formats = [ "*/*", :html, :turbo_stream ]
 
   # The default HTTP method used to sign out a resource. Default is :delete.
   config.sign_out_via = :delete

@@ -14,8 +14,8 @@ Rails.application.routes.draw do
 
     # Session management
     devise_for :users, controllers: {
-      sessions: 'users/sessions',
-      registrations: 'registrations'
+      sessions: "users/sessions",
+      registrations: "registrations"
     }
     devise_scope :user do
       get "sessions/challenge" => "users/sessions#challenge", as: :session_challenge

@@ -3,9 +3,9 @@
 class Users::SessionsController < Devise::SessionsController
   layout "users"
   skip_after_action :verify_authorized
-  
+
   # Disable CSRF for API requests
-  protect_from_forgery with: :null_session, if: -> { request.format.json? } 
+  protect_from_forgery with: :null_session, if: -> { request.format.json? }
   respond_to :html, :json
 
   def new
@@ -32,9 +32,9 @@ class Users::SessionsController < Devise::SessionsController
         end
 
         # Authenticate user via Warden
-        warden = request.env['warden']
+        warden = request.env["warden"]
         warden.set_user(user, scope: :user)
-  
+
         redirect_to root_path, notice: "Signed in successfully!"
     else
 

@@ -233,7 +233,7 @@ infra-lint: ## Lint infra code
 infra-lint: lint-markdown infra-lint-scripts infra-lint-terraform infra-lint-workflows
 
 infra-lint-scripts: ## Lint shell scripts
-	shellcheck bin/**
+	shellcheck -o require-variable-braces,quote-safe-variables bin/**
 
 infra-lint-terraform: ## Lint Terraform code
 	terraform fmt -recursive -check infra

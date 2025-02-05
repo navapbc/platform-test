@@ -1,8 +1,12 @@
 # frozen_string_literal: true
 
 class AuthService
-  def initialize(auth_adapter = Auth::CognitoAdapter.new)
+  def initialize(auth_adapter = AuthServiceFactory.instance.auth_service)
     @auth_adapter = auth_adapter
+  end
+
+  def create_account(email, password)
+    @auth_adapter.create_account(email, password)
   end
 
   # Send a confirmation code that's required to change the user's password
@@ -39,7 +43,7 @@ class AuthService
     # See https://github.com/navapbc/template-application-rails/issues/15
     account = @auth_adapter.create_account(email, password)
 
-    create_db_user(account[:uid], email, account[:provider], role)
+    create_db_user(account[:uid], email, account[:provider], password, role)
   end
 
   # Verify the code sent to the user as part of their initial sign up process.
@@ -72,15 +76,26 @@ class AuthService
 
   private
 
-    def create_db_user(uid, email, provider, role = "applicant")
+    def create_db_user(uid, email, provider, password = nil, role = "applicant")
       Rails.logger.info "Creating User uid: #{uid}, and UserRole: #{role}"
 
-      user = User.create!(
-        uid: uid,
-        email: email,
-        provider: provider,
-      )
-      user_role = UserRole.create!(user: user, role: role)
+      user = nil 
+      if Rails.env.development?
+        user = User.create!(
+          uid: uid,
+          email: email,
+          password:,
+          provider: provider,
+        )
+      else
+        user = User.create!(
+          uid: uid,
+          email: email,
+          provider: provider,
+        )
+      end
+
+      user_role = UserRole.create!(user:, role:)
       user
     end
 

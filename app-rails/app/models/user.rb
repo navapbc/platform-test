@@ -1,5 +1,5 @@
 class User < ApplicationRecord
-  if Rails.env.development? && ENV['USE_DEVISE'].blank?
+  if Rails.env.development? && !ENV['USE_DEVISE'].blank?
     devise :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable
   else
     devise :cognito_authenticatable, :timeoutable

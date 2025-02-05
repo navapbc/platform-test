@@ -4,7 +4,6 @@ FactoryBot.define do
     uid { Faker::Internet.uuid }
     provider { "factory_bot" }
     mfa_preference { "opt_out" }
-    # password { "passwordpassword" }
 
     trait :applicant do
       user_role { create(:user_role, :applicant) }

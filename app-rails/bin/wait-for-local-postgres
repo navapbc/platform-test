@@ -42,10 +42,10 @@ until pg_isready -h localhost -p "${DB_PORT}" -d "${DB_NAME}" -q; do
   echo "waiting on Postgres DB to initialize..."
   sleep 3
 
-  wait_time=$(($wait_time + 3))
-  if [ $wait_time -gt $MAX_WAIT_TIME ]; then
+  wait_time=$((wait_time + 3))
+  if [[ "${wait_time}" -gt "${MAX_WAIT_TIME}" ]]; then
     echo -e "${RED}ERROR: Database appears to not be starting up, running \"${DOCKER_CMD} logs ${DOCKER_DB_SERVICE_NAME}\" to troubleshoot${NO_COLOR}"
-    ${DOCKER_CMD} logs "${DOCKER_DB_SERVICE_NAME}"
+    "${DOCKER_CMD}" logs "${DOCKER_DB_SERVICE_NAME}"
     exit 1
   fi
 done

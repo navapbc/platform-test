@@ -41,7 +41,7 @@ jobs:
         id: get-commit-hash
         run: |
           # HEAD should be the same as inputs.ref since we checked out inputs.ref
-          COMMIT_HASH=$(git rev-parse HEAD)
+          COMMIT_HASH="$(git rev-parse HEAD)"
           echo "Commit hash: $COMMIT_HASH"
           echo "commit_hash=$COMMIT_HASH" >> "$GITHUB_OUTPUT"
   build-and-publish:
@@ -71,7 +71,7 @@ jobs:
       - name: Check if image is already published
         id: check-image-published
         run: |
-          is_image_published=$(./bin/is-image-published "${{ inputs.app_name }}" "${{ needs.get-commit-hash.outputs.commit_hash }}")
+          is_image_published="$(./bin/is-image-published "${{ inputs.app_name }}" "${{ needs.get-commit-hash.outputs.commit_hash }}")"
           echo "Is image published: $is_image_published"
           echo "is_image_published=$is_image_published" >> "$GITHUB_OUTPUT"
 

@@ -40,7 +40,7 @@ jobs:
           terraform -chdir="infra/project-config" init > /dev/null
           terraform -chdir="infra/project-config" apply -auto-approve > /dev/null
 
-          channel_config="$(terraform -chdir="infra/project-config" output -json system_notifications_config | jq -r '.channels."${{ inputs.channel }}"')"
+          channel_config="$(terraform -chdir="infra/project-config" output -json system_notifications_config | jq -r '.channels["${{ inputs.channel }}"]')"
 
           channel_type="$(echo "${channel_config}" | jq -r ".type")"
           echo "Channel type: ${channel_type}"

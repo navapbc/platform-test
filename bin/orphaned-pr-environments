@@ -24,18 +24,17 @@ echo "::endgroup::"
 
 echo "::group::Check status of each PR"
 closed_prs=()
-for pr_num in $pr_nums; do
-  pr_status="$(gh pr view "$pr_num" --json state --jq ".state")"
+for pr_num in ${pr_nums}; do
+  pr_status="$(gh pr view "${pr_num}" --json state --jq ".state")"
   echo "PR ${pr_num}: ${pr_status}"
 
-  if [ "$pr_status" == "CLOSED" ]; then
-    closed_prs+=("$pr_num")
+  if [ "${pr_status}" == "CLOSED" ]; then
+    closed_prs+=("${pr_num}")
   fi
 done
 echo "::endgroup::"
 
-# if closed_prs is not empty exit with 1 otherwise exit with 0
-if [ ${#closed_prs[@]} -gt 0 ]; then
+if [ "${#closed_prs[@]}" -gt 0 ]; then
   echo "Found orphaned PR environments for the following PRs: ${closed_prs[*]}"
   echo "Found orphaned PR environments for the following PRs: ${closed_prs[*]}" >> "${GITHUB_STEP_SUMMARY}"
   exit 1

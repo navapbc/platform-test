@@ -170,13 +170,13 @@ variable "vpc_id" {
   description = "Uniquely identifies the VPC."
 }
 
-# Custom Template-diverging variables
-variable "container_read_only" {
-  type        = bool
-  description = "Whether the container root filesystem should be read-only"
-  default     = true
+variable "ephemeral_write_volumes" {
+  type        = set(string)
+  description = "A set of absolute paths in the container to be mounted as writable for the life of the task. These should also be declared with VOLUME statements in the container definition file."
+  default     = []
 }
 
+# Custom Template-diverging variables
 variable "healthcheck_type" {
   type        = string
   description = "Whether to configure a curl or wget healthcheck. curl is more common. use wget for alpine-based images"

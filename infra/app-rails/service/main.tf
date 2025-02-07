@@ -125,9 +125,12 @@ module "service" {
     } : {},
   )
 
+  ephemeral_write_volumes = [
+    "/rails/tmp"
+  ]
+
   is_temporary = local.is_temporary
 
   # Template Divergent Variables
-  container_read_only = false
-  healthcheck_type    = "curl"
+  healthcheck_type = "curl"
 }

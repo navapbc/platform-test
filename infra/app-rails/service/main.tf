@@ -128,6 +128,6 @@ module "service" {
   is_temporary = local.is_temporary
 
   # Template Divergent Variables
-  container_read_only = false
+  container_read_only = true
   healthcheck_type    = "curl"
 }

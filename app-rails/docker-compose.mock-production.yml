@@ -15,6 +15,7 @@ services:
   # Rails app
   # Configured for "production" RAILS_ENV
   app-rails:
+    read_only: true
     build:
       context: .
       target: release

@@ -20,6 +20,8 @@ ENV RAILS_ENV="production" \
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3100
 
+# In production, this should be the only filesystem location with writes
+VOLUME /rails/tmp
 
 ##########################################################################################
 # BUILD: Throw-away build stage
@@ -73,6 +75,10 @@ RUN gem install debug -v 1.10.0
 
 # Copy application code
 COPY . .
+
+# During local development, app is configured to write to more places
+VOLUME /rails/log
+VOLUME /rails/storage
 
 CMD ["./bin/dev"]
 

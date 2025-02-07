@@ -125,6 +125,10 @@ module "service" {
     } : {},
   )
 
+  ephemeral_write_volumes = [
+    "/rails/tmp"
+  ]
+
   is_temporary = local.is_temporary
 
   # Template Divergent Variables

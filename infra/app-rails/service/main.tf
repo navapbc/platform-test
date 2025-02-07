@@ -130,7 +130,4 @@ module "service" {
   ]
 
   is_temporary = local.is_temporary
-
-  # Template Divergent Variables
-  healthcheck_type = "curl"
 }

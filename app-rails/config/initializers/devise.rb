@@ -24,11 +24,10 @@ Devise.setup do |config|
   end
 
   Rails.application.config.to_prepare do
-    # Ensure ActiveRecord is connected before loading Devise
-    User.connection
-
-    # Safely load Devise mappings
-    Devise.mappings[:user]
+    if Rails.env.development?
+      User.connection
+      Devise.mappings[:user]
+    end
   end
 
   # ==> Navigation configuration

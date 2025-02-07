@@ -175,14 +175,3 @@ variable "ephemeral_write_volumes" {
   description = "A set of absolute paths in the container to be mounted as writable for the life of the task. These should also be declared with VOLUME statements in the container definition file."
   default     = []
 }
-
-# Custom Template-diverging variables
-variable "healthcheck_type" {
-  type        = string
-  description = "Whether to configure a curl or wget healthcheck. curl is more common. use wget for alpine-based images"
-  default     = "wget"
-  validation {
-    condition     = contains(["curl", "wget"], var.healthcheck_type)
-    error_message = "choose either: curl or wget"
-  }
-}

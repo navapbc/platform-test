@@ -170,6 +170,12 @@ variable "vpc_id" {
   description = "Uniquely identifies the VPC."
 }
 
+variable "ephemeral_write_volumes" {
+  type        = set(string)
+  description = "A set of absolute paths in the container to be mounted as writable for the life of the task. These should also be declared with VOLUME statements in the container definition file."
+  default     = []
+}
+
 # Custom Template-diverging variables
 variable "container_read_only" {
   type        = bool

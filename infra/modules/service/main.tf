@@ -31,6 +31,19 @@ locals {
       { name : name, value : value }
     ],
   )
+
+  ephemeral_write_volumes_with_name = [for container_path in var.ephemeral_write_volumes : {
+    container_path : container_path,
+    volume_name : replace(trim(container_path, "/"), "/", "_"),
+  }]
+  ephemeral_write_volumes = [for e in local.ephemeral_write_volumes_with_name : {
+    mount_point : {
+      "sourceVolume" : e.volume_name
+      "containerPath" : e.container_path,
+      "readOnly" : false
+    },
+    volume : { "name" : e.volume_name }
+  }]
 }
 
 #-------------------
@@ -113,12 +126,19 @@ resource "aws_ecs_task_definition" "app" {
           "awslogs-region"        = data.aws_region.current.name,
           "awslogs-stream-prefix" = local.log_stream_prefix
         }
-      }
-      mountPoints    = []
+      },
+      mountPoints    = [for e in local.ephemeral_write_volumes : e.mount_point]
       systemControls = []
       volumesFrom    = []
     }
   ])
+
+  dynamic "volume" {
+    for_each = [for e in local.ephemeral_write_volumes : e.volume]
+    content {
+      name = volume.value["name"]
+    }
+  }
 
   cpu    = var.cpu
   memory = var.memory

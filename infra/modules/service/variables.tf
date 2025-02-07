@@ -177,12 +177,6 @@ variable "ephemeral_write_volumes" {
 }
 
 # Custom Template-diverging variables
-variable "container_read_only" {
-  type        = bool
-  description = "Whether the container root filesystem should be read-only"
-  default     = true
-}
-
 variable "healthcheck_type" {
   type        = string
   description = "Whether to configure a curl or wget healthcheck. curl is more common. use wget for alpine-based images"

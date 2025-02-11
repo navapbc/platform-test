@@ -36,7 +36,7 @@ locals {
     container_path : container_path,
     volume_name : replace(trim(container_path, "/"), "/", "_"),
   }]
-  ephemeral_write_volumes = [for e in local.ephemeral_write_volumes_with_name : {
+  ephemeral_write_volume_configs = [for e in local.ephemeral_write_volumes_with_name : {
     mount_point : {
       "sourceVolume" : e.volume_name
       "containerPath" : e.container_path,
@@ -127,14 +127,14 @@ resource "aws_ecs_task_definition" "app" {
           "awslogs-stream-prefix" = local.log_stream_prefix
         }
       },
-      mountPoints    = [for e in local.ephemeral_write_volumes : e.mount_point]
+      mountPoints    = local.ephemeral_write_volume_configs[*].mount_point
       systemControls = []
       volumesFrom    = []
     }
   ])
 
   dynamic "volume" {
-    for_each = [for e in local.ephemeral_write_volumes : e.volume]
+    for_each = local.ephemeral_write_volume_configs[*].volume
     content {
       name = volume.value["name"]
     }

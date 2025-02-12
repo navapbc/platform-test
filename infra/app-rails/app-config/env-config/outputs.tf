@@ -42,7 +42,9 @@ output "service_config" {
       job_name => merge({ source_bucket = local.bucket_name }, job_config)
     }
 
-    ephemeral_write_volumes = []
+    ephemeral_write_volumes = [
+      "/rails/tmp"
+    ]
   }
 }
 

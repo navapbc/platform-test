@@ -125,6 +125,8 @@ module "service" {
     } : {},
   )
 
+  ephemeral_write_volumes = local.service_config.ephemeral_write_volumes
+
   is_temporary = local.is_temporary
 
   # Template Divergent Variables

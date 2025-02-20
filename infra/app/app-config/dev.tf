@@ -24,7 +24,7 @@ module "dev_config" {
   # enable_command_execution = true
 
   # Uncomment to override default feature flag values
-  # feature_flag_overrides = {
-  #   BAR = true
-  # }
+  feature_flag_overrides = {
+    BAR = true
+  }
 }

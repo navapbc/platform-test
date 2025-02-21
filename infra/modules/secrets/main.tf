@@ -23,10 +23,6 @@ resource "aws_ssm_parameter" "secrets" {
   name  = each.value.secret_store_name
   type  = "SecureString"
   value = random_password.secrets[each.key].result
-
-  tags = {
-    Service = var.service_name
-  }
 }
 
 data "aws_ssm_parameter" "secrets" {

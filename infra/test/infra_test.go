@@ -16,12 +16,11 @@ import (
 	"time"
 
 	http_helper "github.com/gruntwork-io/terratest/modules/http-helper"
-	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/shell"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 )
 
-var uniqueId = strings.ToLower(random.UniqueId())
+var uniqueId = strings.ToLower(generateTestId())
 var workspaceName = fmt.Sprintf("t-%s", uniqueId)
 var testAppName = os.Getenv("APP_NAME")
 
@@ -93,4 +92,27 @@ func DestroyService(t *testing.T, terraformOptions *terraform.Options) {
 	fmt.Println("::group::Destroy service layer")
 	terraform.Destroy(t, terraformOptions)
 	fmt.Println("::endgroup::")
+}
+
+func generateTestId() string {
+	now := time.Now()
+	// Combine hour, minute, second, and millisecond into a single number
+	timeNum := int64(now.Hour())*3600000 +
+		int64(now.Minute())*60000 +
+		int64(now.Second())*1000 +
+		int64(now.Nanosecond()/1000000)
+	return toBase62(timeNum)
+}
+
+func toBase62(n int64) string {
+	const charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+	if n == 0 {
+		return "0"
+	}
+	result := ""
+	for n > 0 {
+		result = string(charset[n%62]) + result
+		n /= 62
+	}
+	return result
 }

@@ -14,6 +14,9 @@ variable "secrets" {
     # If manage_method is 'generated', path to store the secret in AWS parameter store.
     # If manage_method is 'manual', path to reference the secret in AWS parameter store.
     secret_store_name = string
+
+    # Optional version property for secret rotation
+    version = optional(string)
   }))
   description = "Map of secret configurations"
 

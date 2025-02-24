@@ -16,6 +16,8 @@ module "secrets" {
         "${config.secret_store_name}/${terraform.workspace}" :
         config.secret_store_name
       )
+
+      version = try(config.version, null)
     }
   }
 }

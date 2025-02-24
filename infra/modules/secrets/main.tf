@@ -15,6 +15,10 @@ resource "random_password" "secrets" {
   length           = 64
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
+
+  keepers = each.value.version != null ? {
+    version = each.value.version
+  } : null
 }
 
 resource "aws_ssm_parameter" "secrets" {

@@ -107,12 +107,16 @@ func generateTestId() string {
 func toBase62(n int64) string {
 	const charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 	if n == 0 {
-		return "0"
+		return "000000"
 	}
 	result := ""
 	for n > 0 {
 		result = string(charset[n%62]) + result
 		n /= 62
+	}
+	// Pad with leading zeros to ensure at least 6 characters
+	for len(result) < 6 {
+		result = "0" + result
 	}
 	return result
 }

@@ -25,12 +25,6 @@ variable "enable_command_execution" {
   default     = false
 }
 
-variable "email_alert_recipients" {
-  type        = list(string)
-  description = "List of email addresses to receive monitoring alerts"
-  default     = []
-}
-
 variable "enable_https" {
   type        = bool
   description = "Whether to enable HTTPS for the application"

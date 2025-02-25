@@ -32,7 +32,7 @@ runs:
         if [[ "${{ inputs.environment }}" == "shared" ]]; then
           network_name="$(terraform -chdir="infra/${{ inputs.app_name }}/app-config" output -raw shared_network_name)"
         else
-          network_name="$(terraform -chdir="infra/${{ inputs.app_name }}/app-config" output -json environment_configs | jq -r '.[ "${{ inputs.environment }}" ].network_name')"
+          network_name="$(terraform -chdir="infra/${{ inputs.app_name }}/app-config" output -json environment_configs | jq -r ".${{ inputs.environment }}.network_name")"
         fi
 
         echo "Network name retrieved: ${network_name}"

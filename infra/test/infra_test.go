@@ -96,11 +96,7 @@ func DestroyService(t *testing.T, terraformOptions *terraform.Options) {
 
 func generateTestId() string {
 	now := time.Now()
-	// Combine hour, minute, second, and millisecond into a single number
-	timeNum := int64(now.Hour())*3600000 +
-		int64(now.Minute())*60000 +
-		int64(now.Second())*1000 +
-		int64(now.Nanosecond()/1000000)
+	timeNum := now.Unix()
 	return toBase62(timeNum)
 }
 

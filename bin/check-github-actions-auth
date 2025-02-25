@@ -14,7 +14,7 @@ code_repository="$(terraform -chdir="infra/project-config" output --raw code_rep
 
 # This is used later to determine the run id of the workflow run
 # See comment below about "Getting workflow run id"
-prev_run_create_time="$(gh run list --repo "${code_repository}" --workflow check-ci-cd-auth.yml --limit 1 --json createdAt --jq '.[].createdAt')"
+prev_run_create_time="$(gh run list --repo "${code_repository}" --workflow check-ci-cd-auth.yml --limit 1 --json createdAt --jq ".[].createdAt")"
 
 echo "========================="
 echo "Check GitHub Actions Auth"
@@ -76,13 +76,13 @@ echo "Previous workflow run created at ${prev_run_create_time}"
 echo "Check workflow run create time until we find a newer workflow run"
 while : ; do
   echo -n "."
-  run_create_time="$(gh run list --repo "${code_repository}" --workflow check-ci-cd-auth.yml --limit 1 --json createdAt --jq '.[].createdAt')"
+  run_create_time="$(gh run list --repo "${code_repository}" --workflow check-ci-cd-auth.yml --limit 1 --json createdAt --jq ".[].createdAt")"
   [[ "${run_create_time}" > "${prev_run_create_time}" ]] && break
 done
 echo "Found newer workflow run created at ${run_create_time}"
 
 echo "Get id of workflow run"
-workflow_run_id="$(gh run list --repo "${code_repository}" --workflow check-ci-cd-auth.yml --limit 1 --json databaseId --jq '.[].databaseId')"
+workflow_run_id="$(gh run list --repo "${code_repository}" --workflow check-ci-cd-auth.yml --limit 1 --json databaseId --jq ".[].databaseId")"
 echo "Workflow run id: ${workflow_run_id}"
 
 workflow_run_url="https://github.com/${code_repository}/actions/runs/${workflow_run_id}"

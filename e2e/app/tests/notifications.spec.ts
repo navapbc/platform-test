@@ -11,7 +11,7 @@ test.describe('Email Notifications', () => {
     // Navigate to notifications page and submit email
     await page.goto('/email-notifications');
     await page.getByRole('textbox').fill(emailAddress);
-    await page.getByText('submit').click();
+    await page.getByRole('button').click();
 
     // Wait for and verify email content
     const email = await emailService.waitForEmailWithSubject(emailAddress, 'Test notification');

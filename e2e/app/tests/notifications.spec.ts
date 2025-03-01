@@ -2,8 +2,8 @@ import { EmailAddress, EmailService } from "../../lib/services/email/EmailServic
 import { expect, test } from "@playwright/test";
 import { MessageCheckerService } from "../../lib/services/email/MessageCheckerService";
 
-test.describe('Email Notifications', () => {
-  test('should send test notification email', async ({ page, context }) => {
+test.describe('Email notifications', () => {
+  test('send test email notification', async ({ page, context }) => {
     const emailService: EmailService = new MessageCheckerService(context);
     const emailAddress: EmailAddress = emailService.generateEmailAddress();
 

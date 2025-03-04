@@ -8,6 +8,7 @@ export default defineConfig(deepMerge(
     use: {
       baseURL: baseConfig.use.baseURL || "localhost:3100",
       ignoreHTTPSErrors: true, // Ignore SSL certificate errors
+      // emailServiceType: "Mailinator", // Options: ["MessageChecker", "Mailinator"]. Default: "MessageChecker"
     },
   }
 ));

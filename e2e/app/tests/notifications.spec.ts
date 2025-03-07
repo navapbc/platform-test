@@ -1,6 +1,6 @@
-import { EmailAddress, EmailService } from "../../lib/services/email/EmailService";
-import { expect, test } from "@playwright/test";
-import { MessageCheckerService } from "../../lib/services/email/MessageCheckerService";
+import { EmailAddress, EmailService } from '../../lib/services/email/EmailService';
+import { expect, test } from '@playwright/test';
+import { MessageCheckerService } from '../../lib/services/email/MessageCheckerService';
 
 test.describe('Email notifications', () => {
   test('send test email notification', async ({ page, context }) => {

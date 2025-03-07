@@ -25,34 +25,6 @@ RSpec.describe User, type: :model do
     end
   end
 
-  describe "applicant?" do
-    let(:user) { build(:user) }
-
-    it "returns true if the user has a applicant role" do
-      user.user_role = build(:user_role, :applicant)
-      expect(user.applicant?).to eq(true)
-    end
-
-    it "returns false if the user does not have a applicant role" do
-      user.user_role = build(:user_role, :employer)
-      expect(user.applicant?).to eq(false)
-    end
-  end
-
-  describe "employer?" do
-    let(:user) { build(:user) }
-
-    it "returns true if the user has an employer role" do
-      user.user_role = build(:user_role, :employer)
-      expect(user.employer?).to eq(true)
-    end
-
-    it "returns false if the user does not have an employer role" do
-      user.user_role = build(:user_role, :applicant)
-      expect(user.employer?).to eq(false)
-    end
-  end
-
   describe "superadmin?" do
     let(:user) { build(:user) }
 

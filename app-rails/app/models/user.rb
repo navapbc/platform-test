@@ -8,20 +8,11 @@ class User < ApplicationRecord
 
   # == Relationships ========================================================
   has_many :tasks
-  has_one :user_role, dependent: :destroy
 
   # == Validations ==========================================================
   validates :provider, presence: true
 
   # == Methods ==============================================================
-  def applicant?
-    user_role&.applicant?
-  end
-
-  def employer?
-    user_role&.employer?
-  end
-
   def superadmin?
     email.include?("+admin")
   end

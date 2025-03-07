@@ -14,7 +14,6 @@ RSpec.describe AuthService do
       expect(user).to be_present
       expect(user.provider).to eq("mock")
       expect(user.email).to eq("test@example.com")
-      expect(user.employer?).to eq(true)
     end
   end
 
@@ -38,7 +37,6 @@ RSpec.describe AuthService do
 
       user = User.find_by(uid: mock_uid)
       expect(response[:user]).to eq(user)
-      expect(user.applicant?).to eq(true)
     end
 
     it "updates the user's email if it has changed" do

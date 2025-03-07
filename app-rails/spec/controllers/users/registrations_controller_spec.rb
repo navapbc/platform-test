@@ -42,7 +42,6 @@ RSpec.describe Users::RegistrationsController do
       user = User.find_by(email: email)
 
       expect(user).to be_present
-      expect(user.employer?).to be(true)
       expect(response).to redirect_to(users_verify_account_path)
     end
 

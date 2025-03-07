@@ -4,13 +4,8 @@ class Users::RegistrationsController < ApplicationController
   layout "users"
   skip_after_action :verify_authorized
 
-  def new_applicant
-    @form = Users::RegistrationForm.new(role: "applicant")
-    render :new
-  end
-
-  def new_employer
-    @form = Users::RegistrationForm.new(role: "employer")
+  def new
+    @form = Users::RegistrationForm.new()
     render :new
   end
 

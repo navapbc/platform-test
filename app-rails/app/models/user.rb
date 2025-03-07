@@ -13,9 +13,6 @@ class User < ApplicationRecord
   validates :provider, presence: true
 
   # == Methods ==============================================================
-  def superadmin?
-    email.include?("+admin")
-  end
 
   # Check if the access token is expired or will expire within the next `minutes` minutes.
   # Access token is only stored in the session, so it needs passed in, rather than accessed from the model.

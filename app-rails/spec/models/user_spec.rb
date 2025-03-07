@@ -24,20 +24,4 @@ RSpec.describe User, type: :model do
       expect(user.access_token_expires_within_minutes?(access_token, 1)).to eq(false)
     end
   end
-
-  describe "superadmin?" do
-    let(:user) { build(:user) }
-
-    pending "returns true for a superadmin"
-
-    it "returns false for a applicant" do
-      user.user_role = build(:user_role, :applicant)
-      expect(user.superadmin?).to eq(false)
-    end
-
-    it "returns false for an employer" do
-      user.user_role = build(:user_role, :employer)
-      expect(user.superadmin?).to eq(false)
-    end
-  end
 end

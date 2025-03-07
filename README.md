@@ -8,9 +8,7 @@ This repo consists of a Makefile called `platform-test.mak`. We avoided calling 
 
 ## Environment URLs
 
-* [app dev environment](https://platform-test-dev.navateam.com)
-* [app prod environment](https://platform-test.navateam.com)
-* [app-rails dev environment](https://app-rails.platform-test-dev.navateam.com/)
+* [Dev environment](https://platform-test-dev.navateam.com)
 
 ## Usage
 

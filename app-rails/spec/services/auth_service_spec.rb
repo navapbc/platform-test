@@ -5,10 +5,10 @@ RSpec.describe AuthService do
   let(:mock_auth_adapter) { Auth::MockAdapter.new(uid_generator: -> { mock_uid }) }
 
   describe "#register" do
-    it "creates a new user with the given role" do
+    it "creates a new user" do
       auth_service = AuthService.new(mock_auth_adapter)
 
-      auth_service.register("test@example.com", "password", "employer")
+      auth_service.register("test@example.com", "password")
 
       user = User.find_by(uid: mock_uid)
       expect(user).to be_present

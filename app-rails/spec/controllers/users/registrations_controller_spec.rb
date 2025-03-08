@@ -25,7 +25,6 @@ RSpec.describe Users::RegistrationsController do
         users_registration_form: {
           email: email,
           password: "password",
-          role: "employer"
         },
         locale: "en"
       }
@@ -40,7 +39,6 @@ RSpec.describe Users::RegistrationsController do
         users_registration_form: {
           email: "invalid",
           password: "password",
-          role: "employer"
         },
         locale: "en"
       }
@@ -53,7 +51,6 @@ RSpec.describe Users::RegistrationsController do
         users_registration_form: {
           email: "UsernameExists@example.com",
           password: "password",
-          role: "employer"
         },
         locale: "en"
       }
@@ -68,7 +65,7 @@ RSpec.describe Users::RegistrationsController do
         users_registration_form: {
           email: email,
           password: "password",
-          role: "employer",
+
           spam_trap: "I am a bot"
         },
         locale: "en"

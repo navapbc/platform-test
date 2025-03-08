@@ -18,7 +18,7 @@ class Users::RegistrationsController < ApplicationController
     end
 
     begin
-      auth_service.register(@form.email, @form.password, @form.role)
+      auth_service.register(@form.email, @form.password)
     rescue Auth::Errors::BaseAuthError => e
       flash.now[:errors] = [ e.message ]
       return render :new, status: :unprocessable_entity
@@ -72,7 +72,7 @@ class Users::RegistrationsController < ApplicationController
     end
 
     def registration_params
-      params.require(:users_registration_form).permit(:email, :password, :password_confirmation, :role, :spam_trap)
+      params.require(:users_registration_form).permit(:email, :password, :password_confirmation, :spam_trap)
     end
 
     def verify_account_params

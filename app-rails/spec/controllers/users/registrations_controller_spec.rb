@@ -24,7 +24,7 @@ RSpec.describe Users::RegistrationsController do
       post :create, params: {
         users_registration_form: {
           email: email,
-          password: "password",
+          password: "password"
         },
         locale: "en"
       }
@@ -38,7 +38,7 @@ RSpec.describe Users::RegistrationsController do
       post :create, params: {
         users_registration_form: {
           email: "invalid",
-          password: "password",
+          password: "password"
         },
         locale: "en"
       }
@@ -50,7 +50,7 @@ RSpec.describe Users::RegistrationsController do
       post :create, params: {
         users_registration_form: {
           email: "UsernameExists@example.com",
-          password: "password",
+          password: "password"
         },
         locale: "en"
       }

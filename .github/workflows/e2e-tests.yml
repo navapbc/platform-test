@@ -23,7 +23,7 @@ on:
 
 jobs:
   e2e:
-    name: Run E2E tests (${{ matrix.shard }} of ${{ matrix.total_shards }})
+    name: E2E tests (${{ matrix.shard }} of ${{ matrix.total_shards }})
     runs-on: ubuntu-latest
 
     strategy:

@@ -57,12 +57,12 @@ jobs:
       - name: Upload blob report
         uses: actions/upload-artifact@v4
         with:
-          name: blob-report-shard-${{ matrix.shard }}
+          name: e2e-test-blob-report-${{ matrix.shard }}
           path: ./e2e/blob-report
           retention-days: 1
 
   create-report:
-    name: Create merged test report
+    name: Create test report
     if: ${{ !cancelled() }}
     needs: e2e
     runs-on: ubuntu-latest
@@ -90,14 +90,14 @@ jobs:
       - name: Download blob reports from GitHub Actions Artifacts
         uses: actions/download-artifact@v4
         with:
-          path: ./e2e/blob-report
-          pattern: blob-report-shard-*
+          path: ./e2e/blob-reports
+          pattern: e2e-test-blob-report-*
           merge-multiple: true
 
       - name: Verify downloaded artifacts
         run: |
           echo "Contents of ./e2e/blob-report after download:"
-          ls -R ./e2e/blob-report
+          ls -R ./e2e/blob-reports
 
       - name: Merge reports
         run: make e2e-merge-reports

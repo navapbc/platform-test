@@ -62,7 +62,7 @@ jobs:
           retention-days: 1
 
   create-report:
-    name: Create test report
+    name: E2E test report
     if: ${{ !cancelled() }}
     needs: e2e
     runs-on: ubuntu-latest

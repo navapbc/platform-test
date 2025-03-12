@@ -12,7 +12,6 @@
   </div>
 
   <%= us_form_with model: @form, url: users_registrations_path, local: true do |f| %>
-    <%= f.hidden_field :role %>
     <%= f.honeypot_field %>
     <%= f.email_field :email %>
 

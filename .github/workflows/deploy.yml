@@ -60,6 +60,7 @@ jobs:
           service_endpoint=$(terraform -chdir="infra/${{ inputs.app_name }}/service" output -raw service_endpoint)
           echo "service_endpoint=${service_endpoint}"
           echo "service_endpoint=${service_endpoint}" >> "$GITHUB_OUTPUT"
+
   e2e:
     name: " " # GitHub UI is noisy when calling reusable workflows, so use whitespace for name to reduce noise
     needs: [deploy]

@@ -34,6 +34,7 @@ jobs:
       fail-fast: false
       matrix:
         app_name: ${{ fromJson(needs.get-app-names.outputs.app_names) }}
+        scan_script: [orphaned-pr-environments, stale-test-environments]
 
     permissions:
       contents: read
@@ -54,7 +55,7 @@ jobs:
 
       - name: List PR workspaces
         run: |
-          ./bin/orphaned-pr-environments ${{ matrix.app_name }}
+          ./bin/${{ matrix.scan_script }} ${{ matrix.app_name }}
         env:
           GH_TOKEN: ${{ github.token }}
           TF_IN_AUTOMATION: "true"

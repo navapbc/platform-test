@@ -57,6 +57,7 @@ data "aws_iam_policy_document" "access_logs_put_access" {
   }
 }
 
+# https://github.com/navapbc/template-infra/issues/907
 resource "aws_s3_bucket_lifecycle_configuration" "access_logs" {
   bucket = aws_s3_bucket.access_logs.id
 

@@ -4,7 +4,7 @@
   "scripts": {
     "format": "prettier --cache --cache-location='./.prettier-cache' --write .",
     "format:check": "prettier --cache --cache-location='./.prettier-cache' --check .",
-    "merge-reports": "npx playwright merge-reports --reporter html ./blob-reports",
+    "merge-reports": "npx playwright merge-reports --reporter html blob-report",
     "show-report": "npx playwright show-report",
     "test": "./run-e2e-test",
     "test:ui": "./run-e2e-test --ui"

@@ -38,15 +38,15 @@ for test_id in $test_ids; do
   age="$((current_timestamp - test_timestamp))"
 
   if [ "${age}" -gt "${MAX_ENVIRONMENT_AGE_MILLIS}" ]; then
-    echo "stale test environment. ID: ${test_id}. age: $((age / 3600)) hours. started: $(date -r "${test_timestamp}")"
-    echo "stale test environment. ID: ${test_id}. age: $((age / 3600)) hours. started: $(date -r "${test_timestamp}")" >> "${GITHUB_STEP_SUMMARY}"
+    echo "stale ID:   ${test_id}   age: $((age / 3600)) hours   started: $(date -r "${test_timestamp}")"
+    echo "stale ID:   ${test_id}   age: $((age / 3600)) hours   started: $(date -r "${test_timestamp}")" >> "${GITHUB_STEP_SUMMARY}"
     stale_tests+=("${test_id}")
   fi
 
   # If age is less than 0, the test ID is invalid
   if [ "${age}" -lt 0 ]; then
-    echo "invalid test ID: ${test_id}"
-    echo "invalid test ID: ${test_id}" >> "${GITHUB_STEP_SUMMARY}"
+    echo "invalid ID: ${test_id}"
+    echo "invalid ID: ${test_id}" >> "${GITHUB_STEP_SUMMARY}"
     stale_tests+=("${test_id}")
   fi
 done

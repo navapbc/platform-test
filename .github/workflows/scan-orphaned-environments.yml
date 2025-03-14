@@ -1,5 +1,7 @@
-# This workflow scans for orphaned PR environments
-name: Scan orphaned PR environments
+# This workflow scans for temporary environments that were not properly cleaned up
+# This can happen if the PR environment destroy workflow failed or didn't run
+# or if the temporary environments created by the infra service tests were not cleaned up
+name: Scan orphaned environments
 
 on:
   workflow_dispatch:

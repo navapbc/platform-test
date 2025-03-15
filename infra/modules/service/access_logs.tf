@@ -57,12 +57,16 @@ data "aws_iam_policy_document" "access_logs_put_access" {
   }
 }
 
+# https://github.com/navapbc/template-infra/issues/907
 resource "aws_s3_bucket_lifecycle_configuration" "access_logs" {
   bucket = aws_s3_bucket.access_logs.id
 
   rule {
     id     = "AbortIncompleteUpload"
     status = "Enabled"
+    filter {
+      prefix = "" # Apply to all objects
+    }
     abort_incomplete_multipart_upload {
       days_after_initiation = 7
     }
@@ -71,6 +75,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "access_logs" {
   rule {
     id     = "StorageClass"
     status = "Enabled"
+    filter {
+      prefix = "" # Apply to all objects
+    }
     dynamic "transition" {
       for_each = local.log_file_transition
       content {
@@ -83,6 +90,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "access_logs" {
   rule {
     id     = "Expiration"
     status = "Enabled"
+    filter {
+      prefix = "" # Apply to all objects
+    }
     expiration {
       days = 2555
     }

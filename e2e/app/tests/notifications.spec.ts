@@ -5,7 +5,7 @@ import { MessageCheckerService } from '../../lib/services/email/MessageCheckerSe
 test.describe('Email notifications', () => {
   test('send test email notification', async ({ page, context }) => {
     const emailService: EmailService = new MessageCheckerService(context);
-    const emailAddress: EmailAddress = emailService.generateEmailAddress();
+    const emailAddress: EmailAddress = emailService.generateEmailAddress(emailService.generateUsername());
 
     await page.goto('/email-notifications');
     await page.getByRole('textbox').fill(emailAddress);

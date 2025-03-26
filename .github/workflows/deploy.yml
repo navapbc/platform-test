@@ -46,7 +46,6 @@ jobs:
       service_endpoint: ${{ steps.deploy-release.outputs.service_endpoint }}
 
     steps:
-      - run: exit 1
       - uses: actions/checkout@v4
 
       - name: Set up Terraform
@@ -87,3 +86,4 @@ jobs:
       channel: "workflow-failures"
       message: "❌ [Failed deploying ${{ inputs.version }} to ${{ inputs.app_name }} ${{ inputs.environment }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
     secrets: inherit
+    

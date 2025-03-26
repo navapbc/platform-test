@@ -85,5 +85,5 @@ jobs:
     uses: ./.github/workflows/send-system-notification.yml
     with:
       channel: "workflow-failures"
-      message: "❌ [Failed deploying ${{ inputs.version }} to ${{ inputs.app_name }} ${{ inputs.environment }}]((https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}))"
+      message: "❌ [Failed deploying ${{ inputs.version }} to ${{ inputs.app_name }} ${{ inputs.environment }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
     secrets: inherit

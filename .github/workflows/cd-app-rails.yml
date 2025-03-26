@@ -35,3 +35,4 @@ jobs:
       app_name: "app-rails"
       environment: ${{ inputs.environment || 'dev' }}
       version: ${{ inputs.version || 'main' }}
+    secrets: inherit

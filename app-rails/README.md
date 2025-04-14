@@ -96,6 +96,29 @@ To run natively:
 1. `make start-native`
 1. Then visit http://localhost:3100
 
+### Enabling Local Login for Development
+
+For local development (without AWS Cognito credentials), you can use local login via Devise. To enable local login:
+
+1. **Set Rails environment to development**:
+
+   ```bash
+   RAILS_ENV=development
+
+2. **Enable Devise in development by setting the environment variable:**:
+   ```bash
+   USE_DEVISE=true
+
+3. **Set up the database (run migrations):**:
+   ```bash
+   rails db:migrate
+
+4. **Follow the instructions for starting a container then start it:**:
+   ```bash
+   make start-container
+   
+5. **Visit the sign-up page: Go to http://localhost:3100/users/sign_up and register with any email and password.:**:
+
 #### IDE tips
 
 <details>

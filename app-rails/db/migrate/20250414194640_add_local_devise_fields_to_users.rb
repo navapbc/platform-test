@@ -1,10 +1,8 @@
-# frozen_string_literal: true
-
-class UpdateUsers < ActiveRecord::Migration[7.1]
+class AddLocalDeviseFieldsToUsers < ActiveRecord::Migration[7.2]
   def change
     change_table :users do |t|
       ## Database authenticatable
-      t.string :encrypted_password, null: false, default: ""
+      t.string :encrypted_password, null: true
 
       ## Recoverable
       t.string   :reset_password_token
@@ -18,3 +16,4 @@ class UpdateUsers < ActiveRecord::Migration[7.1]
     add_index :users, :reset_password_token, unique: true
   end
 end
+

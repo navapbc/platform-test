@@ -80,7 +80,7 @@ class AuthService
       Rails.logger.info "Creating User uid: #{uid}, and UserRole: #{role}"
 
       user = nil
-      if Rails.env.development?
+      if Rails.env.development? && ENV["USE_DEVISE"].present?
         user = User.create!(
           uid: uid,
           email: email,

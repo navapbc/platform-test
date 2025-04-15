@@ -94,7 +94,7 @@ class AuthService
           provider: provider,
         )
       end
-    
+
       user
     end
 

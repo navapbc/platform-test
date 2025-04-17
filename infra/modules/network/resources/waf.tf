@@ -65,6 +65,18 @@ resource "aws_wafv2_web_acl" "main" {
 resource "aws_cloudwatch_log_group" "waf_logs" {
   name              = "aws-waf-logs-${var.name}"
   retention_in_days = 30
+  kms_key_id        = aws_kms_key.waf_logs.arn
+}
+
+resource "aws_kms_key" "waf_logs" {
+  description             = "KMS key for WAF logs encryption"
+  deletion_window_in_days = 7
+  enable_key_rotation     = true
+}
+
+resource "aws_kms_alias" "waf_logs" {
+  name          = "alias/${var.name}-waf-logs"
+  target_key_id = aws_kms_key.waf_logs.key_id
 }
 
 resource "aws_wafv2_web_acl_logging_configuration" "main" {

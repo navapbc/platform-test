@@ -56,6 +56,30 @@ resource "aws_lb_listener" "alb_listener_http" {
   }
 }
 
+resource "aws_lb_listener_rule" "http_to_https_redirect" {
+  count = var.certificate_arn != null ? 1 : 0
+
+  listener_arn = aws_lb_listener.alb_listener_http.arn
+  priority     = 50  # Lower priority than the forward rule (runs before)
+
+  action {
+    type = "redirect"
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+      host        = "#{host}"
+      path        = "/#{path}"
+      query       = "#{query}"
+    }
+  }
+  condition {
+    path_pattern {
+      values = ["/*"]
+    }
+  }
+}
+
 resource "aws_lb_listener_rule" "app_http_forward" {
   listener_arn = aws_lb_listener.alb_listener_http.arn
   priority     = 100
@@ -89,6 +113,24 @@ resource "aws_lb_listener" "alb_listener_https" {
       content_type = "text/plain"
       message_body = "Not Found"
       status_code  = "404"
+    }
+  }
+}
+
+resource "aws_lb_listener" "alb_listener_https_no_cert" {
+  count = var.certificate_arn == null ? 1 : 0
+
+  load_balancer_arn = aws_lb.alb.arn
+  port              = 443
+  protocol          = "HTTP" # Using HTTP protocol since we don't have a certificate
+
+  default_action {
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "certificate not available"
+      status_code  = "503"
     }
   }
 }

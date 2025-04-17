@@ -60,7 +60,7 @@ resource "aws_lb_listener_rule" "http_to_https_redirect" {
   count = var.certificate_arn != null ? 1 : 0
 
   listener_arn = aws_lb_listener.alb_listener_http.arn
-  priority     = 50  # Lower priority than the forward rule (runs before)
+  priority     = 100
 
   action {
     type = "redirect"
@@ -81,6 +81,8 @@ resource "aws_lb_listener_rule" "http_to_https_redirect" {
 }
 
 resource "aws_lb_listener_rule" "app_http_forward" {
+  count = var.certificate_arn == null ? 1 : 0
+  
   listener_arn = aws_lb_listener.alb_listener_http.arn
   priority     = 100
 

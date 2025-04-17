@@ -166,3 +166,9 @@ variable "ephemeral_write_volumes" {
   description = "A set of absolute paths in the container to be mounted as writable for the life of the task. These need to be declared with `VOLUME` instructions in the container build file."
   default     = []
 }
+
+variable "waf_arn" {
+  type        = string
+  description = "The ARN of the WAF ACL to associate with the load balancer"
+  default     = null
+}

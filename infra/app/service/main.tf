@@ -69,7 +69,7 @@ module "service" {
   domain_name     = module.domain.domain_name
   hosted_zone_id  = module.domain.hosted_zone_id
   certificate_arn = module.domain.certificate_arn
-  waf_arn         = module.app_config.enable_waf ? module.service.network.waf_arn : null
+  waf_arn         = module.app_config.enable_waf ? module.network.waf_arn : null
 
   cpu                      = local.service_config.cpu
   memory                   = local.service_config.memory

@@ -21,3 +21,12 @@ output "private_subnet_ids" {
 output "vpc_id" {
   value = data.aws_vpc.network.id
 }
+
+data "aws_wafv2_web_acl" "network" {
+  name  = module.interface.waf_acl_name
+  scope = "REGIONAL"
+}
+
+output "waf_arn" {
+  value = data.aws_wafv2_web_acl.network.arn
+}

@@ -72,7 +72,3 @@ resource "aws_wafv2_web_acl_logging_configuration" "main" {
   log_destination_configs = [aws_cloudwatch_log_group.waf_logs.arn]
   resource_arn            = aws_wafv2_web_acl.main.arn
 }
-
-output "waf_arn" {
-  value = aws_wafv2_web_acl.main.arn
-}

@@ -167,8 +167,8 @@ variable "ephemeral_write_volumes" {
   default     = []
 }
 
-variable "waf_arn" {
-  type        = string
-  description = "The ARN of the WAF ACL to associate with the load balancer"
-  default     = null
+variable "enable_waf" {
+  type        = bool
+  description = "Whether to enable WAF protection for the load balancer"
+  default     = false
 }

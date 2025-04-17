@@ -51,6 +51,12 @@ variable "enable_command_execution" {
   description = "Whether the service should enable ECS Exec, such as for debugging"
 }
 
+variable "enable_waf" {
+  type        = bool
+  description = "Whether to enable WAF protection for the load balancer"
+  default     = false
+}
+
 variable "extra_environment_variables" {
   type        = map(string)
   description = "Additional environment variables to pass to the service container. Map from environment variable name to the value."
@@ -165,10 +171,4 @@ variable "ephemeral_write_volumes" {
   type        = set(string)
   description = "A set of absolute paths in the container to be mounted as writable for the life of the task. These need to be declared with `VOLUME` instructions in the container build file."
   default     = []
-}
-
-variable "enable_waf" {
-  type        = bool
-  description = "Whether to enable WAF protection for the load balancer"
-  default     = false
 }

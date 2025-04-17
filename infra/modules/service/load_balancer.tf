@@ -122,7 +122,7 @@ resource "aws_lb_listener" "alb_listener_https_no_cert" {
 
   load_balancer_arn = aws_lb.alb.arn
   port              = 443
-  protocol          = "HTTP" # Using HTTP protocol since we don't have a certificate
+  protocol          = "HTTP" # Using HTTP protocol for fixed-response
 
   default_action {
     type = "fixed-response"

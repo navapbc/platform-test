@@ -23,11 +23,10 @@ output "vpc_id" {
 }
 
 data "aws_wafv2_web_acl" "network" {
-  count = var.enable_waf ? 1 : 0
   name  = module.interface.waf_acl_name
   scope = "REGIONAL"
 }
 
 output "waf_arn" {
-  value = var.enable_waf ? one(data.aws_wafv2_web_acl.network[*].arn) : null
+  value = data.aws_wafv2_web_acl.network.arn
 }

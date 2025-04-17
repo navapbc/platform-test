@@ -26,9 +26,3 @@ variable "name" {
   type        = string
   description = "Name to give the VPC. Will be added to the VPC under the 'network_name' tag."
 }
-
-variable "enable_waf" {
-  type        = bool
-  description = "Whether to enable AWS Web Application Firewall (WAF) for ALBs in this network."
-  default     = true
-}

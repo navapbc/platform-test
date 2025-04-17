@@ -1,5 +1,4 @@
 resource "aws_wafv2_web_acl" "main" {
-  count = var.enable_waf ? 1 : 0
   name        = module.interface.waf_acl_name
   description = "WAF to protect application load balancers in the ${var.name} network"
   scope       = "REGIONAL"
@@ -64,14 +63,12 @@ resource "aws_wafv2_web_acl" "main" {
 }
 
 resource "aws_cloudwatch_log_group" "waf_logs" {
-  count = var.enable_waf ? 1 : 0
   # checkov:skip=CKV_AWS_158:The KMS key triggered an operation error
   name              = "aws-waf-logs-${var.name}"
   retention_in_days = 30
 }
 
 resource "aws_wafv2_web_acl_logging_configuration" "main" {
-  count = var.enable_waf ? 1 : 0
-  log_destination_configs = [aws_cloudwatch_log_group.waf_logs[0].arn]
-  resource_arn            = aws_wafv2_web_acl.main[0].arn
+  log_destination_configs = [aws_cloudwatch_log_group.waf_logs.arn]
+  resource_arn            = aws_wafv2_web_acl.main.arn
 }

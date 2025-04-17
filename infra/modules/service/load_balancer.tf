@@ -119,27 +119,6 @@ resource "aws_lb_listener" "alb_listener_https" {
   }
 }
 
-resource "aws_lb_listener" "alb_listener_https_no_cert" {
-  count = var.certificate_arn == null ? 1 : 0
-
-  load_balancer_arn = aws_lb.alb.arn
-  port              = 443
-  protocol          = "HTTPS"
-  # Use a self-signed certificate for the 503 response
-  certificate_arn = module.domain.certificate_arn
-  # Use security policy that supports TLS 1.3 but requires at least TLS 1.2
-  ssl_policy = "ELBSecurityPolicy-TLS13-1-2-2021-06"
-
-  default_action {
-    type = "fixed-response"
-
-    fixed_response {
-      content_type = "text/plain"
-      message_body = "certificate not available"
-      status_code  = "503"
-    }
-  }
-}
 
 resource "aws_lb_listener_rule" "app_https_forward" {
   count = var.certificate_arn != null ? 1 : 0

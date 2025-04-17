@@ -43,12 +43,6 @@ variable "enable_notifications" {
   default     = false
 }
 
-variable "enable_waf" {
-  type        = bool
-  description = "Enables Web Application Firewall (WAF) protection for the application load balancer"
-  default     = true
-}
-
 variable "environment" {
   description = "name of the application environment (e.g. dev, staging, prod)"
   type        = string

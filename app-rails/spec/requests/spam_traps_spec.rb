@@ -1,12 +1,9 @@
 RSpec.describe "Spam trap protection for public forms", type: :request do
   before do
-
     allow_any_instance_of(Users::PasswordsController).to receive(:auth_service).and_return(
       AuthService.new(Auth::MockAdapter.new)
     )
-    
   end
-
 
   forms = [
     {
@@ -56,11 +53,8 @@ RSpec.describe "Spam trap protection for public forms", type: :request do
         post form[:path], params: spam_params
         expect(response).to have_http_status(422), "Expected 422 for #{form[:name]} form, but got #{response.status}"
       end
-
       it "allows valid submissions" do
         post form[:path], params: valid_params
-        puts response.body
-        puts "#########"
         expect(response).to have_http_status(302), "Expected redirect for valid #{form[:name]} form, but got #{response.status}"
       end
     end

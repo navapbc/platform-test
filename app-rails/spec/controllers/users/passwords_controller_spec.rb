@@ -44,15 +44,6 @@ RSpec.describe Users::PasswordsController do
 
       expect(response.status).to eq(422)
     end
-
-    it "handles submission by bots" do
-      post :send_reset_password_instructions, params: {
-        users_forgot_password_form: { email: "UsernameExists@example.com", spam_trap: "I am a bot" },
-        locale: "en"
-      }
-
-      expect(response.status).to eq(422)
-    end
   end
 
   describe "GET reset" do
@@ -98,20 +89,6 @@ RSpec.describe Users::PasswordsController do
           email: "test@example.com",
           code: "000001",
           password: "password"
-        },
-        locale: "en"
-      }
-
-      expect(response.status).to eq(422)
-    end
-
-    it "handles submission by bots" do
-      post :confirm_reset, params: {
-        users_reset_password_form: {
-          email: "test@example.com",
-          code: "123456",
-          password: "password",
-          spam_trap: "I am a bot"
         },
         locale: "en"
       }

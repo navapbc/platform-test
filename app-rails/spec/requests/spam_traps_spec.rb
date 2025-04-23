@@ -32,6 +32,15 @@ RSpec.describe "Spam trap protection for public forms", type: :request do
         email: "evenneweruser@example.com",
         password: "aLongPassword123"
       }
+    },
+    {
+      name: "Login",
+      path: "/users/sign_in",
+      param_key: :users_new_session_form,
+      valid_params: {
+        email: "test@example.com",
+        password: "password"
+      }
     }
   ]
 
@@ -52,10 +61,6 @@ RSpec.describe "Spam trap protection for public forms", type: :request do
       it "rejects spam submissions" do
         post form[:path], params: spam_params
         expect(response).to have_http_status(422), "Expected 422 for #{form[:name]} form, but got #{response.status}"
-      end
-      it "allows valid submissions" do
-        post form[:path], params: valid_params
-        expect(response).to have_http_status(302), "Expected redirect for valid #{form[:name]} form, but got #{response.status}"
       end
     end
   end

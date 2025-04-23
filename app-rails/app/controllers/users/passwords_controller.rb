@@ -3,6 +3,18 @@
 class Users::PasswordsController < ApplicationController
   skip_after_action :verify_authorized
 
+  def auth_service
+    self.class.auth_service || AuthService.new
+  end
+
+  def self.auth_service
+    @auth_service
+  end
+
+  def self.auth_service=(service)
+    @auth_service = service
+  end
+
   def forgot
     @form = Users::ForgotPasswordForm.new
   end

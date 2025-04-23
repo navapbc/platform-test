@@ -57,7 +57,6 @@ RSpec.describe Users::RegistrationsController do
 
       expect(response.status).to eq(422)
     end
-
   end
 
   describe "GET new_account_verification" do

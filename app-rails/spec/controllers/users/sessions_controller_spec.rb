@@ -93,7 +93,6 @@ RSpec.describe Users::SessionsController do
       expect(session[:challenge_email]).to eq("mfa@example.com")
       expect(response).to redirect_to(session_challenge_path)
     end
-
   end
 
   describe "GET challenge" do

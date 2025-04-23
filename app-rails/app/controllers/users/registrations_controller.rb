@@ -4,6 +4,18 @@ class Users::RegistrationsController < ApplicationController
   layout "users"
   skip_after_action :verify_authorized
 
+  def auth_service
+    self.class.auth_service || AuthService.new
+  end
+
+  def self.auth_service
+    @auth_service
+  end
+
+  def self.auth_service=(service)
+    @auth_service = service
+  end
+
   def new
     @form = Users::RegistrationForm.new()
     render :new

@@ -89,7 +89,7 @@ group :development do
   gem "rubocop-rspec", require: false
 
   # Sass compiling
-  gem "sassc", "~> 2.4"
+  gem "sass-embedded"
 
   # Test notifications locally without sending the emails
   gem "letter_opener"

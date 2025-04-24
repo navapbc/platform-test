@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe UswdsFormBuilder do
-  class TestForm 
+  class TestForm
     include ActiveModel::Model
     include ActiveModel::Attributes
 
@@ -25,7 +25,7 @@ RSpec.describe UswdsFormBuilder do
       spam_trap { nil }
     end
   end
-  
+
 
   let(:template) { ActionView::Base.empty }
   let(:object) { build(:test_form) }

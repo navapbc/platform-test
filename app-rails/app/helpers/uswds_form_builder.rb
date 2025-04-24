@@ -91,6 +91,16 @@ class UswdsFormBuilder < ActionView::Helpers::FormBuilder
     super(value, options)
   end
 
+  def honeypot_field
+    spam_trap_classes = "opacity-0 position-absolute z-bottom top-0 left-0 height-0 width-0"
+    label_text = "Do not fill in this field. It is an anti-spam measure."
+
+    @template.content_tag(:div, class: "usa-form-group #{spam_trap_classes}") do
+      label(:spam_trap, label_text, { tabindex: -1, class: "usa-label #{spam_trap_classes}" }) +
+      @template.text_field(@object_name, :spam_trap, { autocomplete: "false", tabindex: -1, class: "usa-input #{spam_trap_classes}" })
+    end
+  end
+
   ########################################
   # Custom helpers
   ########################################
@@ -100,10 +110,7 @@ class UswdsFormBuilder < ActionView::Helpers::FormBuilder
     options[:placeholder] = "_________"
     options[:width] = "md"
 
-    # Actual USWDS mask functionality broken until this is fixed:
-    # https://github.com/uswds/uswds/issues/5517
-    # append_to_option(options, :class, " usa-masked")
-
+    append_to_option(options, :class, " usa-masked")
     append_to_option(options, :hint, @template.content_tag(:p, I18n.t("us_form_with.tax_id_format")))
 
     text_field(attribute, options)

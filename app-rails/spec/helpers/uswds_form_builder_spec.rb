@@ -144,7 +144,7 @@ RSpec.describe UswdsFormBuilder do
     end
 
     it 'includes example format in the hint' do
-      expect(result).to have_element(:p, text: I18n.t('us_form_with.date_picker_format'))
+      expect(result).to have_element(:p, text: "Format: mm/dd/yyyy")
     end
 
     it 'adds USWDS attributes for showing the current value' do

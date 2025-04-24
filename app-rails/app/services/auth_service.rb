@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class AuthService
-  def initialize(auth_adapter = Auth::CognitoAdapter.new)
-    @auth_adapter = auth_adapter
+  def initialize(auth_adapter = nil)
+    @auth_adapter = auth_adapter || default_adapter
   end
 
   # Send a confirmation code that's required to change the user's password
@@ -71,6 +71,14 @@ class AuthService
   end
 
   private
+
+    def default_adapter
+      if Rails.application.config.respond_to?(:auth_adapter_class)
+        Rails.application.config.auth_adapter_class.constantize.new
+      else
+        Auth::CognitoAdapter.new
+      end
+    end
 
     def create_db_user(uid, email, provider)
       Rails.logger.info "Creating User uid: #{uid}"

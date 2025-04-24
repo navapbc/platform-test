@@ -252,6 +252,24 @@ RSpec.describe UswdsFormBuilder do
     end
   end
 
+  describe '#tax_id_field' do
+    let(:result) { builder.tax_id_field(:first_name) }
+
+    it 'outputs a text input' do
+      expect(result).to have_element(:input, type: 'text', class: 'usa-input', name: 'object[first_name]')
+      expect(result).not_to have_css('.usa-form-group--error')
+      expect(result).not_to have_css('.usa-error-message')
+    end
+
+    it 'outputs a label' do
+      expect(result).to have_element(:label, class: 'usa-label', for: 'object_first_name')
+    end
+
+    it 'includes an example in the hint' do
+      expect(result).to have_element(:p, text: "For example, 123456789")
+    end
+  end
+
   describe '#yes_no' do
     let(:result) { builder.yes_no(:first_name, legend: 'Custom legend') }
 

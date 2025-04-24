@@ -61,3 +61,4 @@ en:
   us_form_with:
     boolean_true: "Yes"
     boolean_false: "No"
+    optional: "Optional"

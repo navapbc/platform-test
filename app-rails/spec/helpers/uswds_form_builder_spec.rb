@@ -1,34 +1,21 @@
 require 'rails_helper'
 
 RSpec.describe UswdsFormBuilder do
-  class TestForm
-    include ActiveModel::Model
-    include ActiveModel::Attributes
+  before do
+    test_form_class = Class.new do
+      include ActiveModel::Model
+      include ActiveModel::Attributes
 
-    attribute :first_name, :string
-    attribute :state, :string  # for select
-    attribute :agree_to_terms, :boolean  # for check_box
-    attribute :tax_id, :string  # for tax_id_field
-    attribute :start_date, :date  # for date_picker
-    attribute :file_upload, :string
-    attribute :spam_trap, :string  # for honeypot_field
-  end
-
-  FactoryBot.define do
-    factory :test_form do
-      first_name { "John" }
-      state { "DC" }
-      agree_to_terms { true }
-      tax_id { "123456789" }
-      start_date { Date.current + 7.days }
-      file_upload { Faker::File.file_name }
-      spam_trap { nil }
+      attribute :first_name, :string
+      attribute :start_date, :date  # for date_picker
     end
+
+    stub_const("TestForm", test_form_class)
   end
 
 
   let(:template) { ActionView::Base.empty }
-  let(:object) { build(:test_form) }
+  let(:object) { TestForm.new }
   let(:builder) { described_class.new(:object, object, template, {}) }
 
   describe '#text_field' do
@@ -129,7 +116,7 @@ RSpec.describe UswdsFormBuilder do
 
   describe '#date_picker' do
     let(:result) { builder.date_picker(:start_date) }
-    let(:object) { build(:test_form, start_date: Date.new(2024, 1, 31)) }
+    let(:object) { TestForm.new(start_date: Date.new(2024, 1, 31)) }
 
     it 'wraps the input with a date picker class' do
       expect(result).to have_element(:div, class: 'usa-date-picker usa-form-group')
@@ -145,7 +132,7 @@ RSpec.describe UswdsFormBuilder do
     end
 
     context 'when no existing date value' do
-      let(:object) { build(:test_form, start_date: nil) }
+      let(:object) { TestForm.new(start_date: nil) }
 
       it 'does not set a value' do
         expect(result).to have_element(:input, value: nil)

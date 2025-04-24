@@ -110,14 +110,6 @@ RSpec.describe UswdsFormBuilder do
       end
     end
 
-    context 'with large_label' do
-      let(:result) { builder.text_field(:first_name, large_label: true) }
-
-      it 'outputs a large label' do
-        expect(result).to have_element(:label, class: 'pl-label--large')
-      end
-    end
-
     context 'with label_class' do
       let(:result) { builder.text_field(:first_name, label_class: 'custom-label-class') }
 

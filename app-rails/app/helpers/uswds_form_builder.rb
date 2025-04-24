@@ -30,10 +30,6 @@ class UswdsFormBuilder < ActionView::Helpers::FormBuilder
       label_text = options.delete(:label)
       label_class = options.delete(:label_class) || ""
 
-      if options[:large_label]
-        label_class += " pl-label--large"
-      end
-
       label_options = options.except(:width, :class, :id).merge({
         class: label_class,
         for: options[:id]

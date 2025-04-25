@@ -108,6 +108,29 @@ To run natively:
 
 </details>
 
+### 📖  Lookbook
+
+#### 🔍 Accessing Lookbook
+In development mode, visit: `/[locale]/dev/lookbook`. For Example: `/en-us/dev/lookbook`
+
+#### 📦 Adding a New Component Preview
+1. create your component (if you haven't already):
+```
+app/components/my_component.rb
+app/components/my_component.html.erb
+```
+
+2. Add a preview class in:
+```
+app/components/previews/my_component_preview.rb
+
+```
+
+#### 📝 Config Notes
+Previews live in `app/components/previews/`
+Lookbook uses a custom layout at `app/views/layouts/lookbook.html.erb` to avoid layout dependencies during preview rendering.
+
+
 ## 📇 Additional reading
 
 Beyond this README, you should also refer to the [`docs/app-rails` directory](../docs/app-rails) for more detailed info. Some highlights:

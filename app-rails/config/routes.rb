@@ -46,6 +46,7 @@ Rails.application.routes.draw do
     namespace :dev do
       get "sandbox"
       post "send_email"
+      mount Lookbook::Engine, at: "/lookbook"
     end
   end
 end

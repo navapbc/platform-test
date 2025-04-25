@@ -71,6 +71,8 @@ gem "faraday"
 # Create fake data (outside of dev/test block to support seeding lower environments)
 gem "faker", "~> 3.2"
 
+gem "view_component"
+
 group :development, :test do
   gem "guard-rspec", require: false
 
@@ -104,6 +106,11 @@ group :development do
 
   # Generate ERDs
   gem "rails-erd"
+
+  gem "lookbook"
+  # enable live-updating
+  gem "listen"
+  gem "actioncable"
 end
 
 group :test do

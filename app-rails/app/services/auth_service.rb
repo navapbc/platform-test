@@ -1,8 +1,18 @@
 # frozen_string_literal: true
 
 class AuthService
-  def initialize(auth_adapter = Auth::CognitoAdapter.new)
-    @auth_adapter = auth_adapter
+  def initialize(auth_adapter = nil)
+    @auth_adapter = default_adapter
+  end
+
+  def default_adapter
+    if Rails.env.development? && (ENV["COGNITO_CLIENT_SECRET"].to_s.empty?)
+      Auth::LocalAdapter.new
+    elsif Rails.env.test?
+      Auth::MockAdapter.new
+    else
+      Auth::CognitoAdapter.new
+    end
   end
 
   # Send a confirmation code that's required to change the user's password

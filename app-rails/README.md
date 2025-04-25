@@ -96,6 +96,15 @@ To run natively:
 1. `make start-native`
 1. Then visit http://localhost:3100
 
+#### Local Authentication
+
+To simplify local development, you can log in using the credentials below—just make sure your environment is set to `development` and the `COGNITO_CLIENT_SECRET` is left empty:
+
+```
+email: "dev@example.com"
+password: "password"
+```
+
 #### IDE tips
 
 <details>

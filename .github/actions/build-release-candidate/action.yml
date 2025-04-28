@@ -7,10 +7,6 @@ outputs:
   image_cache_key:
     description: "Cache key for the .tar of the docker image"
     value: ${{ steps.create-image-identifier.outputs.image }}
-
-concurrency:
-  group: build-release-candidate-${{ github.repository }}-${{ github.ref }}
-  cancel-in-progress: false
  
 runs:
   using: "composite"

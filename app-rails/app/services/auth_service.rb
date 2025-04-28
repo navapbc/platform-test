@@ -2,14 +2,14 @@
 
 class AuthService
   def initialize(auth_adapter = nil)
-    @auth_adapter = default_adapter
+    @auth_adapter = auth_adapter || default_adapter
   end
 
   def default_adapter
-    if Rails.env.development? && (ENV["COGNITO_CLIENT_SECRET"].to_s.empty?)
+    return Auth::MockAdapter.new if Rails.env.test?
+
+    if Rails.env.development? && ENV["COGNITO_CLIENT_SECRET"].to_s.empty?
       Auth::LocalAdapter.new
-    elsif Rails.env.test?
-      Auth::MockAdapter.new
     else
       Auth::CognitoAdapter.new
     end

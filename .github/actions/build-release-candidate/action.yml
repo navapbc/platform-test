@@ -9,7 +9,7 @@ outputs:
     value: ${{ steps.create-image-identifier.outputs.image }}
 
 concurrency:
-  group: build-release-candidate-${{ inputs.app_name }}-${{ github.ref }}
+  group: build-release-candidate-${{ github.repository }}-${{ github.ref }}
   cancel-in-progress: false
  
 runs:

@@ -1,0 +1,48 @@
+name: 'Build release candidate'
+description: 'Builds the release candidate that will be used for deployment and validations leading up to deployment'
+inputs:
+  app_name:
+    description: 'Name of application'
+outputs:
+  image_cache_key:
+    description: "Cache key for the .tar of the docker image"
+    value: ${{ steps.create-image-identifier.outputs.image }}
+
+runs:
+  using: "composite"
+  steps:        
+
+    - name: Create image identifier
+      id: create-image-identifier
+      run: |
+        IMAGE_NAME=$(make APP_NAME=${{ inputs.app_name }} release-image-name)
+        IMAGE_TAG=$(make release-image-tag)
+        echo "image=$IMAGE_NAME:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+      shell: bash
+
+    - name: Check whether the image has already been built
+      id: check-image-already-exists
+      uses: actions/cache@v4
+      with:
+        path: /tmp/docker-image.tar
+        key: ${{ steps.create-image-identifier.outputs.image }}
+        lookup-only: true
+
+    - name: Build and tag Docker image for scanning
+      if: steps.check-image-already-exists.outputs.cache-hit != 'true'
+      run: |
+        make APP_NAME=${{ inputs.app_name }} release-build
+      shell: bash
+
+    - name: Save Docker image
+      if: steps.check-image-already-exists.outputs.cache-hit != 'true'
+      run: |
+        docker save ${{ steps.create-image-identifier.outputs.image }} > /tmp/docker-image.tar
+      shell: bash
+
+    - name: Cache Docker image
+      if: steps.check-image-already-exists.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: /tmp/docker-image.tar
+        key: ${{ steps.create-image-identifier.outputs.image }}

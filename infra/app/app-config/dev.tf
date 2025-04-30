@@ -23,10 +23,6 @@ module "dev_config" {
   # Defaults to `false`. Uncomment the next line to enable.
   # enable_command_execution = true
 
-  service_override_extra_environment_variables = {
-    ENABLE_LOOKBOOK = "true"
-  }
-
   # Uncomment to override default feature flag values
   feature_flag_overrides = {
     BAR = true

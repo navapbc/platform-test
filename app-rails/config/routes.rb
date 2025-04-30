@@ -7,6 +7,8 @@ Rails.application.routes.draw do
   # Keep the default /up rails endpoint.
   get "up" => "rails/health#show"
 
+  mount Lookbook::Engine, at: "/lookbook"
+
   # Support locale prefixes for these routes:
   localized do
     # Defines the root path route ("/")

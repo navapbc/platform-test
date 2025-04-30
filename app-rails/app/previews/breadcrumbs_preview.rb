@@ -3,7 +3,7 @@ class BreadcrumbsPreview < Lookbook::Preview
 
   def default
     render template: "application/_breadcrumbs", locals: { crumbs: [
-      { name: "Passport applications", url: "https://google.com" },
+      { name: "Passport applications", url: "default" },
       ], current_name: "New passport application" } 
   end
 end

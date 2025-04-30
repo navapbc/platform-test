@@ -1,19 +1,9 @@
-<%# Top-level layout for all pages in the application %>
+<%# Layout for Lookbook previews of component partials %>
 <!DOCTYPE html>
 <html lang="<%= I18n.locale %>">
   <head>
-    <title>
-      <%= content_for?(:title) ? "#{ yield(:title) } | #{ t('header.title') }" : t("header.title") %>
-    </title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
-
-    <%= favicon_link_tag asset_path('@uswds/uswds/dist/img/us_flag_small.png') %>
-
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-    <%= yield :head %>
-
     <%= javascript_importmap_tags %>
     <%= javascript_include_tag '@uswds/uswds/dist/js/uswds-init.min.js' %>
   </head>
@@ -30,6 +20,5 @@
     </div>
 
     <%= javascript_include_tag '@uswds/uswds/dist/js/uswds.min.js' %>
-    <%= yield :scripts %>
   </body>
 </html>

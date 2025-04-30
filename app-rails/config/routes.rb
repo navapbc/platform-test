@@ -7,7 +7,7 @@ Rails.application.routes.draw do
   # Keep the default /up rails endpoint.
   get "up" => "rails/health#show"
 
-  mount Lookbook::Engine, at: "/lookbook"
+  mount Lookbook::Engine, at: "/lookbook" if ENV["ENABLE_LOOKBOOK"].present?
 
   # Support locale prefixes for these routes:
   localized do

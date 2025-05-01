@@ -20,15 +20,15 @@ class Auth::MockAdapter
         "session": "mock-session"
       }
     end
-    
+
     existing_user = User.find_by(email: email)
 
     uid = if existing_user
             existing_user.uid
-          else
+    else
             @uid_generator.call
-          end
-  
+    end
+
     {
       uid: uid,
       provider: "mock",

@@ -98,7 +98,12 @@ To run natively:
 
 #### Local Authentication
 
-To simplify local development, you can log in using any email and password
+You can circumvent typical login and log in using any email and password if you add
+```
+AUTH_ADAPTER=mock
+```
+
+to your .env
 
 #### IDE tips
 

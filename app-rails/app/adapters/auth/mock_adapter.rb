@@ -6,7 +6,7 @@ class Auth::MockAdapter
   end
 
   def self.provider_name
-    "mock"
+    @@provider_name
   end
 
   def initiate_auth(email, password)

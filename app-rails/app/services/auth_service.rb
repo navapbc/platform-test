@@ -6,12 +6,16 @@ class AuthService
   end
 
   def default_adapter
-    return Auth::MockAdapter.new if Rails.env.test?
-
-    if Rails.env.development? && ENV["COGNITO_CLIENT_SECRET"].to_s.empty?
-      Auth::LocalAdapter.new
-    else
+    auth_service = ENV.fetch("AUTH_SERVICE") do
+      Rails.env.test? || Rails.env.development? ? "mock" : "cognito"
+    end
+    case auth_service
+    when "cognito"
       Auth::CognitoAdapter.new
+    when "mock"
+      Auth::MockAdapter.new
+    else
+      raise "Unsupported AUTH_SERVICE: #{auth_service}"
     end
   end
 

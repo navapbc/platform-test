@@ -6,7 +6,39 @@ class Auth::MockAdapter
   end
 
   def self.provider_name
-    @@provider_name
+    "mock"
+  end
+
+  def initiate_auth(email, password)
+    if email.include?("unconfirmed")
+      raise Auth::Errors::UserNotConfirmed.new
+    elsif password == "wrong"
+      raise Auth::Errors::InvalidCredentials.new
+    elsif email.include?("mfa")
+      return {
+        "challenge_name": "SOFTWARE_TOKEN_MFA",
+        "session": "mock-session"
+      }
+    end
+    
+    existing_user = User.find_by(email: email)
+
+    uid = if existing_user
+            existing_user.uid
+          else
+            @uid_generator.call
+          end
+  
+    {
+      uid: uid,
+      provider: "mock",
+      token: generate_token(email)
+    }
+  end
+
+  def generate_token(email)
+    # Return a dummy token — apps expecting a token can grab this
+    JWT.encode({ user_id: email, exp: 24.hours.from_now.to_i }, "mock_secret_key")
   end
 
   def create_account(email, password)
@@ -22,6 +54,7 @@ class Auth::MockAdapter
   end
 
   def change_email(uid, new_email)
+    # No-op
   end
 
   def forgot_password(email)
@@ -40,24 +73,6 @@ class Auth::MockAdapter
     end
   end
 
-  def initiate_auth(email, password)
-    if email.include?("unconfirmed")
-      raise Auth::Errors::UserNotConfirmed.new
-    elsif password == "wrong"
-      raise Auth::Errors::InvalidCredentials.new
-    elsif email.include?("mfa")
-      return {
-        "challenge_name": "SOFTWARE_TOKEN_MFA",
-        "session": "mock-session"
-      }
-    end
-
-    {
-      uid: @uid_generator.call,
-      provider: "mock"
-    }
-  end
-
   def associate_software_token(access_token)
     "mock-secret"
   end
@@ -69,6 +84,7 @@ class Auth::MockAdapter
   end
 
   def disable_software_token(uid)
+    # No-op
   end
 
   def respond_to_auth_challenge(code, challenge)
@@ -78,7 +94,8 @@ class Auth::MockAdapter
 
     {
       uid: @uid_generator.call,
-      provider: "mock"
+      provider: "mock",
+      token: generate_token("challenge-user@example.com")
     }
   end
 

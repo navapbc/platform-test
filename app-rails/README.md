@@ -98,12 +98,7 @@ To run natively:
 
 #### Local Authentication
 
-To simplify local development, you can log in using the credentials below—just make sure your environment is set to `development` and the `COGNITO_CLIENT_SECRET` is left empty:
-
-```
-email: "dev@example.com"
-password: "password"
-```
+To simplify local development, you can log in using any email and password
 
 #### IDE tips
 

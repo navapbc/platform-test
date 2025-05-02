@@ -53,6 +53,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: get-commit-hash
 
+    permissions:
+      contents: read
+      id-token: write
+
     outputs:
       is_image_published: ${{ steps.check-image-published.outputs.is_image_published }}
 
@@ -81,6 +85,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: check-image-already-published
     if: ${{ needs.check-image-already-published.outputs.is_image_published == 'false' }}
+
+    permissions:
+      contents: read
+      id-token: write
     
     concurrency:
       group: build-${{ inputs.app_name }}-${{ github.ref }}

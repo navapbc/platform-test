@@ -6,12 +6,6 @@ class AuthService
   end
 
   def default_adapter
-    auth_service = ENV["AUTH_ADAPTER"]
-
-    if Rails.env.test?
-      auth service = "mock"
-    end
-
     case auth_service
     when "cognito"
       Auth::CognitoAdapter.new

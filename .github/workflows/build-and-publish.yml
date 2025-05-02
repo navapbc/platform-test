@@ -79,7 +79,8 @@ jobs:
 
   build-and-publish:
     runs-on: ubuntu-latest
-    if: ${{ jobs.check-image-already-published.outputs.is_image_published == 'false' }}
+    needs: check-image-already-published
+    if: ${{ check-image-already-published.outputs.is_image_published == 'false' }}
     
     concurrency:
       group: build-${{ inputs.app_name }}-${{ github.ref }}

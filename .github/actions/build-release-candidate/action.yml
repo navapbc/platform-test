@@ -46,3 +46,7 @@ runs:
       with:
         path: /tmp/docker-image.tar
         key: ${{ steps.create-image-identifier.outputs.image }}
+    
+    - name: (debugging) Sleep to better observe concurrency
+      run: sleep 2m
+      shell: bash

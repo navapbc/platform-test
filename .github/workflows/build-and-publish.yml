@@ -48,17 +48,13 @@ jobs:
           echo "Commit hash: $COMMIT_HASH"
           echo "commit_hash=$COMMIT_HASH" >> "$GITHUB_OUTPUT"
 
-  build-and-publish:
-    name: Build and publish
+  check-image-already-published:
+    name: Check whether the image is already published
     runs-on: ubuntu-latest
     needs: get-commit-hash
-    concurrency:
-      group: build-${{ inputs.app_name }}-${{ github.ref }}
-      cancel-in-progress: false
 
-    permissions:
-      contents: read
-      id-token: write
+    outputs:
+      is_image_published: ${{ steps.check-image-published.outputs.is_image_published }}
 
     steps:
       - uses: actions/checkout@v4
@@ -81,14 +77,25 @@ jobs:
           echo "Is image published: $is_image_published"
           echo "is_image_published=$is_image_published" >> "$GITHUB_OUTPUT"
 
+  build-and-publish:
+    runs-on: ubuntu-latest
+    if: ${{ jobs.check-image-already-published.outputs.is_image_published == 'false' }}
+    
+    concurrency:
+      group: build-${{ inputs.app_name }}-${{ github.ref }}
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
       - id: build-release-candidate
-        if: steps.check-image-published.outputs.is_image_published == 'false'
         uses: ./.github/actions/build-release-candidate
         with:
           app_name: ${{ inputs.app_name }}
 
       - name: Restore cached Docker image
-        if: steps.check-image-published.outputs.is_image_published == 'false'
         uses: actions/cache/restore@v4
         with:
           path: /tmp/docker-image.tar
@@ -96,10 +103,17 @@ jobs:
           fail-on-cache-miss: true
 
       - name: Load cached Docker image
-        if: steps.check-image-published.outputs.is_image_published == 'false'
         run: |
           docker load < /tmp/docker-image.tar
 
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: ${{ inputs.app_name }}
+          environment: shared
+
       - name: Publish release
-        if: steps.check-image-published.outputs.is_image_published == 'false'
         run: make APP_NAME=${{ inputs.app_name }} release-publish

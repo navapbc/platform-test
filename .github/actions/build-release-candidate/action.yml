@@ -1,5 +1,5 @@
 name: 'Build release candidate'
-description: 'Builds the release candidate that will be used for deployment and validations leading up to deployment'
+description: 'Builds and caches the release candidate that will be used for deployment and validations leading up to deployment'
 inputs:
   app_name:
     description: 'Name of application'

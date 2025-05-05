@@ -98,12 +98,12 @@ To run natively:
 
 #### Local Authentication
 
-You can circumvent typical login and log in using any email and password if you add
+The .env example sets local authentication to mock, meaning you can log in using any email and password. To use Cognito, set `AUTH_ADAPTER` in your .env like so:
 ```
-AUTH_ADAPTER=mock
+AUTH_ADAPTER=cognito
 ```
 
-to your .env
+You will need to set the other cognito variables as well; setting `AUTH_ADAPTER` alone will merely set the auth flow to cognito, not enable cognito log in.
 
 #### IDE tips
 

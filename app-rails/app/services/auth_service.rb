@@ -6,6 +6,8 @@ class AuthService
   end
 
   def default_adapter
+    auth_service = Rails.application.config.auth_adapter
+
     case auth_service
     when "cognito"
       Auth::CognitoAdapter.new

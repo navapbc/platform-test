@@ -1,5 +1,5 @@
-name: 'Build release candidate'
-description: 'Builds and caches the release candidate that will be used for deployment and validations leading up to deployment'
+name: 'Build release candidates'
+description: 'Builds and loads the image that will be used for deployment and validations leading up to deployment'
 inputs:
   app_name:
     description: 'Name of application'
@@ -46,7 +46,19 @@ runs:
       with:
         path: /tmp/docker-image.tar
         key: ${{ steps.create-image-identifier.outputs.image }}
-    
+  
+    - name: Restore cached Docker image
+      if: steps.check-image-already-exists.outputs.cache-hit == 'true'
+      uses: actions/cache/restore@v4
+      with:
+        path: /tmp/docker-image.tar
+        key: ${{ steps.create-image-identifier.outputs.image }}
+        fail-on-cache-miss: true
+
+    - name: Load cached Docker image
+      run: |
+        docker load < /tmp/docker-image.tar
+
     - name: (debugging) Sleep to better observe concurrency
       run: sleep 2m
       shell: bash

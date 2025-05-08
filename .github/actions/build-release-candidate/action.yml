@@ -49,6 +49,7 @@ runs:
     - name: Load cached Docker image
       run: |
         docker load < /tmp/docker-image.tar
+      shell: bash
 
     - name: (debugging) Sleep to better observe concurrency
       run: sleep 2m

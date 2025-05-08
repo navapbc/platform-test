@@ -20,40 +20,31 @@ runs:
         echo "image=$IMAGE_NAME:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
       shell: bash
 
-    - name: Check whether the image has already been built
-      id: check-image-already-exists
+    - name: Retrieve the image from cache
+      id: retrieve-image-from-cache
       uses: actions/cache@v4
       with:
         path: /tmp/docker-image.tar
         key: ${{ steps.create-image-identifier.outputs.image }}
-        lookup-only: true
 
-    - name: Build and tag Docker image for scanning
-      if: steps.check-image-already-exists.outputs.cache-hit != 'true'
+    - name: Build and tag Docker image
+      if: steps.retrieve-image-from-cache.outputs.cache-hit != 'true'
       run: |
         make APP_NAME=${{ inputs.app_name }} release-build
       shell: bash
 
     - name: Save Docker image
-      if: steps.check-image-already-exists.outputs.cache-hit != 'true'
+      if: steps.retrieve-image-from-cache.outputs.cache-hit != 'true'
       run: |
         docker save ${{ steps.create-image-identifier.outputs.image }} > /tmp/docker-image.tar
       shell: bash
 
     - name: Cache Docker image
-      if: steps.check-image-already-exists.outputs.cache-hit != 'true'
+      if: steps.retrieve-image-from-cache.outputs.cache-hit != 'true'
       uses: actions/cache/save@v4
       with:
         path: /tmp/docker-image.tar
         key: ${{ steps.create-image-identifier.outputs.image }}
-  
-    - name: Restore cached Docker image
-      if: steps.check-image-already-exists.outputs.cache-hit == 'true'
-      uses: actions/cache/restore@v4
-      with:
-        path: /tmp/docker-image.tar
-        key: ${{ steps.create-image-identifier.outputs.image }}
-        fail-on-cache-miss: true
 
     - name: Load cached Docker image
       run: |

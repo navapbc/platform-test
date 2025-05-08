@@ -48,6 +48,14 @@ jobs:
           echo "Commit hash: $COMMIT_HASH"
           echo "commit_hash=$COMMIT_HASH" >> "$GITHUB_OUTPUT"
 
+      - name: debugging what reference i should be using # https://www.kenmuse.com/blog/the-many-shas-of-a-github-pull-request/
+        run: |
+          echo "GITHUB_REF $GITHUB_REF"
+          echo "GITHUB_SHA $GITHUB_SHA"
+          echo "GITHUB_WORKFLOW_REF $GITHUB_WORKFLOW_REF"
+          echo "GITHUB_WORKFLOW_SHA $GITHUB_WORKFLOW_SHA"
+          echo "HEAD  $(git rev-parse HEAD)"
+
   check-image-already-published:
     name: Check whether the image is already published
     runs-on: ubuntu-latest

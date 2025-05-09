@@ -74,7 +74,7 @@ jobs:
       id-token: write
     
     concurrency:
-      group: build-${{ inputs.app_name }}-${{ github.ref }}
+      group: build-${{ inputs.app_name }}-${{ needs.check-image-already-published.outputs.commit_hash }}
       cancel-in-progress: false
 
     steps:

@@ -52,7 +52,7 @@ runs:
       shell: bash
 
     - name: debugging - do we get a cache hit when we attempt a lookup?
-      id: retrieve-image-from-cache
+      id: debugging-build-release-candidate
       uses: actions/cache@v4
       with:
         path: /tmp/docker-image.tar

@@ -37,7 +37,7 @@ jobs:
       id-token: write
 
     outputs:
-      commit_hash: ${{ steps.get-commit-hash.outputs.image_tag }}
+      commit_hash: ${{ steps.get-commit-hash.outputs.commit_hash }}
       is_image_published: ${{ steps.check-image-published.outputs.is_image_published }}
 
     steps:
@@ -47,8 +47,10 @@ jobs:
 
       - id: get-commit-hash
         run: |
-          IMAGE_TAG=$(make release-image-tag)
-          echo "image_tag=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+          # HEAD should be the same as inputs.ref since we checked out inputs.ref
+          COMMIT_HASH=$(git rev-parse HEAD)
+          echo "Commit hash: $COMMIT_HASH"
+          echo "commit_hash=$COMMIT_HASH" >> "$GITHUB_OUTPUT"
 
       - name: Set up Terraform
         uses: ./.github/actions/setup-terraform

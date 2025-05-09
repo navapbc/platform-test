@@ -1,5 +1,5 @@
 name: 'Build release candidates'
-description: 'Builds and loads the image that will be used for deployment and validations leading up to deployment'
+description: 'Builds, caches, and loads the docker image'
 inputs:
   app_name:
     description: 'Name of application'
@@ -46,15 +46,7 @@ runs:
         path: /tmp/docker-image.tar
         key: ${{ steps.create-image-identifier.outputs.image }}
 
-    - name: Load cached Docker image
+    - name: Load the Docker image
       run: |
         docker load < /tmp/docker-image.tar
       shell: bash
-
-    - name: debugging - do we get a cache hit when we attempt a lookup?
-      id: debugging-build-release-candidate
-      uses: actions/cache@v4
-      with:
-        path: /tmp/docker-image.tar
-        key: ${{ steps.create-image-identifier.outputs.image }}
-        lookup-only: true

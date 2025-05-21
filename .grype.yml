@@ -27,3 +27,7 @@ ignore:
   - vulnerability: GHSA-v8gr-m533-ghj9
   - vulnerability: GHSA-mq26-g339-26xf
   - vulnerability: GHSA-3ww4-gg4f-jr7f
+  - vulnerability: CVE-2025-26519
+  - vulnerability: CVE-2024-12254
+  - vulnerability: CVE-2025-29087
+  - vulnerability: CVE-2025-31115

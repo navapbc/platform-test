@@ -122,7 +122,7 @@ module "service" {
       identity_provider_access = module.identity_provider_client[0].access_policy_arn,
     } : {},
     module.app_config.enable_notifications ? {
-      notifications_access = module.notifications[0].access_policy_arn,
+      notifications_access = local.ses_access_policy_arn,
     } : {},
   )
 

@@ -6,7 +6,7 @@ variable "enable_command_execution" {
 
 variable "enable_notifications" {
   type        = bool
-  description = "Whether the application(s) in this network need AWS Pinpoint access."
+  description = "Whether the application(s) in this network need AWS SES access for email notifications."
   default     = false
 }
 

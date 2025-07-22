@@ -1,39 +1,13 @@
 # platform-test
 
-This repo is used to test the platform.
+This repo is used to test the [Nava Platform](https://github.com/navapbc/platform).
 
-## Contents
+Namely the [AWS infrastructure
+template](https://github.com/navapbc/template-infra), with multiple applications
+and environments:
 
-This repo consists of a Makefile called `platform-test.mak`. We avoided calling it `Makefile` in order to avoid conflicting with the Makefile that is copied over from [template-infra](https://github.com/navapbc/template-infra) when installing the template infrastructure.
+| App Name                                                                                     | Dev URL                                           | Prod URL                           |
+|----------------------------------------------------------------------------------------------|---------------------------------------------------|------------------------------------|
+| app <br /> ([source](https://github.com/navapbc/template-infra/tree/main/template-only-app)) | https://platform-test-dev.navateam.com            | https://platform-test.navateam.com |
+| app-rails <br /> ([source](https://github.com/navapbc/template-application-rails))           | https://app-rails.platform-test-dev.navateam.com/ |                                    |
 
-## Environment URLs
-
-* [app dev environment](https://platform-test-dev.navateam.com)
-* [app prod environment](https://platform-test.navateam.com)
-* [app-rails dev environment](https://app-rails.platform-test-dev.navateam.com/)
-
-## Usage
-
-Test installing template infrastructure
-
-```bash
-make -f platform-test.mak install-infra
-```
-
-Test installing NextJS application template
-
-```bash
-make -f platform-test.mak install-application-nextjs
-```
-
-Test installing Flask application template
-
-```bash
-make -f platform-test.mak install-application-flask
-```
-
-Cleanup after testing
-
-```bash
-make -f platform-test.mak clean
-```

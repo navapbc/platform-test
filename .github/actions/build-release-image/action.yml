@@ -1,0 +1,45 @@
+name: Build release candidate
+description: Builds a docker image and leverages the build cache to re-use results from previous builds.
+
+inputs:
+  app_name:
+    required: true
+    type: string
+    description: 'Name of application folder'
+  commit_hash:
+    required: false
+    type: string
+    description: 'The commit hash'
+    default: ${{ github.sha }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Restore from Cache
+      id: cache-buildx
+      uses: actions/cache@v4
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ inputs.app_name }}-buildx-${{ inputs.commit_hash }}
+        restore-keys: |
+          ${{ inputs.app_name }}-buildx-
+
+    - name: Build and tag Docker image for scanning
+      if: steps.cache-buildx.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        make APP_NAME=${{ inputs.app_name }} release-build \
+        OPTIONAL_BUILD_FLAGS=" \
+        --cache-from=type=local,src=/tmp/.buildx-cache \
+        --cache-to=type=local,dest=/tmp/.buildx-cache-new"
+
+    - name: Replace the cache
+      if: steps.cache-buildx.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        rm -rf /tmp/.buildx-cache
+        mv /tmp/.buildx-cache-new /tmp/.buildx-cache

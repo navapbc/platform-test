@@ -3,7 +3,7 @@ data "external" "account_ids_by_name" {
 }
 
 locals {
-  image_repository_name         = "${local.project_name}-${local.app_name}"
+  image_repository_name         = local.project_name
   image_repository_region       = module.project_config.default_region
   image_repository_account_name = module.project_config.network_configs[local.shared_network_name].account_name
   image_repository_account_id   = data.external.account_ids_by_name.result[local.image_repository_account_name]

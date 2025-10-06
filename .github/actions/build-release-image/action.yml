@@ -33,7 +33,8 @@ runs:
       run: |
         make APP_NAME=${{ inputs.app_name }} release-build OPTIONAL_BUILD_FLAGS="\
         --cache-from=type=local,src=/tmp/.buildx-cache \
-        --cache-to=type=local,dest=/tmp/.buildx-cache-new"
+        --cache-to=type=local,dest=/tmp/.buildx-cache-new \
+        --load"
 
     - name: Replace the cache
       shell: bash

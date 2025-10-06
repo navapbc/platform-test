@@ -31,9 +31,7 @@ runs:
     - name: Build and tag Docker image for scanning
       shell: bash
       run: |
-        make APP_NAME=${{ inputs.app_name }} release-build \
-        OPTIONAL_BUILD_FLAGS=" \
-        --load \
+        make APP_NAME=${{ inputs.app_name }} release-build OPTIONAL_BUILD_FLAGS="\
         --cache-from=type=local,src=/tmp/.buildx-cache \
         --cache-to=type=local,dest=/tmp/.buildx-cache-new"
 

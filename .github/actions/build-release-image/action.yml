@@ -29,11 +29,11 @@ runs:
           ${{ inputs.app_name }}-buildx-
 
     - name: Build and tag Docker image for scanning
-      if: steps.cache-buildx.outputs.cache-hit != 'true'
       shell: bash
       run: |
         make APP_NAME=${{ inputs.app_name }} release-build \
         OPTIONAL_BUILD_FLAGS=" \
+        --load \
         --cache-from=type=local,src=/tmp/.buildx-cache \
         --cache-to=type=local,dest=/tmp/.buildx-cache-new"
 

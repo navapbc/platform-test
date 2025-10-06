@@ -38,7 +38,6 @@ runs:
         --cache-to=type=local,dest=/tmp/.buildx-cache-new"
 
     - name: Replace the cache
-      if: steps.cache-buildx.outputs.cache-hit != 'true'
       shell: bash
       run: |
         rm -rf /tmp/.buildx-cache

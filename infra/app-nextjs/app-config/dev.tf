@@ -5,8 +5,8 @@ module "dev_config" {
   default_region                  = module.project_config.default_region
   environment                     = "dev"
   network_name                    = "dev"
-  domain_name                     = null
-  enable_https                    = false
+  domain_name                     = "${local.app_name}.${module.project_config.network_configs["dev"].domain_config.hosted_zone}"
+  enable_https                    = true
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
   enable_notifications            = local.enable_notifications

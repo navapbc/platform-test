@@ -17,8 +17,6 @@ and environments:
 
 ### app-flask
 
-Flask application using [template-application-flask](https://github.com/navapbc/template-application-flask).
-
 **API Documentation:**
 - Dev: https://app-flask.platform-test-dev.navateam.com/docs
 

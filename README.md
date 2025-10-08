@@ -19,8 +19,5 @@ To retrieve the API key for use in the dev environment:
 ```bash
 aws ssm get-parameter --name "/app-flask-dev/api-auth-token" --with-decryption --query Parameter.Value --output text
 
-### app-nextjs 
-
-Next.js application using [template-application-nextjs](https://github.com/navapbc/template-application-nextjs).
 
 

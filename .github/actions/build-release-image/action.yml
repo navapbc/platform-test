@@ -40,6 +40,7 @@ runs:
           container-build-${{ inputs.app_name }}-
 
     - name: Ensure Buildx cache exists
+      shell: bash
       run: |
         mkdir -p /tmp/.buildx-cache
 

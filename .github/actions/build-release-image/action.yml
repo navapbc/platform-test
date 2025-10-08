@@ -1,11 +1,11 @@
 name: Build release candidate
-description: Builds a docker image and leverages the build cache to re-use results from previous builds.
+description: Builds a docker image and leverages the build cache to re-use cached layers from previous builds.
 
 inputs:
   app_name:
     required: true
     type: string
-    description: 'Name of application folder'
+    description: "name of application folder under infra directory"
   commit_hash:
     required: false
     type: string

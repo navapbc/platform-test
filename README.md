@@ -18,6 +18,7 @@ You can view API docs at `/docs` on the above URLs, in [dev for example](https:/
 To retrieve the API key for use in the dev environment:
 ```bash
 aws ssm get-parameter --name "/app-flask-dev/api-auth-token" --with-decryption --query Parameter.Value --output text
+```
 
 
 

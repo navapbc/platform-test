@@ -11,10 +11,21 @@ inputs:
     type: string
     description: 'The commit hash'
     default: ${{ github.sha }}
-
+outputs:
+  image:
+    description: the identifier of the docker image, in 'name:tag' format
+    value: ${{ steps.get-image-identifier.outputs.image }}
 runs:
   using: "composite"
   steps:
+
+    - id: get-image-identifier
+      shell: bash
+      run: |
+        IMAGE_NAME=$(make APP_NAME=${{ inputs.app_name }} release-image-name)
+        IMAGE_TAG=$(make release-image-tag)
+        echo "image=$IMAGE_NAME:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+
     - name: Set up Docker Buildx
       id: buildx
       uses: docker/setup-buildx-action@v3

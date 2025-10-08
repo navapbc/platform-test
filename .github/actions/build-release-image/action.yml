@@ -52,3 +52,9 @@ runs:
       run: |
         rm -rf /tmp/.buildx-cache
         mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+    - name: List layers in the docker image
+      shell: bash
+      run: |
+        docker inspect ${{ steps.get-image-identifier.outputs.image }} \
+        | jq -r '.[] | .RootFS.Layers | to_entries[] | "\(.key): \(.value)"'

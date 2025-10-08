@@ -19,6 +19,11 @@ locals {
   #   }
   # }
   secrets = {
+    API_AUTH_TOKEN = {
+      manage_method     = "generated"
+      secret_store_name = "/${var.app_name}-${var.environment}/api-auth-token"
+    }
+
     # Example generated secret
     # RANDOM_SECRET = {
     #   manage_method     = "generated"

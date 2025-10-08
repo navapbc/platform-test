@@ -30,6 +30,4 @@ aws ssm get-parameter --name "/app-flask-dev/api-auth-token" --with-decryption -
 
 Next.js application using [template-application-nextjs](https://github.com/navapbc/template-application-nextjs).
 
-**Resources:**
-- Storybook: https://navapbc.github.io/platform-test/app-nextjs/storybook/
 

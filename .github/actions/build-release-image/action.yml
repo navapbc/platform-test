@@ -35,9 +35,9 @@ runs:
       uses: actions/cache@v4
       with:
         path: /tmp/.buildx-cache
-        key: ${{ inputs.app_name }}-buildx-${{ inputs.commit_hash }}
+        key: container-build-${{ inputs.app_name }}-${{ inputs.commit_hash }}
         restore-keys: |
-          ${{ inputs.app_name }}-buildx-
+          container-build-${{ inputs.app_name }}-
 
     - name: Build and tag Docker image for scanning
       shell: bash

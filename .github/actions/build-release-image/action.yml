@@ -39,6 +39,10 @@ runs:
         restore-keys: |
           container-build-${{ inputs.app_name }}-
 
+    - name: Ensure Buildx cache exists
+      run: |
+        mkdir -p /tmp/.buildx-cache
+
     - name: Build and tag Docker image for scanning
       shell: bash
       run: |

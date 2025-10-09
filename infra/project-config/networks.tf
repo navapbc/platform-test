@@ -12,6 +12,14 @@ locals {
             source = "issued"
           }
 
+          "app-flask.platform-test-dev.navateam.com" = {
+            source = "issued"
+          }
+
+          "app-nextjs.platform-test-dev.navateam.com" = {
+            source = "issued"
+          }
+
           "app-rails.platform-test-dev.navateam.com" = {
             source = "issued"
           }

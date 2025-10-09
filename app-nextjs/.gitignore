@@ -1,0 +1,48 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+.swc
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+.pnpm-debug.log*
+
+# local env files
+.env*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+
+# storybook
+/storybook-static
+
+# compiled css
+/public/css
+
+# uswds assets
+/public/uswds
+
+# Developer-specific IDE settings
+.vscode
+
+# Generated per-project by Next.js commands to facilitate type-checking of
+# certain things
+next-env.d.ts

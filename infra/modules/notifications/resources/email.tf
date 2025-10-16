@@ -1,5 +1,3 @@
-resource "aws_pinpoint_email_channel" "app" {
-  application_id = aws_pinpoint_app.app.application_id
-  from_address   = var.sender_display_name != null ? "${var.sender_display_name} <${var.sender_email}>" : var.sender_email
-  identity       = var.domain_identity_arn
-}
+# Pinpoint email channel has been removed
+# Applications now use SES directly via the sesv2 API
+# The email identity and configuration set are managed by the notifications-email-domain module

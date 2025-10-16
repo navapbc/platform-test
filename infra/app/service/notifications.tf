@@ -8,8 +8,8 @@ locals {
     module.existing_notifications_email_domain[0].domain_identity_arn
   ) : null
   notifications_environment_variables = local.notifications_config != null ? {
-    AWS_PINPOINT_APP_ID       = module.notifications[0].app_id,
-    AWS_PINPOINT_SENDER_EMAIL = local.notifications_config.sender_email
+    AWS_SES_CONFIGURATION_SET = module.notifications[0].configuration_set_name,
+    AWS_SES_FROM_EMAIL        = module.notifications[0].from_email
   } : {}
   notifications_app_name = local.notifications_config != null ? "${local.prefix}${local.notifications_config.name}" : ""
 }
@@ -40,8 +40,9 @@ module "notifications" {
   count  = local.notifications_config != null ? 1 : 0
   source = "../../modules/notifications/resources"
 
-  name                = local.notifications_app_name
-  domain_identity_arn = local.domain_identity_arn
-  sender_display_name = local.notifications_config.sender_display_name
-  sender_email        = local.notifications_config.sender_email
+  name                   = local.notifications_app_name
+  domain_identity_arn    = local.domain_identity_arn
+  configuration_set_name = !local.is_temporary ? module.notifications_email_domain[0].configuration_set_name : module.existing_notifications_email_domain[0].configuration_set_name
+  sender_display_name    = local.notifications_config.sender_display_name
+  sender_email           = local.notifications_config.sender_email
 }

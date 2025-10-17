@@ -18,8 +18,3 @@ variable "domain_identity_arn" {
   type        = string
   description = "The ARN of the domain identity to use for sending emails"
 }
-
-variable "configuration_set_name" {
-  type        = string
-  description = "The name of the SES configuration set to use for sending emails"
-}

@@ -15,7 +15,7 @@ resource "aws_iam_policy" "access" {
         ]
         Resource = [
           var.domain_identity_arn,
-          "arn:*:ses:*:*:configuration-set/${var.configuration_set_name}",
+          "arn:*:ses:*:*:configuration-set/*",
         ]
       }
     ]

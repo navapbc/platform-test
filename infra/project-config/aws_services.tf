@@ -54,7 +54,6 @@ locals {
     // Amazon CloudWatch Logs – Collects, monitors, and analyzes log data from AWS services.
     "logs",
 
-
     // Amazon EventBridge Pipes – Connects event producers to consumers with filtering and enrichment.
     "pipes",
 

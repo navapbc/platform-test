@@ -1,7 +1,7 @@
 name: Deploy app
 # Need to set a default value for when the workflow is triggered from a git push
 # which bypasses the default configuration for inputs
-run-name: Deploy ${{inputs.version || 'main' }} to app ${{ inputs.environment || 'dev' }}
+run-name: Deploy ${{ inputs.version || github.sha }} to app ${{ inputs.environment || 'dev' }}
 
 on:
   push:
@@ -34,5 +34,5 @@ jobs:
     with:
       app_name: "app"
       environment: ${{ inputs.environment || 'dev' }}
-      version: ${{ inputs.version || 'main' }}
+      version: ${{ inputs.version || github.sha }}
     secrets: inherit

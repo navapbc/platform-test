@@ -77,13 +77,12 @@ jobs:
       app_name: ${{ inputs.app_name }}
       service_endpoint: ${{ needs.deploy.outputs.service_endpoint }}
 
-  notify:
-    name: " " # GitHub UI is noisy when calling reusable workflows, so use whitespace for name to reduce noise
-    needs: e2e
-    if: failure()
-    uses: ./.github/workflows/send-system-notification.yml
-    with:
-      channel: "workflow-failures"
-      message: "❌ [Failed deploying ${{ inputs.version }} to ${{ inputs.app_name }} ${{ inputs.environment }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-    secrets: inherit
-    
+  # notify:
+  #   name: " " # GitHub UI is noisy when calling reusable workflows, so use whitespace for name to reduce noise
+  #   needs: e2e
+  #   if: failure()
+  #   uses: ./.github/workflows/send-system-notification.yml
+  #   with:
+  #     channel: "workflow-failures"
+  #     message: "❌ [Failed deploying ${{ inputs.version }} to ${{ inputs.app_name }} ${{ inputs.environment }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+  #   secrets: inherit

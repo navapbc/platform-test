@@ -41,5 +41,5 @@ module "bda_test" {
     }
   }
   name_prefix        = "bda_module_test"
-  bucket_policy_arns = toset([module.bda_input_bucket.arn, module.bda_output_bucket.arn])
+  bucket_policy_arns = toset([module.bda_input_bucket.access_policy_arn, module.bda_output_bucket.access_policy_arn])
 }

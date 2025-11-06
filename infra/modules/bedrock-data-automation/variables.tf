@@ -5,7 +5,7 @@ variable "name_prefix" {
 
 variable "bucket_policy_arns" {
   description = "The set of policy ARNs for the input and output buckets to attach to the BDA role."
-  type        = set(string)
+  type        = map(string)
 }
 
 variable "bda_project_description" {

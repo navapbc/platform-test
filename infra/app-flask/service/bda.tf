@@ -40,6 +40,9 @@ module "bda_test" {
       tags                   = [{ key = "example_tag_key", value = "example_tag_value" }]
     }
   }
-  name_prefix        = "bda_module_test"
-  bucket_policy_arns = toset([module.bda_input_bucket.access_policy_arn, module.bda_output_bucket.access_policy_arn])
+  name_prefix = "bda_module_test"
+  bucket_policy_arns = {
+    input_bucket  = module.bda_input_bucket.access_policy_arn,
+    output_bucket = module.bda_output_bucket.access_policy_arn
+  }
 }

@@ -40,9 +40,6 @@ module "bda_test" {
       tags                   = [{ key = "example_tag_key", value = "example_tag_value" }]
     }
   }
-  name_prefix = "bda_module_test"
-  bucket_policy_arns = set(
-    module.bda_input_bucket.arn,
-    module.bda_output_bucket.arn
-  )
+  name_prefix        = "bda_module_test"
+  bucket_policy_arns = set([module.bda_input_bucket.arn, module.bda_output_bucket.arn])
 }

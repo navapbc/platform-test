@@ -15,9 +15,6 @@ locals {
     // AWS Backup – Centralized service for automating backups across AWS resources.
     "backup",
 
-    // AWS CloudFormation – Infrastructure as Code (IaC) service for provisioning and managing AWS resources.
-    "cloudformation",
-
     // Amazon CloudWatch – Monitors and logs AWS resources and applications.
     "cloudwatch",
 

@@ -3,14 +3,9 @@ variable "name_prefix" {
   type        = string
 }
 
-variable "input_bucket_arn" {
-  description = "The ARN of the S3 bucket to use for BDA input data"
-  type        = string
-}
-
-variable "output_bucket_arn" {
-  description = "The ARN of the S3 bucket to use for BDA output data"
-  type        = string
+variable "bucket_policy_arns" {
+  description = "The set of policy ARNs for the input and output buckets to attach to the BDA role."
+  type        = set(string)
 }
 
 variable "bda_project_description" {

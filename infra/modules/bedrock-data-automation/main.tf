@@ -49,37 +49,9 @@ resource "aws_iam_role" "bda_role" {
   })
 }
 
+resource "aws_iam_role_policy_attachment" "role_policy_attachments" {
+  for_each = var.bucket_policy_arns
 
-resource "aws_iam_role_policy" "s3_rw_policy" {
-  name = "S3ReadWritePolicy"
-  role = aws_iam_role.bda_role.name
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "s3:HeadObject",
-          "s3:GetObject",
-          "s3:ListBucket"
-        ]
-        Resource = [
-          var.input_bucket_arn,
-          "${var.input_bucket_arn}/*",
-          var.output_bucket_arn,
-          "${var.output_bucket_arn}/*"
-        ]
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "s3:PutObject"
-        ]
-        Resource = [
-          "${var.output_bucket_arn}/*"
-        ]
-      }
-    ]
-  })
+  role       = aws_iam_role.bda_role.name
+  policy_arn = each.value
 }

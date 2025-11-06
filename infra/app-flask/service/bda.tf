@@ -1,61 +1,13 @@
-data "aws_caller_identity" "current" {}
-
-resource "aws_s3_bucket_policy" "input_policy" {
-  bucket = aws_s3_bucket.input.id
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/bda_module_test-bda_role"
-        }
-        Action = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:ListBucket"
-        ]
-        Resource = [
-          aws_s3_bucket.input.arn,
-          "${aws_s3_bucket.input.arn}/*"
-        ]
-      }
-    ]
-  })
+module "bda_input_bucket" {
+  source       = "../../modules/storage"
+  name         = "bda-test-input-app-flask"
+  is_temporary = local.is_temporary
 }
 
-resource "aws_s3_bucket_policy" "output_policy" {
-  bucket = aws_s3_bucket.output.id
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/bda_module_test-bda_role"
-        }
-        Action = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:ListBucket"
-        ]
-        Resource = [
-          aws_s3_bucket.output.arn,
-          "${aws_s3_bucket.output.arn}/*"
-        ]
-      }
-    ]
-  })
-}
-
-resource "aws_s3_bucket" "input" {
-  bucket        = "app-flask-bda-test-input-bucket"
-  force_destroy = true
-}
-
-resource "aws_s3_bucket" "output" {
-  bucket        = "app-flask-bda-test-output-bucket"
-  force_destroy = true
+module "bda_output_bucket" {
+  source       = "../../modules/storage"
+  name         = "bda-test-output-app-flask"
+  is_temporary = local.is_temporary
 }
 
 module "bda_test" {
@@ -89,6 +41,8 @@ module "bda_test" {
     }
   }
   name_prefix       = "bda_module_test"
-  input_bucket_arn  = aws_s3_bucket.input.arn
-  output_bucket_arn = aws_s3_bucket.output.arn
+  bucket_policy_arns = set(
+    module.bda_input_bucket.arn,
+    module.bda_output_bucket.arn
+  )
 }

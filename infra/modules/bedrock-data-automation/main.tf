@@ -1,0 +1,85 @@
+resource "awscc_bedrock_data_automation_project" "bda_project" {
+  project_name                  = "${var.name_prefix}-project"
+  project_description           = var.bda_project_description
+  kms_encryption_context        = var.bda_kms_encryption_context
+  kms_key_id                    = var.bda_kms_key_id
+  tags                          = var.bda_tags
+  standard_output_configuration = var.bda_standard_output_configuration
+  custom_output_configuration = {
+    blueprints = [for k, v in awscc_bedrock_blueprint.bda_blueprint : {
+      blueprint_arn   = v.blueprint_arn
+      blueprint_stage = v.blueprint_stage
+    }]
+  }
+  override_configuration = {
+    document = {
+      splitter = {
+        state = var.bda_override_config_state
+      }
+    }
+  }
+}
+
+resource "awscc_bedrock_blueprint" "bda_blueprint" {
+  for_each = var.blueprints_map
+
+  blueprint_name         = "${var.name_prefix}-${each.key}"
+  schema                 = each.value.schema
+  type                   = each.value.type
+  kms_encryption_context = each.value.kms_encryption_context
+  kms_key_id             = each.value.kms_key_id
+  tags                   = each.value.tags
+}
+
+
+resource "aws_iam_role" "bda_role" {
+  name = "${var.name_prefix}-bda_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "bedrock.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+
+resource "aws_iam_role_policy" "s3_rw_policy" {
+  name = "S3ReadWritePolicy"
+  role = aws_iam_role.bda_role.name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:HeadObject",
+          "s3:GetObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          var.input_bucket_arn,
+          "${var.input_bucket_arn}/*",
+          var.output_bucket_arn,
+          "${var.output_bucket_arn}/*"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject"
+        ]
+        Resource = [
+          "${var.output_bucket_arn}/*"
+        ]
+      }
+    ]
+  })
+}

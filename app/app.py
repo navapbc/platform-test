@@ -26,6 +26,7 @@ def main():
 
 @app.route("/")
 def hello_world():
+    # TEST
     return render_template("index.html")
 
 

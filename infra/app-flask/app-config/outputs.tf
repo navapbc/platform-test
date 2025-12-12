@@ -41,3 +41,7 @@ output "enable_waf" {
 output "shared_network_name" {
   value = local.shared_network_name
 }
+
+output "enable_document_data_extraction" {
+  value = local.enable_document_data_extraction
+}

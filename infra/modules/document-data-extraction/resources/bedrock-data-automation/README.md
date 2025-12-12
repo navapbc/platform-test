@@ -21,7 +21,7 @@ The module creates:
 
 ```hcl
 module "bedrock_data_automation" {
-  source = "../../modules/bedrock-data-automation"
+  source = "../../modules/document-data-extraction/resources/bedrock-data-automation"
   
   name_prefix = "my-app-prod"
   
@@ -166,7 +166,7 @@ list(object({
 ### Minimal Configuration
 ```hcl
 module "bedrock_data_automation" {
-  source = "../../modules/bedrock-data-automation"
+  source = "../../modules/document-data-extraction/resources/bedrock-data-automation"
   
   name_prefix = "my-app"
   
@@ -182,7 +182,7 @@ module "bedrock_data_automation" {
 ### With Standard Output Configuration
 ```hcl
 module "bedrock_data_automation" {
-  source = "../../modules/bedrock-data-automation"
+  source = "../../modules/document-data-extraction/resources/bedrock-data-automation"
   
   name_prefix        = "my-app"
   bucket_policy_arns = { /* ... */ }

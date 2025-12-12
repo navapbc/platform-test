@@ -19,7 +19,6 @@ resource "awscc_bedrock_data_automation_project" "bda_project" {
     }
   }
 }
-
 resource "awscc_bedrock_blueprint" "bda_blueprint" {
   for_each = var.blueprints_map
 
@@ -30,7 +29,6 @@ resource "awscc_bedrock_blueprint" "bda_blueprint" {
   kms_key_id             = each.value.kms_key_id
   tags                   = each.value.tags
 }
-
 
 resource "aws_iam_role" "bda_role" {
   name = "${var.name_prefix}-bda_role"

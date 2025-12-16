@@ -10,8 +10,8 @@ locals {
   ]
 
   document_data_extraction_environment_variables = local.document_data_extraction_config != null ? {
-    DDE_INPUT_BUCKET_NAME  = local.document_data_extraction_config.input_bucket_name
-    DDE_OUTPUT_BUCKET_NAME = local.document_data_extraction_config.output_bucket_name
+    DDE_INPUT_BUCKET_NAME  = "${local.prefix}${local.document_data_extraction_config.input_bucket_name}"
+    DDE_OUTPUT_BUCKET_NAME = "${local.prefix}${local.document_data_extraction_config.output_bucket_name}"
     DDE_PROJECT_ARN        = module.dde[0].bda_project_arn
   } : {}
 }
@@ -19,14 +19,14 @@ locals {
 module "dde_input_bucket" {
   count        = local.document_data_extraction_config != null ? 1 : 0
   source       = "../../modules/storage"
-  name         = local.document_data_extraction_config.input_bucket_name
+  name         = "${local.prefix}${local.document_data_extraction_config.input_bucket_name}"
   is_temporary = local.is_temporary
 }
 
 module "dde_output_bucket" {
   count        = local.document_data_extraction_config != null ? 1 : 0
   source       = "../../modules/storage"
-  name         = local.document_data_extraction_config.output_bucket_name
+  name         = "${local.prefix}${local.document_data_extraction_config.output_bucket_name}"
   is_temporary = local.is_temporary
 }
 

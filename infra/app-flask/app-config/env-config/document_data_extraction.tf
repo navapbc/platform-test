@@ -1,15 +1,15 @@
 locals {
   document_data_extraction_config = var.enable_document_data_extraction ? {
-    name               = "document-data-extraction"
+    name               = "${var.app_name}-${var.environment}"
     input_bucket_name  = "${var.app_name}-${var.environment}-bda-input"
     output_bucket_name = "${var.app_name}-${var.environment}-bda-output"
-    blueprints_path    = "./blueprints"
+    blueprints_path    = "./document-data-extraction-blueprints/"
 
     enabled_blueprints = [
       "template_blueprint.json"
     ]
 
-    bda_standard_output_configuration = {
+    standard_output_configuration = {
       image = {
         extraction = {
           bounding_box = {

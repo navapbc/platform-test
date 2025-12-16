@@ -2,7 +2,7 @@ locals {
   document_data_extraction_config = local.environment_config.document_data_extraction_config
 
   # convert tags map to bedrock data automation format
-  bda_tags_dict = [
+  tags_dict = [
     for key, value in local.tags : {
       key   = key
       value = value
@@ -32,10 +32,10 @@ module "dde_output_bucket" {
 
 module "dde" {
   count  = local.document_data_extraction_config != null ? 1 : 0
-  source = "../../modules/document-data-extraction/resources/bedrock-data-automation"
+  source = "../../modules/document-data-extraction/resources"
 
-  bda_standard_output_configuration = local.document_data_extraction_config.bda_standard_output_configuration
-  bda_tags                          = local.bda_tags_dict
+  standard_output_configuration = local.document_data_extraction_config.standard_output_configuration
+  tags                          = local.tags_dict
 
   blueprints_map = {
     for blueprint in local.document_data_extraction_config.enabled_blueprints :
@@ -44,11 +44,12 @@ module "dde" {
       type                   = "DOCUMENT"
       kms_encryption_context = null
       kms_key_id             = null
-      tags                   = local.bda_tags_dict
+      tags                   = local.tags_dict
     }
   }
 
-  name_prefix = local.document_data_extraction_config.name
+  name = "${local.prefix}${local.document_data_extraction_config.name}"
+
   bucket_policy_arns = {
     input_bucket  = module.dde_input_bucket[0].access_policy_arn,
     output_bucket = module.dde_output_bucket[0].access_policy_arn

@@ -5,10 +5,6 @@ locals {
     output_bucket_name = "${var.app_name}-${var.environment}-bda-output"
     blueprints_path    = "./document-data-extraction-blueprints/"
 
-    enabled_blueprints = [
-      "template_blueprint.json"
-    ]
-
     standard_output_configuration = {
       image = {
         extraction = {

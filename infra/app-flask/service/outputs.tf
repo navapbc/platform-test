@@ -45,7 +45,7 @@ output "dde_project_arn" {
 
 output "dde_access_policy_arn" {
   description = "IAM policy ARN for invoking document data extraction"
-  value       = local.document_data_extraction_config != null ? module.dde[0].bda_role_arn : null
+  value       = local.document_data_extraction_config != null ? module.dde[0].access_policy_arn : null
 }
 
 output "dde_blueprint_arns" {

@@ -32,11 +32,19 @@ output "service_name" {
 }
 
 output "dde_input_bucket_name" {
-  value = local.document_data_extraction_config != null ? local.document_data_extraction_config.input_bucket_name : null
+  value = local.document_data_extraction_config != null ? "${local.prefix}${local.document_data_extraction_config.input_bucket_name}" : null
 }
 
 output "dde_output_bucket_name" {
-  value = local.document_data_extraction_config != null ? local.document_data_extraction_config.output_bucket_name : null
+  value = local.document_data_extraction_config != null ? "${local.prefix}${local.document_data_extraction_config.output_bucket_name}" : null
+}
+
+# aws bedrock data automation requires users to use cross Region inference support 
+# when processing files. the following like the profile ARNs for different inference
+# profiles
+# https://docs.aws.amazon.com/bedrock/latest/userguide/bda-cris.html
+output "dde_profile_arn" {
+  value = local.document_data_extraction_config != null ? "arn:aws:bedrock:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:data-automation-profile/us.data-automation-v1" : null
 }
 
 output "dde_project_arn" {

@@ -5,8 +5,7 @@ from typing import Any, Dict, Tuple
 
 import boto3
 from apiflask import APIBlueprint
-from flask import current_app
-from marshmallow import Schema, fields
+from marshmallow import fields
 from werkzeug.exceptions import BadRequest, InternalServerError
 
 from src.api import response
@@ -16,17 +15,15 @@ logger = logging.getLogger(__name__)
 
 
 class DocumentProcessingRequestSchema(request_schema.OrderedSchema):
-    trace_id: str = fields.Str(
+    trace_id = fields.Str(
         required=False, metadata={"description": "Optional trace ID for tracking"}
     )
-    file_key: str = fields.Str(
-        required=True, metadata={"description": "S3 key of the file to process"}
-    )
+    file_key = fields.Str(required=True, metadata={"description": "S3 key of the file to process"})
 
 
 class DocumentProcessingResponseSchema(request_schema.OrderedSchema):
-    dde_response: Dict[str, Any] = fields.Dict(metadata={"description": "DDE processing results"})
-    job_id: str = fields.Str(metadata={"description": "Job ID assigned to the processing task"})
+    dde_response = fields.Dict(metadata={"description": "DDE processing results"})
+    job_id = fields.Str(metadata={"description": "Job ID assigned to the processing task"})
 
 
 document_processing_blueprint = APIBlueprint(
@@ -69,14 +66,6 @@ def test_document_data_extraction_processing(
 
     try:
         bedrock = boto3.client("bedrock-data-automation-runtime")
-        print(profile_arn)
-
-        bedrock_request = {
-            "dataAutomationProfileArn": profile_arn,
-            "dataAutomationConfiguration": {"dataAutomationProjectArn": project_arn},
-            "inputConfiguration": {"s3Uri": f"s3://{input_bucket}/{file_key}"},
-            "outputConfiguration": {"s3Uri": f"s3://{output_bucket}/{file_key}"},
-        }
 
         logger.info(f"Invoking DDE for file:  s3://{input_bucket}/{file_key}; trace_id: {trace_id}")
         bedrock_response = bedrock.invoke_data_automation_async(

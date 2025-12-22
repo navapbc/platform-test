@@ -12,7 +12,7 @@ locals {
     # when processing files. the following like the profile ARNs for different inference
     # profiles
     # https://docs.aws.amazon.com/bedrock/latest/userguide/bda-cris.html
-    DDE_PROFILE_ARN        = "arn:aws:bedrock:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:data-automation-profile/us.data-automation-v1"
+    DDE_PROFILE_ARN = "arn:aws:bedrock:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:data-automation-profile/us.data-automation-v1"
   } : {}
 }
 

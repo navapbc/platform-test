@@ -730,6 +730,18 @@ files = [
 python-dateutil = ">=2.4"
 
 [[package]]
+name = "filelock"
+version = "3.20.1"
+description = "A platform independent file lock."
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "filelock-3.20.1-py3-none-any.whl", hash = "sha256:15d9e9a67306188a44baa72f569d2bfd803076269365fdea0934385da4dc361a"},
+    {file = "filelock-3.20.1.tar.gz", hash = "sha256:b8360948b351b80f420878d8516519a2204b07aefcdcfd24912a5d33127f188c"},
+]
+
+[[package]]
 name = "flask"
 version = "3.1.2"
 description = "A simple framework for building complex web applications."
@@ -2392,4 +2404,4 @@ test = ["pytest", "pytest-cov"]
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.13"
-content-hash = "bf7ccdaa573a4c881386970c6f80778f122d4036a5eb2dcee726809e1c33dc01"
+content-hash = "ed50f92fcbe96ac4cb6b20d139b2efa22c4f110d0fbcc84368e2d3aff1605ab9"

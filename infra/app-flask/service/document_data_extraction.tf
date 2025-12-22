@@ -1,3 +1,5 @@
+data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
 locals {
   document_data_extraction_config = local.environment_config.document_data_extraction_config
 
@@ -5,6 +7,12 @@ locals {
     DDE_INPUT_BUCKET_NAME  = "${local.prefix}${local.document_data_extraction_config.input_bucket_name}"
     DDE_OUTPUT_BUCKET_NAME = "${local.prefix}${local.document_data_extraction_config.output_bucket_name}"
     DDE_PROJECT_ARN        = module.dde[0].bda_project_arn
+
+    # aws bedrock data automation requires users to use cross Region inference support 
+    # when processing files. the following like the profile ARNs for different inference
+    # profiles
+    # https://docs.aws.amazon.com/bedrock/latest/userguide/bda-cris.html
+    DDE_PROFILE_ARN        = "arn:aws:bedrock:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:data-automation-profile/us.data-automation-v1"
   } : {}
 }
 

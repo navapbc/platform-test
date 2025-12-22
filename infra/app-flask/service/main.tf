@@ -24,9 +24,6 @@ locals {
   service_name = "${local.prefix}${local.service_config.service_name}"
 }
 
-data "aws_region" "current" {}
-data "aws_caller_identity" "current" {}
-
 terraform {
   required_version = "~>1.10.0"
 

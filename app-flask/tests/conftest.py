@@ -154,7 +154,7 @@ def reset_aws_env_vars(monkeypatch):
 
 @pytest.fixture
 def mock_s3(reset_aws_env_vars):
-    with moto.mock_s3():
+    with moto.mock_aws():
         yield boto3.resource("s3")
 
 

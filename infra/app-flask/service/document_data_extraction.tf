@@ -48,7 +48,7 @@ module "dde" {
 
   name = "${local.prefix}${local.document_data_extraction_config.name}"
 
-  bucket_policy_arns = {
+  data_access_policy_arns = {
     input_bucket  = module.dde_input_bucket[0].access_policy_arn,
     output_bucket = module.dde_output_bucket[0].access_policy_arn
   }

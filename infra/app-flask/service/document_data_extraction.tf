@@ -6,7 +6,7 @@ locals {
     DDE_INPUT_LOCATION  = "${local.prefix}${local.document_data_extraction_config.input_bucket_name}"
     DDE_OUTPUT_LOCATION = "${local.prefix}${local.document_data_extraction_config.output_bucket_name}"
     DDE_PROJECT_ARN     = module.dde[0].bda_project_arn
-    DDE_PROFILE_ARN     = module.dde[0].dde_profile_arn
+    DDE_PROFILE_ARN     = module.dde[0].bda_profile_arn
   } : {}
 }
 
@@ -24,7 +24,7 @@ module "dde_input_bucket" {
   providers = {
     aws = aws.dde
   }
-  
+
   count        = local.document_data_extraction_config != null ? 1 : 0
   source       = "../../modules/storage"
   name         = "${local.prefix}${local.document_data_extraction_config.input_bucket_name}"

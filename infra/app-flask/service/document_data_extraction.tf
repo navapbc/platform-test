@@ -3,21 +3,21 @@ locals {
   document_data_extraction_config = local.environment_config.document_data_extraction_config
 
   document_data_extraction_environment_variables = local.document_data_extraction_config != null ? {
-    DDE_INPUT_LOCATION  = "${local.prefix}${local.document_data_extraction_config.input_bucket_name}"
-    DDE_OUTPUT_LOCATION = "${local.prefix}${local.document_data_extraction_config.output_bucket_name}"
+    DDE_INPUT_LOCATION  = "s3://${local.prefix}${local.document_data_extraction_config.input_bucket_name}"
+    DDE_OUTPUT_LOCATION = "s3://${local.prefix}${local.document_data_extraction_config.output_bucket_name}"
     DDE_PROJECT_ARN     = module.dde[0].bda_project_arn
     DDE_PROFILE_ARN     = module.dde[0].bda_profile_arn
   } : {}
 }
 
 provider "aws" {
-  alias  = "dde" 
+  alias  = "dde"
   region = local.document_data_extraction_config.bda_region
 }
 
 provider "awscc" {
   alias  = "dde"
-  region = local.document_data_extraction_config.bda_region  
+  region = local.document_data_extraction_config.bda_region
 }
 
 module "dde_input_bucket" {
@@ -44,7 +44,7 @@ module "dde_output_bucket" {
 
 module "dde" {
   providers = {
-    aws = aws.dde
+    aws   = aws.dde
     awscc = awscc.dde
   }
 

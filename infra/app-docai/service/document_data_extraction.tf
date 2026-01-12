@@ -39,7 +39,7 @@ locals {
     bda_output_processor = {
       function_name      = "bda-output-processor"
       role_name          = "output-processor-role"
-      handler            = "handlers.bda_output_processor" 
+      handler            = "handlers.bda_output_processor"
       description        = "Processes BDA output and updates DynamoDB"
       policies           = ["grantOutputBucket", "grantDynamoDb"]
       attachOpenCvLayer  = false
@@ -301,6 +301,33 @@ resource "aws_s3_object" "lambda_code" {
 }
 
 #-------------------
+# Lambda Permissions for EventBridge
+#-------------------
+#-------------------
+# Lambda Permissions for EventBridge
+#-------------------
+resource "aws_lambda_permission" "allow_eventbridge_ddb_insert" {
+  count = local.document_data_extraction_config != null ? 1 : 0
+  
+  statement_id  = "AllowExecutionFromEventBridge"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.functions["ddb_insert_file_name"].function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.input_bucket_object_created[0].arn
+}
+
+resource "aws_lambda_permission" "allow_eventbridge_output_processor" {
+  count = local.document_data_extraction_config != null ? 1 : 0
+  
+  statement_id  = "AllowExecutionFromEventBridge"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.functions["bda_output_processor"].function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.output_bucket_object_created[0].arn
+}
+
+
+#-------------------
 # Lambda Layers
 #-------------------
 data "external" "opencv_layer_build" {
@@ -381,6 +408,10 @@ resource "aws_lambda_function" "functions" {
     each.value.attachOpenCvLayer ? aws_lambda_layer_version.opencv_layer[0].arn : null,
     each.value.attachPopplerLayer ? aws_lambda_layer_version.poppler_layer[0].arn : null
   ])
+  
+  environment {
+    variables = local.document_data_extraction_environment_variables
+  }
 }
 
 
@@ -397,7 +428,7 @@ resource "aws_cloudwatch_event_rule" "input_bucket_object_created" {
     source      = ["aws.s3"]
     detail = {
       bucket = {
-        name = [local.document_data_extraction_config.input_bucket_name]
+        name = ["${local.prefix}${local.document_data_extraction_config.input_bucket_name}"]
       }
     }
   })
@@ -445,7 +476,7 @@ resource "aws_cloudwatch_event_rule" "output_bucket_object_created" {
     source      = ["aws.s3"]
     detail = {
       bucket = {
-        name = [local.document_data_extraction_config.output_bucket_name]
+        name = ["${local.prefix}${local.document_data_extraction_config.output_bucket_name}"]
       }
       object = {
         key = [{

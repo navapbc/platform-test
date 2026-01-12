@@ -19,25 +19,31 @@ locals {
 
   lambda_functions = local.document_data_extraction_config != null ? {
     ddb_insert_file_name = {
-      function_name = "ddb-insert-file-name"
-      role_name     = "ddb-insert-role"
-      handler       = "handlers.ddb_insert_file_name"
-      description   = "Inserts file name into DynamoDB when files are uploaded"
-      policies      = ["grantInputBucket", "grantDynamoDb"]
+      function_name      = "ddb-insert-file-name"
+      role_name          = "ddb-insert-role"
+      handler            = "handlers.ddb_insert_file_name"
+      description        = "Inserts file name into DynamoDB when files are uploaded"
+      policies           = ["grantInputBucket", "grantDynamoDb"]
+      attachOpenCvLayer  = true
+      attachPopplerLayer = true
     }
     bda_invoker = {
-      function_name = "bda-invoker"
-      role_name     = "bda-invoker-role"
-      handler       = "handlers.bda_invoker"
-      description   = "Invokes BDA job when DynamoDB record is created"
-      policies      = ["grantDynamoDb", "grantDynamoStreams", "grantBedrockInvoke"]
+      function_name      = "bda-invoker"
+      role_name          = "bda-invoker-role"
+      handler            = "handlers.bda_invoker"
+      description        = "Invokes BDA job when DynamoDB record is created"
+      policies           = ["grantDynamoDb", "grantDynamoStreams", "grantBedrockInvoke"]
+      attachOpenCvLayer  = true
+      attachPopplerLayer = true
     }
     bda_output_processor = {
-      function_name = "bda-output-processor"
-      role_name     = "output-processor-role"
-      handler       = "handlers.bda_output_processor" 
-      description   = "Processes BDA output and updates DynamoDB"
-      policies      = ["grantOutputBucket", "grantDynamoDb"]
+      function_name      = "bda-output-processor"
+      role_name          = "output-processor-role"
+      handler            = "handlers.bda_output_processor" 
+      description        = "Processes BDA output and updates DynamoDB"
+      policies           = ["grantOutputBucket", "grantDynamoDb"]
+      attachOpenCvLayer  = false
+      attachPopplerLayer = false
     }
   } : {}
 
@@ -295,6 +301,67 @@ resource "aws_s3_object" "lambda_code" {
 }
 
 #-------------------
+# Lambda Layers
+#-------------------
+data "external" "opencv_layer_build" {
+  count = local.document_data_extraction_config != null ? 1 : 0
+  
+  program = ["bash", "-c", <<-EOT
+    set -e
+    cd "${path.module}/../layers/opencv"
+    mkdir -p output/python
+    docker run --rm --entrypoint="" -v $(pwd):/workspace -v $(pwd)/output:/asset-output \
+      public.ecr.aws/lambda/python:3.11 \
+      /bin/bash -c "pip install --no-cache-dir --platform manylinux2014_x86_64 --only-binary=:all: --implementation cp --python-version 311 -r /workspace/requirements.txt -t /asset-output/python" >&2
+    cd output && zip -r opencv-layer.zip python/ >&2
+    aws s3 cp opencv-layer.zip s3://${aws_s3_bucket.lambda_artifacts[0].bucket}/opencv-layer.zip >&2
+    echo '{"status": "success"}'
+  EOT
+  ]
+}
+
+data "external" "poppler_layer_build" {
+  count = local.document_data_extraction_config != null ? 1 : 0
+  
+  program = ["bash", "-c", <<-EOT
+    set -e
+    cd "${path.module}/../layers/poppler"
+    docker build --platform linux/amd64 -t poppler-layer . >&2
+    mkdir -p output
+    docker run --rm -v $(pwd)/output:/output poppler-layer cp -r /opt /output/ >&2
+    cd output && zip -r poppler-layer.zip opt/ >&2
+    aws s3 cp poppler-layer.zip s3://${aws_s3_bucket.lambda_artifacts[0].bucket}/poppler-layer.zip >&2
+    echo '{"status": "success"}'
+  EOT
+  ]
+}
+resource "aws_lambda_layer_version" "opencv_layer" {
+  count = local.document_data_extraction_config != null ? 1 : 0
+  
+  layer_name          = "${local.prefix}opencv-numpy-pillow"
+  description         = "OpenCV, NumPy, and Pillow libraries for image processing"
+  compatible_runtimes = ["python3.11"]
+  
+  s3_bucket = aws_s3_bucket.lambda_artifacts[0].bucket
+  s3_key    = "opencv-layer.zip"
+  
+  depends_on = [data.external.opencv_layer_build]
+}
+
+resource "aws_lambda_layer_version" "poppler_layer" {
+  count = local.document_data_extraction_config != null ? 1 : 0
+  
+  layer_name          = "${local.prefix}poppler-utils"
+  description         = "Poppler utilities for PDF processing"
+  compatible_runtimes = ["python3.11"]
+  
+  s3_bucket = aws_s3_bucket.lambda_artifacts[0].bucket
+  s3_key    = "poppler-layer.zip"
+  
+  depends_on = [data.external.poppler_layer_build]
+}
+
+#-------------------
 # Lambda Functions
 #-------------------
 resource "aws_lambda_function" "functions" {
@@ -308,6 +375,12 @@ resource "aws_lambda_function" "functions" {
   runtime       = "python3.11"
   description   = each.value.description
   depends_on    = [ aws_s3_object.lambda_code ]
+
+  # add layers as needed
+  layers = compact([
+    each.value.attachOpenCvLayer ? aws_lambda_layer_version.opencv_layer[0].arn : null,
+    each.value.attachPopplerLayer ? aws_lambda_layer_version.poppler_layer[0].arn : null
+  ])
 }
 
 

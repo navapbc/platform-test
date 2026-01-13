@@ -26,6 +26,7 @@ locals {
       policies           = ["grantInputBucket", "grantDynamoDb"]
       attachOpenCvLayer  = true
       attachPopplerLayer = true
+      timeout_seconds    = 60
     }
     bda_invoker = {
       function_name      = "bda-invoker"
@@ -35,6 +36,7 @@ locals {
       policies           = ["grantDynamoDb", "grantDynamoStreams", "grantBedrockInvoke"]
       attachOpenCvLayer  = true
       attachPopplerLayer = true
+      timeout_seconds    = 60
     }
     bda_output_processor = {
       function_name      = "bda-output-processor"
@@ -44,6 +46,7 @@ locals {
       policies           = ["grantOutputBucket", "grantDynamoDb"]
       attachOpenCvLayer  = false
       attachPopplerLayer = false
+      timeout_seconds    = 60
     }
   } : {}
 
@@ -134,23 +137,6 @@ resource "aws_dynamodb_table" "document_metadata" {
 #-------------------
 # IAM Policies
 #-------------------
-resource "aws_iam_policy" "s3_input_bucket_access" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-  
-  name = "${local.prefix}s3-input-bucket-access"
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Action = ["s3:GetObject", "s3:ListBucket", "s3:PutObject"]
-      Resource = [
-        module.dde_input_bucket[0].bucket_arn,
-        "${module.dde_input_bucket[0].bucket_arn}/*"
-      ]
-      Effect = "Allow"
-    }]
-  })
-}
-
 resource "aws_iam_policy" "dynamodb_read_write" {
   count = local.document_data_extraction_config != null ? 1 : 0
   
@@ -208,23 +194,6 @@ resource "aws_iam_policy" "bedrock_invoke" {
   })
 }
 
-resource "aws_iam_policy" "s3_output_bucket_access" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-  
-  name = "${local.prefix}s3-output-bucket-access"
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Action = ["s3:GetObject", "s3:ListBucket", "s3:PutObject"]
-      Resource = [
-        module.dde_output_bucket[0].bucket_arn,
-        "${module.dde_output_bucket[0].bucket_arn}/*"
-      ]
-      Effect = "Allow"
-    }]
-  })
-}
-
 #-------------------
 # IAM Roles
 #-------------------
@@ -263,8 +232,8 @@ resource "aws_iam_role_policy_attachment" "policy_attachments" {
           key = "${func_config.role_name}-${policy}"
           role_name = func_config.role_name
           policy_arn = (
-            policy == "grantInputBucket" ? aws_iam_policy.s3_input_bucket_access[0].arn :
-            policy == "grantOutputBucket" ? aws_iam_policy.s3_output_bucket_access[0].arn :
+            policy == "grantInputBucket" ? module.dde_input_bucket[0].access_policy_arn :
+            policy == "grantOutputBucket" ? module.dde_output_bucket[0].access_policy_arn :
             policy == "grantDynamoDb" ? aws_iam_policy.dynamodb_read_write[0].arn :
             policy == "grantDynamoStreams" ? aws_iam_policy.dynamodb_streams[0].arn :
             policy == "grantBedrockInvoke" ? aws_iam_policy.bedrock_invoke[0].arn : null
@@ -401,6 +370,7 @@ resource "aws_lambda_function" "functions" {
   handler       = each.value.handler
   runtime       = "python3.11"
   description   = each.value.description
+  timeout       = each.value.timeout_seconds
   depends_on    = [ aws_s3_object.lambda_code ]
 
   # add layers as needed

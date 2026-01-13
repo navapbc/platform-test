@@ -9,6 +9,7 @@ locals {
     DDE_OUTPUT_LOCATION              = "s3://${local.prefix}${local.document_data_extraction_config.output_bucket_name}"
     DDE_DOCUMENT_METADATA_TABLE_NAME = "${local.prefix}${local.document_data_extraction_config.document_metadata_table_name}"
     DDE_PROJECT_ARN                  = module.dde[0].bda_project_arn
+    DDE_REGION                       = "us-east-1"  # TODO: update to use dde module region
 
     # aws bedrock data automation requires users to use cross Region inference support 
     # when processing files. the following like the profile ARNs for different inference
@@ -33,7 +34,7 @@ locals {
       role_name          = "bda-invoker-role"
       handler            = "handlers.bda_invoker"
       description        = "Invokes BDA job when DynamoDB record is created"
-      policies           = ["grantDynamoDb", "grantDynamoStreams", "grantBedrockInvoke"]
+      policies           = ["grantInputBucket", "grantDynamoDb", "grantDynamoStreams", "grantBedrockInvoke"]
       attachOpenCvLayer  = true
       attachPopplerLayer = true
       timeout_seconds    = 60

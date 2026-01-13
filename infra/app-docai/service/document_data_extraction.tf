@@ -272,9 +272,6 @@ resource "aws_s3_object" "lambda_code" {
 #-------------------
 # Lambda Permissions for EventBridge
 #-------------------
-#-------------------
-# Lambda Permissions for EventBridge
-#-------------------
 resource "aws_lambda_permission" "allow_eventbridge_ddb_insert" {
   count = local.document_data_extraction_config != null ? 1 : 0
   
@@ -305,6 +302,7 @@ data "external" "opencv_layer_build" {
   program = ["bash", "-c", <<-EOT
     set -e
     cd "${path.module}/../layers/opencv"
+    rm -rf output
     mkdir -p output/python
     docker run --rm --entrypoint="" -v $(pwd):/workspace -v $(pwd)/output:/asset-output \
       public.ecr.aws/lambda/python:3.11 \
@@ -316,6 +314,7 @@ data "external" "opencv_layer_build" {
   ]
 }
 
+
 data "external" "poppler_layer_build" {
   count = local.document_data_extraction_config != null ? 1 : 0
   
@@ -323,14 +322,16 @@ data "external" "poppler_layer_build" {
     set -e
     cd "${path.module}/../layers/poppler"
     docker build --platform linux/amd64 -t poppler-layer . >&2
+    rm -rf output
     mkdir -p output
-    docker run --rm -v $(pwd)/output:/output poppler-layer cp -r /opt /output/ >&2
-    cd output && zip -r poppler-layer.zip opt/ >&2
+    docker run --rm -v $(pwd)/output:/output poppler-layer sh -c "cp -r /opt/. /output/" >&2
+    cd output && zip -r poppler-layer.zip . >&2
     aws s3 cp poppler-layer.zip s3://${aws_s3_bucket.lambda_artifacts[0].bucket}/poppler-layer.zip >&2
     echo '{"status": "success"}'
   EOT
   ]
 }
+
 resource "aws_lambda_layer_version" "opencv_layer" {
   count = local.document_data_extraction_config != null ? 1 : 0
   
@@ -347,9 +348,10 @@ resource "aws_lambda_layer_version" "opencv_layer" {
 resource "aws_lambda_layer_version" "poppler_layer" {
   count = local.document_data_extraction_config != null ? 1 : 0
   
-  layer_name          = "${local.prefix}poppler-utils"
-  description         = "Poppler utilities for PDF processing"
-  compatible_runtimes = ["python3.11"]
+  layer_name               = "${local.prefix}poppler-utils"
+  description              = "Poppler utilities for PDF processing"
+  compatible_runtimes      = ["python3.11"]
+  compatible_architectures = ["x86_64"]
   
   s3_bucket = aws_s3_bucket.lambda_artifacts[0].bucket
   s3_key    = "poppler-layer.zip"
@@ -378,9 +380,15 @@ resource "aws_lambda_function" "functions" {
     each.value.attachOpenCvLayer ? aws_lambda_layer_version.opencv_layer[0].arn : null,
     each.value.attachPopplerLayer ? aws_lambda_layer_version.poppler_layer[0].arn : null
   ])
-  
+
   environment {
-    variables = local.document_data_extraction_environment_variables
+    variables = merge(
+      local.document_data_extraction_environment_variables,
+      each.value.attachPopplerLayer ? {
+        PATH = "/opt/bin:/usr/local/bin:/usr/bin:/bin"
+        LD_LIBRARY_PATH = "/opt/lib64:/lib64:/usr/lib64"
+      } : {}
+    )
   }
 }
 

@@ -3,11 +3,6 @@ variable "name" {
   type        = string
 }
 
-variable "data_access_policy_arns" {
-  description = "The set of policy ARNs for the input and output locations to attach to the BDA role."
-  type        = map(string)
-}
-
 variable "custom_output_config" {
   description = "A list of the BDA custom output configuartion blueprint(s)."
   type = list(object({

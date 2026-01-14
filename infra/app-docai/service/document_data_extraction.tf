@@ -24,7 +24,7 @@ locals {
     ddb_insert_file_name = {
       function_name      = "ddb-insert-file-name"
       role_name          = "ddb-insert-role"
-      handler            = "handlers.ddb_insert_file_name"
+      handler            = "handler.handler"
       description        = "Inserts file name into DynamoDB when files are uploaded"
       policies           = ["grantInputBucket", "grantDynamoDb"]
       attachOpenCvLayer  = true
@@ -35,7 +35,7 @@ locals {
     bda_invoker = {
       function_name      = "bda-invoker"
       role_name          = "bda-invoker-role"
-      handler            = "handlers.bda_invoker"
+      handler            = "handler.handler"
       description        = "Invokes BDA job when DynamoDB record is created"
       policies           = ["grantInputBucket", "grantOutputBucket", "grantDynamoDb", "grantDynamoStreams", "grantBedrockInvoke"]
       attachOpenCvLayer  = true
@@ -46,7 +46,7 @@ locals {
     bda_output_processor = {
       function_name      = "bda-output-processor"
       role_name          = "output-processor-role"
-      handler            = "handlers.bda_output_processor"
+      handler            = "handler.handler"
       description        = "Processes BDA output and updates DynamoDB"
       policies           = ["grantOutputBucket", "grantDynamoDb"]
       attachOpenCvLayer  = false

@@ -28,6 +28,7 @@ locals {
       attachOpenCvLayer  = true
       attachPopplerLayer = true
       timeout_seconds    = 60
+      memory_size        = 5120
     }
     bda_invoker = {
       function_name      = "bda-invoker"
@@ -38,6 +39,7 @@ locals {
       attachOpenCvLayer  = true
       attachPopplerLayer = true
       timeout_seconds    = 60
+      memory_size        = 5120
     }
     bda_output_processor = {
       function_name      = "bda-output-processor"
@@ -48,6 +50,7 @@ locals {
       attachOpenCvLayer  = false
       attachPopplerLayer = false
       timeout_seconds    = 60
+      memory_size        = 512  # intentionally 512, no layers, but needs reasonable memory for JSON processing
     }
   } : {}
 
@@ -371,6 +374,7 @@ resource "aws_lambda_function" "functions" {
   runtime       = "python3.11"
   description   = each.value.description
   timeout       = each.value.timeout_seconds
+  memory_size   = each.value.memory_size
   depends_on    = [ aws_s3_object.lambda_code ]
 
   # add layers as needed

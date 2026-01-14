@@ -3,13 +3,15 @@ data "aws_caller_identity" "current" {}
 
 locals {
   document_data_extraction_config = local.environment_config.document_data_extraction_config
+  job_id_index_name = "jobId-index"
 
   document_data_extraction_environment_variables = local.document_data_extraction_config != null ? {
-    DDE_INPUT_LOCATION               = "s3://${local.prefix}${local.document_data_extraction_config.input_bucket_name}"
-    DDE_OUTPUT_LOCATION              = "s3://${local.prefix}${local.document_data_extraction_config.output_bucket_name}"
-    DDE_DOCUMENT_METADATA_TABLE_NAME = "${local.prefix}${local.document_data_extraction_config.document_metadata_table_name}"
-    DDE_PROJECT_ARN                  = module.dde[0].bda_project_arn
-    DDE_REGION                       = "us-east-1"  # TODO: update to use dde module region
+    DDE_INPUT_LOCATION                      = "s3://${local.prefix}${local.document_data_extraction_config.input_bucket_name}"
+    DDE_OUTPUT_LOCATION                     = "s3://${local.prefix}${local.document_data_extraction_config.output_bucket_name}"
+    DDE_DOCUMENT_METADATA_TABLE_NAME        = "${local.prefix}${local.document_data_extraction_config.document_metadata_table_name}"
+    DDE_DOCUMENT_METADATA_JOB_ID_INDEX_NAME = local.job_id_index_name
+    DDE_PROJECT_ARN                         = module.dde[0].bda_project_arn
+    DDE_REGION                              = "us-east-1"  # TODO: update to use dde module region
 
     # aws bedrock data automation requires users to use cross Region inference support 
     # when processing files. the following like the profile ARNs for different inference
@@ -124,7 +126,7 @@ resource "aws_dynamodb_table" "document_metadata" {
   }
 
   global_secondary_index {
-    name            = "jobId-index"
+    name            = local.job_id_index_name
     hash_key        = "jobId"
     projection_type = "ALL"
   }

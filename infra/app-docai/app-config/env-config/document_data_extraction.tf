@@ -7,19 +7,22 @@ locals {
     blueprints_path              = "./document-data-extraction-blueprints/"
 
     standard_output_configuration = {
-      image = {
+      document = {
         extraction = {
+          granularity = {
+            types = ["PAGE"]
+          }
           bounding_box = {
             state = "ENABLED"
           }
-          category = {
-            state = "ENABLED"
-            types = ["TEXT_DETECTION", "LOGOS"]
-          }
         }
-        generative_field = {
-          state = "ENABLED"
-          types = ["IMAGE_SUMMARY"]
+        output_format = {
+          additional_file_format = {
+            state = "DISABLED"
+          }
+          text_format = {
+            types = ["PLAIN_TEXT"]
+          }
         }
       }
     }

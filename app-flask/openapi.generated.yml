@@ -9,6 +9,7 @@ info:
 tags:
 - name: Health
 - name: User
+- name: Document Processing
 paths:
   /health:
     get:
@@ -40,6 +41,7 @@ paths:
                     description: The pagination information for paginated endpoints
                     allOf:
                     - $ref: '#/components/schemas/PaginationInfo'
+                additionalProperties: false
           description: Successful response
         '503':
           content:
@@ -67,6 +69,7 @@ paths:
                     description: The pagination information for paginated endpoints
                     allOf:
                     - $ref: '#/components/schemas/PaginationInfo'
+                additionalProperties: false
           description: Service Unavailable
       tags:
       - Health
@@ -101,6 +104,7 @@ paths:
                     description: The pagination information for paginated endpoints
                     allOf:
                     - $ref: '#/components/schemas/PaginationInfo'
+                additionalProperties: false
           description: Successful response
         '422':
           content:
@@ -128,6 +132,7 @@ paths:
                     description: The pagination information for paginated endpoints
                     allOf:
                     - $ref: '#/components/schemas/PaginationInfo'
+                additionalProperties: false
           description: Validation error
         '401':
           content:
@@ -155,6 +160,7 @@ paths:
                     description: The pagination information for paginated endpoints
                     allOf:
                     - $ref: '#/components/schemas/PaginationInfo'
+                additionalProperties: false
           description: Authentication error
       tags:
       - User
@@ -198,6 +204,7 @@ paths:
                     description: The pagination information for paginated endpoints
                     allOf:
                     - $ref: '#/components/schemas/PaginationInfo'
+                additionalProperties: false
           description: Successful response
         '422':
           content:
@@ -225,6 +232,7 @@ paths:
                     description: The pagination information for paginated endpoints
                     allOf:
                     - $ref: '#/components/schemas/PaginationInfo'
+                additionalProperties: false
           description: Validation error
         '401':
           content:
@@ -252,6 +260,7 @@ paths:
                     description: The pagination information for paginated endpoints
                     allOf:
                     - $ref: '#/components/schemas/PaginationInfo'
+                additionalProperties: false
           description: Authentication error
       tags:
       - User
@@ -298,6 +307,7 @@ paths:
                     description: The pagination information for paginated endpoints
                     allOf:
                     - $ref: '#/components/schemas/PaginationInfo'
+                additionalProperties: false
           description: Successful response
         '401':
           content:
@@ -325,6 +335,7 @@ paths:
                     description: The pagination information for paginated endpoints
                     allOf:
                     - $ref: '#/components/schemas/PaginationInfo'
+                additionalProperties: false
           description: Authentication error
         '404':
           content:
@@ -352,6 +363,7 @@ paths:
                     description: The pagination information for paginated endpoints
                     allOf:
                     - $ref: '#/components/schemas/PaginationInfo'
+                additionalProperties: false
           description: Not found
       tags:
       - User
@@ -392,6 +404,7 @@ paths:
                     description: The pagination information for paginated endpoints
                     allOf:
                     - $ref: '#/components/schemas/PaginationInfo'
+                additionalProperties: false
           description: Successful response
         '422':
           content:
@@ -419,6 +432,7 @@ paths:
                     description: The pagination information for paginated endpoints
                     allOf:
                     - $ref: '#/components/schemas/PaginationInfo'
+                additionalProperties: false
           description: Validation error
         '401':
           content:
@@ -446,6 +460,7 @@ paths:
                     description: The pagination information for paginated endpoints
                     allOf:
                     - $ref: '#/components/schemas/PaginationInfo'
+                additionalProperties: false
           description: Authentication error
         '404':
           content:
@@ -473,6 +488,7 @@ paths:
                     description: The pagination information for paginated endpoints
                     allOf:
                     - $ref: '#/components/schemas/PaginationInfo'
+                additionalProperties: false
           description: Not found
       tags:
       - User
@@ -484,6 +500,131 @@ paths:
               $ref: '#/components/schemas/UserUpdate'
       security:
       - ApiKeyAuth: []
+  /test-document-data-extraction-config:
+    post:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The message to return
+                  data:
+                    $ref: '#/components/schemas/DocumentProcessingResponse'
+                  status_code:
+                    type: integer
+                    description: The HTTP status code
+                  warnings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ValidationError'
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ValidationError'
+                  pagination_info:
+                    description: The pagination information for paginated endpoints
+                    allOf:
+                    - $ref: '#/components/schemas/PaginationInfo'
+                additionalProperties: false
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The message to return
+                  data:
+                    $ref: '#/components/schemas/ValidationError'
+                  status_code:
+                    type: integer
+                    description: The HTTP status code
+                  warnings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ValidationError'
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ValidationError'
+                  pagination_info:
+                    description: The pagination information for paginated endpoints
+                    allOf:
+                    - $ref: '#/components/schemas/PaginationInfo'
+                additionalProperties: false
+          description: Validation error
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The message to return
+                  data:
+                    $ref: '#/components/schemas/HTTPError'
+                  status_code:
+                    type: integer
+                    description: The HTTP status code
+                  warnings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ValidationError'
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ValidationError'
+                  pagination_info:
+                    description: The pagination information for paginated endpoints
+                    allOf:
+                    - $ref: '#/components/schemas/PaginationInfo'
+                additionalProperties: false
+          description: Bad Request
+        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The message to return
+                  data:
+                    $ref: '#/components/schemas/HTTPError'
+                  status_code:
+                    type: integer
+                    description: The HTTP status code
+                  warnings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ValidationError'
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ValidationError'
+                  pagination_info:
+                    description: The pagination information for paginated endpoints
+                    allOf:
+                    - $ref: '#/components/schemas/PaginationInfo'
+                additionalProperties: false
+          description: Internal Server Error
+      tags:
+      - Document Processing
+      summary: Test document data extraction processing with a file from the input
+        bucket.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentProcessingRequest'
 openapi: 3.0.3
 components:
   schemas:
@@ -505,6 +646,7 @@ components:
         value:
           type: string
           description: The value that failed
+      additionalProperties: false
     PaginationInfo:
       type: object
       properties:
@@ -533,6 +675,7 @@ components:
           enum:
           - ascending
           - descending
+      additionalProperties: false
     HTTPError:
       properties:
         detail:
@@ -543,6 +686,7 @@ components:
     Healthcheck:
       type: object
       properties: {}
+      additionalProperties: false
     Role:
       type: object
       properties:
@@ -551,6 +695,7 @@ components:
           enum:
           - USER
           - ADMIN
+      additionalProperties: false
     User:
       type: object
       properties:
@@ -598,6 +743,7 @@ components:
       - last_name
       - phone_number
       - roles
+      additionalProperties: false
     UserSorting:
       type: object
       properties:
@@ -616,6 +762,7 @@ components:
       required:
       - order_by
       - sort_direction
+      additionalProperties: false
     Pagination:
       type: object
       properties:
@@ -632,6 +779,7 @@ components:
       required:
       - page_offset
       - page_size
+      additionalProperties: false
     UserSearch:
       type: object
       properties:
@@ -652,6 +800,7 @@ components:
           $ref: '#/components/schemas/Pagination'
       required:
       - paging
+      additionalProperties: false
     UserUpdate:
       type: object
       properties:
@@ -692,6 +841,30 @@ components:
           type: string
           format: date-time
           readOnly: true
+      additionalProperties: false
+    DocumentProcessingRequest:
+      type: object
+      properties:
+        trace_id:
+          type: string
+          description: Optional trace ID for tracking
+        file_key:
+          type: string
+          description: S3 key of the file to process
+      required:
+      - file_key
+      additionalProperties: false
+    DocumentProcessingResponse:
+      type: object
+      properties:
+        dde_response:
+          type: object
+          description: DDE processing results
+          additionalProperties: {}
+        job_id:
+          type: string
+          description: Job ID assigned to the processing task
+      additionalProperties: false
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

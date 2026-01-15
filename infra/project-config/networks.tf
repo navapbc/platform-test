@@ -23,6 +23,10 @@ locals {
           "app-rails.platform-test-dev.navateam.com" = {
             source = "issued"
           }
+
+          "app-docai.platform-test-dev.navateam.com" = {
+            source = "issued"
+          }
         }
       }
     }

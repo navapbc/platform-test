@@ -3,6 +3,12 @@ data "aws_caller_identity" "current" {}
 
 locals {
   document_data_extraction_config = local.environment_config.document_data_extraction_config
+
+  # bda region must be hardcoded here to avoid circular dependency.
+  # Provider configurations must be known at plan time, but 
+  # local.document_data_extraction_config.bda_region depends on module outputs.
+  # bda is only available in us-east-1, us-west-2, and us-gov-west-1.
+  bda_region        = "us-east-1"
   job_id_index_name = "jobId-index"
 
   document_data_extraction_environment_variables = local.document_data_extraction_config != null ? {
@@ -11,7 +17,7 @@ locals {
     DDE_DOCUMENT_METADATA_TABLE_NAME        = "${local.prefix}${local.document_data_extraction_config.document_metadata_table_name}"
     DDE_DOCUMENT_METADATA_JOB_ID_INDEX_NAME = local.job_id_index_name
     DDE_PROJECT_ARN                         = module.dde[0].bda_project_arn
-    DDE_REGION                              = "us-east-1"  # TODO: update to use dde module region
+    DDE_REGION                              = local.bda_region
 
     # aws bedrock data automation requires users to use cross Region inference support 
     # when processing files. the following like the profile ARNs for different inference
@@ -66,12 +72,12 @@ locals {
 
 provider "aws" {
   alias  = "dde"
-  region = local.document_data_extraction_config.bda_region
+  region = local.bda_region
 }
 
 provider "awscc" {
   alias  = "dde"
-  region = local.document_data_extraction_config.bda_region
+  region = local.bda_region
 }
 
 module "dde_input_bucket" {

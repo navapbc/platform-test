@@ -3,6 +3,12 @@ variable "name" {
   type        = string
 }
 
+variable "aws_managed_blueprints" {
+  description = "List of AWS managed blueprint ARNs (stage defaults to LIVE)"
+  type        = list(string)
+  default     = null
+}
+
 variable "custom_output_config" {
   description = "A list of the BDA custom output configuartion blueprint(s)."
   type = list(object({
@@ -120,3 +126,4 @@ variable "blueprints_map" {
     tags   = map(string)
   }))
 }
+

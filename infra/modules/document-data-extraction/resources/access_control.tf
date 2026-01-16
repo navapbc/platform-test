@@ -10,13 +10,15 @@ data "aws_iam_policy_document" "bedrock_access" {
       "bedrock:InvokeModelWithResponseStream",
       "bedrock:GetDataAutomationProject",
       "bedrock:StartDataAutomationJob",
+      "bedrock:GetBlueprint",
       "bedrock:GetDataAutomationJob",
       "bedrock:ListDataAutomationJobs"
     ]
     effect = "Allow"
     resources = [
       awscc_bedrock_data_automation_project.bda_project.project_arn,
-      "${awscc_bedrock_data_automation_project.bda_project.project_arn}/*"
+      "${awscc_bedrock_data_automation_project.bda_project.project_arn}/*",
+      "arn:aws:bedrock:*:*:blueprint/*"
     ]
   }
 }

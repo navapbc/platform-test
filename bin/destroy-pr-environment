@@ -23,6 +23,12 @@ echo "::endgroup::"
 echo "Select Terraform workspace: ${workspace}"
 terraform -chdir="infra/${app_name}/service" workspace select "${workspace}"
 
+# TODO: tmp remove pinpoint state stuff so the rest of the removal can proceed
+#
+# Then go delete the actual resources via Console UI, Pinpoint > All projects > <project> > Settings > General Settings, "Delete project" button in upper right, enter "delete" then click "Delete" button
+terraform -chdir="infra/${app_name}/service" state rm 'module.notifications[0].aws_pinpoint_email_channel.app'
+terraform -chdir="infra/${app_name}/service" state rm 'module.notifications[0].aws_pinpoint_app.app'
+
 echo "::group::Destroy resources"
 terraform -chdir="infra/${app_name}/service" destroy -var="environment_name=${environment}" -input=false -auto-approve
 echo "::endgroup::"

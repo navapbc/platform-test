@@ -1,9 +1,10 @@
 locals {
   document_data_extraction_config = var.enable_document_data_extraction ? {
-    name               = "${var.app_name}-${var.environment}"
-    input_bucket_name  = "${var.app_name}-${var.environment}-bda-input"
-    output_bucket_name = "${var.app_name}-${var.environment}-bda-output"
-    blueprints_path    = "./document-data-extraction-blueprints/"
+    name                   = "${var.app_name}-${var.environment}"
+    input_bucket_name      = "${var.app_name}-${var.environment}-bda-input"
+    output_bucket_name     = "${var.app_name}-${var.environment}-bda-output"
+    blueprints_path        = "./document-data-extraction-blueprints/"
+    aws_managed_blueprints = null
 
     # BDA can only be deployed to us-east-1, us-west-2, and us-gov-west-1
     bda_region = "us-east-1"

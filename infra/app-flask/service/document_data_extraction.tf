@@ -25,10 +25,11 @@ module "dde_input_bucket" {
     aws = aws.dde
   }
 
-  count        = local.document_data_extraction_config != null ? 1 : 0
-  source       = "../../modules/storage"
-  name         = "${local.prefix}${local.document_data_extraction_config.input_bucket_name}"
-  is_temporary = local.is_temporary
+  count                      = local.document_data_extraction_config != null ? 1 : 0
+  source                     = "../../modules/storage"
+  name                       = "${local.prefix}${local.document_data_extraction_config.input_bucket_name}"
+  is_temporary               = local.is_temporary
+  use_aws_managed_encryption = true
 }
 
 module "dde_output_bucket" {
@@ -36,10 +37,11 @@ module "dde_output_bucket" {
     aws = aws.dde
   }
 
-  count        = local.document_data_extraction_config != null ? 1 : 0
-  source       = "../../modules/storage"
-  name         = "${local.prefix}${local.document_data_extraction_config.output_bucket_name}"
-  is_temporary = local.is_temporary
+  count                      = local.document_data_extraction_config != null ? 1 : 0
+  source                     = "../../modules/storage"
+  name                       = "${local.prefix}${local.document_data_extraction_config.output_bucket_name}"
+  is_temporary               = local.is_temporary
+  use_aws_managed_encryption = true
 }
 
 module "dde" {
@@ -51,7 +53,9 @@ module "dde" {
   count  = local.document_data_extraction_config != null ? 1 : 0
   source = "../../modules/document-data-extraction/resources"
 
+
   standard_output_configuration = local.document_data_extraction_config.standard_output_configuration
+  aws_managed_blueprints        = local.document_data_extraction_config.aws_managed_blueprints
   tags                          = local.tags
 
   blueprints_map = {
@@ -66,9 +70,4 @@ module "dde" {
   }
 
   name = "${local.prefix}${local.document_data_extraction_config.name}"
-
-  data_access_policy_arns = {
-    input_bucket  = module.dde_input_bucket[0].access_policy_arn,
-    output_bucket = module.dde_output_bucket[0].access_policy_arn
-  }
 }

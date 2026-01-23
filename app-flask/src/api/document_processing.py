@@ -42,8 +42,8 @@ def test_document_data_extraction_processing(
 
     file_key = json_data["file_key"]
     trace_id = json_data.get("trace_id") or str(uuid.uuid4())
-    input_bucket = os.getenv("DDE_INPUT_BUCKET_NAME")
-    output_bucket = os.getenv("DDE_OUTPUT_BUCKET_NAME")
+    input_bucket = os.getenv("DDE_INPUT_LOCATION")
+    output_bucket = os.getenv("DDE_OUTPUT_LOCATION")
     project_arn = os.getenv("DDE_PROJECT_ARN")
     profile_arn = os.getenv("DDE_PROFILE_ARN")
     job_id = str(uuid.uuid4())

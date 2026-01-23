@@ -4,7 +4,8 @@ locals {
     input_bucket_name            = "${var.app_name}-${var.environment}-bda-input"
     output_bucket_name           = "${var.app_name}-${var.environment}-bda-output"
     document_metadata_table_name = "${var.app_name}-${var.environment}-document-metadata"
-    custom_blueprints_path       = "../../modules/document-data-extraction/resources/bedrock-data-automation/"
+    custom_blueprints_path       = "./document-data-extraction-blueprints/"
+
 
     # BDA can only be deployed to us-east-1, us-west-2, and us-gov-west-1
     bda_region = "us-east-1"

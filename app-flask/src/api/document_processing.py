@@ -71,8 +71,8 @@ def test_document_data_extraction_processing(
         bedrock_response = bedrock.invoke_data_automation_async(
             dataAutomationProfileArn=profile_arn,
             dataAutomationConfiguration={"dataAutomationProjectArn": project_arn},
-            inputConfiguration={"s3Uri": f"s3://{input_bucket}/{file_key}"},
-            outputConfiguration={"s3Uri": f"s3://{output_bucket}/{file_key}"},
+            inputConfiguration={"s3Uri": f"{input_bucket}/{file_key}"},
+            outputConfiguration={"s3Uri": f"{output_bucket}/{file_key}"},
         )
         logger.info(
             f"DDE invocation successful for file: {file_key}, invocation_arn: {bedrock_response.get('invocationArn')}"

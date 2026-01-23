@@ -28,7 +28,7 @@ resource "awscc_bedrock_data_automation_project" "bda_project" {
   project_description           = "Project for ${var.name}"
   tags                          = local.bda_tags
   standard_output_configuration = var.standard_output_configuration
-  custom_output_configuration   = length(local.all_blueprints) > 0 ? {
+  custom_output_configuration = length(local.all_blueprints) > 0 ? {
     blueprints = local.all_blueprints
   } : null
   override_configuration = var.override_configuration

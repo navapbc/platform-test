@@ -10,7 +10,7 @@ variable "name" {
 }
 
 variable "use_aws_managed_encryption" {
-  description = "Use AWS-managed encryption (AES256) instead of customer-managed KMS keys"
+  description = "Whether to use AWS-managed encryption (AES256) instead of customer-managed KMS keys"
   type        = bool
   default     = false
 }

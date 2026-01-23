@@ -15,6 +15,6 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "storage" {
       kms_master_key_id = var.use_aws_managed_encryption ? null : aws_kms_key.storage[0].arn
       sse_algorithm     = var.use_aws_managed_encryption ? "AES256" : "aws:kms"
     }
-    bucket_key_enabled = true
+    bucket_key_enabled = var.use_aws_managed_encryption ? null : true
   }
 }

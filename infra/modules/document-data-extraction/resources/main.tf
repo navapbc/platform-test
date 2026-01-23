@@ -28,7 +28,7 @@ resource "awscc_bedrock_data_automation_project" "bda_project" {
   project_description           = "Project for ${var.name}"
   tags                          = local.bda_tags
   standard_output_configuration = var.standard_output_configuration
-  custom_output_configuration   = length(local.all_blueprints) > 0 ? {
+  custom_output_configuration = length(local.all_blueprints) > 0 ? {
     blueprints = local.all_blueprints
   } : null
   override_configuration = var.override_configuration
@@ -37,8 +37,8 @@ resource "awscc_bedrock_data_automation_project" "bda_project" {
 resource "awscc_bedrock_blueprint" "bda_blueprint" {
   for_each = var.blueprints_map
 
-  blueprint_name         = "${var.name}-${each.key}"
-  schema                 = each.value.schema
-  type                   = each.value.type
-  tags                   = local.bda_tags
+  blueprint_name = "${var.name}-${each.key}"
+  schema         = each.value.schema
+  type           = each.value.type
+  tags           = local.bda_tags
 }

@@ -102,7 +102,10 @@ See `variables.tf` for complete structure details.
 |------|-------------|
 | `bda_project_arn` | The ARN of the Bedrock Data Automation project |
 | `access_policy_arn` | The ARN of the IAM policy for accessing the Bedrock Data Automation project |
-
+| `bda_profile_arn` | The profile ARN for cross-region inference |
+| `bda_blueprint_arns` | List of created blueprint ARNs |
+| `bda_blueprint_names` | List of created blueprint names |
+| `bda_blueprint_arn_to_name` | Map of blueprint ARNs to names |
 
 ## Resources Created
 

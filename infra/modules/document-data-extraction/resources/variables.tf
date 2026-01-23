@@ -126,4 +126,3 @@ variable "blueprints_map" {
     tags   = map(string)
   }))
 }
-

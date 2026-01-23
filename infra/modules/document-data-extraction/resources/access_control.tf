@@ -8,9 +8,10 @@ data "aws_iam_policy_document" "bedrock_access" {
     actions = [
       "bedrock:InvokeModel",
       "bedrock:InvokeModelWithResponseStream",
+      "bedrock:InvokeDataAutomationAsync",
       "bedrock:GetDataAutomationProject",
-      "bedrock:StartDataAutomationJob",
       "bedrock:GetBlueprint",
+      "bedrock:StartDataAutomationJob",
       "bedrock:GetDataAutomationJob",
       "bedrock:ListDataAutomationJobs"
     ]
@@ -18,7 +19,8 @@ data "aws_iam_policy_document" "bedrock_access" {
     resources = [
       awscc_bedrock_data_automation_project.bda_project.project_arn,
       "${awscc_bedrock_data_automation_project.bda_project.project_arn}/*",
-      "arn:aws:bedrock:*:*:blueprint/*"
+      "arn:aws:bedrock:*:*:blueprint/*",
+      "arn:aws:bedrock:*:*:data-automation-profile/*"
     ]
   }
 }

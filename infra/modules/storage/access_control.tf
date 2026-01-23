@@ -57,7 +57,6 @@ data "aws_iam_policy_document" "storage_access" {
       "arn:aws:s3:::${var.name}/*"
     ]
   }
-
   dynamic "statement" {
     for_each = var.use_aws_managed_encryption ? [] : [1]
     content {

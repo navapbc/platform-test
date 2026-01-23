@@ -71,3 +71,9 @@ module "dde" {
 
   name = "${local.prefix}${local.document_data_extraction_config.name}"
 }
+
+resource "aws_iam_role_policy_attachment" "app_bedrock_access" {
+  count      = local.document_data_extraction_config != null ? 1 : 0
+  role       = module.service.app_role_name
+  policy_arn = module.dde[0].access_policy_arn
+}

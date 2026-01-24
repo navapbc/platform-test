@@ -54,7 +54,7 @@ locals {
       role_name          = "output-processor-role"
       handler            = "handler.handler"
       description        = "Processes BDA output and updates DynamoDB"
-      policies           = ["grantOutputBucket", "grantDynamoDb"]
+      policies           = ["grantOutputBucket", "grantDynamoDb", "grantSqsSendMessage"]
       attachOpenCvLayer  = false
       attachPopplerLayer = false
       timeout_seconds    = 60
@@ -271,7 +271,8 @@ resource "aws_iam_role_policy_attachment" "policy_attachments" {
             policy == "grantOutputBucket" ? module.dde_output_bucket[0].access_policy_arn :
             policy == "grantDynamoDb" ? aws_iam_policy.dynamodb_read_write[0].arn :
             policy == "grantDynamoStreams" ? aws_iam_policy.dynamodb_streams[0].arn :
-            policy == "grantBedrockInvoke" ? aws_iam_policy.bedrock_invoke[0].arn : null
+            policy == "grantBedrockInvoke" ? aws_iam_policy.bedrock_invoke[0].arn :
+            policy == "grantSqsSendMessage" ? aws_iam_policy.sqs_send_message[0].arn : null            
           )
         }
       ]

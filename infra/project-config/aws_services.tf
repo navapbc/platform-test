@@ -12,6 +12,9 @@ locals {
     // AWS Auto Scaling – Automatically adjusts EC2 instance capacity based on demand.
     "autoscaling",
 
+    // Amazon Athena – An interactive query service for analyzing data in S3 using SQL. Used for metrics analysis.
+    "athena",
+
     // AWS Backup – Centralized service for automating backups across AWS resources.
     "backup",
 
@@ -44,6 +47,9 @@ locals {
 
     // AWS Identity and Access Management – Manages users, roles, and permissions for AWS services.
     "iam",
+
+    // AWS Glue – A serverless data integration service for ETL and data catalog. Used for metrics data schema.
+    "glue",
 
     // AWS Key Management Service – Manages encryption keys for securing AWS data.
     "kms",
@@ -89,6 +95,9 @@ locals {
 
     // AWS Systems Manager – Contains Parameter Store service which securely stores and manages configuration data and secrets.
     "ssm",
+
+    // AWS Simple Queue Service (SQS) – A managed message queuing service for decoupling applications.
+    "sqs",
 
     // AWS Step Functions – Orchestrates workflows for AWS services with state machines. Used for background jobs.
     "states",

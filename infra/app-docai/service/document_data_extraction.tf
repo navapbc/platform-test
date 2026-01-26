@@ -421,6 +421,7 @@ resource "aws_lambda_function" "functions" {
   environment {
     variables = merge(
       local.document_data_extraction_environment_variables,
+      local.metrics_environment_variables,
       each.value.attachPopplerLayer ? {
         PATH = "/opt/bin:/usr/local/bin:/usr/bin:/bin"
         LD_LIBRARY_PATH = "/opt/lib64:/lib64:/usr/lib64"

@@ -52,7 +52,9 @@ locals {
   ]
 
   metrics_environment_variables = local.document_data_extraction_config != null ? {
-    GLUE_DATABASE_NAME                      = local.glue_database_name
+    GLUE_DATABASE_NAME      = local.glue_database_name
+    DDE_METRICS_QUEUE_URL   = aws_sqs_queue.dde_job_completion_metrics[0].url
+    DDE_METRICS_BUCKET_NAME = module.dde_metrics_data_bucket[0].bucket_name
   } : {}
 }
 
@@ -186,5 +188,32 @@ resource "aws_iam_policy" "sqs_send_message" {
       Resource = aws_sqs_queue.dde_job_completion_metrics[0].arn
       Effect   = "Allow"
     }]
+  })
+}
+
+resource "aws_iam_policy" "metrics_processor" {
+  count = local.document_data_extraction_config != null ? 1 : 0
+
+  name = "${local.prefix}dde-metrics-processor"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:GetQueueAttributes"
+        ]
+        Resource = aws_sqs_queue.dde_job_completion_metrics[0].arn
+        Effect   = "Allow"
+      },
+      {
+        Action = [
+          "s3:PutObject"
+        ]
+        Resource = "${module.dde_metrics_data_bucket[0].bucket_arn}/*"
+        Effect   = "Allow"
+      }
+    ]
   })
 }

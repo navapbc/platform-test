@@ -30,3 +30,11 @@ output "service_endpoint" {
 output "service_name" {
   value = local.service_name
 }
+
+output "metrics_queue_url" {
+  value = local.document_data_extraction_config != null ? aws_sqs_queue.dde_job_completion_metrics[0].url : null
+}
+
+output "metrics_bucket_name" {
+  value = local.document_data_extraction_config != null ? module.dde_metrics_data_bucket[0].bucket_name : null
+}

@@ -6,9 +6,24 @@ locals {
   # The syntax for `schedule_expression` is explained in the following documentation:
   # https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-scheduled-rule-pattern.html
   scheduled_jobs = {
-    # cron = {
-    #   task_command        = ["python", "-m", "flask", "--app", "app.py", "cron"]
-    #   schedule_expression = "cron(0 * ? * * *)"
-    # }
+    process_dde_metrics_queue = {
+      task_command = [
+        "sh", "-c",
+        join(" ", [
+          "cd $PYTHONPATH && python -m scripts.process_dde_metrics_queue",
+          "--queue-url \"$DDE_METRICS_QUEUE_URL\"",
+          "--destination-bucket-name \"$DDE_METRICS_BUCKET_NAME\"",
+          "--max-messages ${local.metrics_max_messages}",
+          "--max-batches ${local.metrics_max_batches}",
+          "--log-level ${local.metrics_log_level}"
+        ])
+      ]
+      schedule_expression = local.metrics_schedule_expression
+    }
   }
+
+  metrics_schedule_expression = "rate(5 minutes)"
+  metrics_max_messages = 10
+  metrics_max_batches  = 10
+  metrics_log_level    = "INFO"
 }

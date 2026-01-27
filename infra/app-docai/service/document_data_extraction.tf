@@ -11,6 +11,10 @@ locals {
   bda_region        = "us-east-1"
   job_id_index_name = "jobId-index"
 
+  # batch upload configuration
+  batch_prefix         = "batches/"
+  batch_expiration_days = 7
+
   document_data_extraction_environment_variables = local.document_data_extraction_config != null ? {
     DDE_INPUT_LOCATION                      = "s3://${local.prefix}${local.document_data_extraction_config.input_bucket_name}"
     DDE_OUTPUT_LOCATION                     = "s3://${local.prefix}${local.document_data_extraction_config.output_bucket_name}"
@@ -167,6 +171,25 @@ resource "aws_dynamodb_table" "document_metadata" {
   stream_view_type = "NEW_AND_OLD_IMAGES"
 
   tags = local.tags
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "input_bucket_batches_cleanup" {
+  count = local.document_data_extraction_config != null ? 1 : 0
+
+  bucket = module.dde_input_bucket[0].bucket_name
+
+  rule {
+    id     = "DeleteOldBatches"
+    status = "Enabled"
+
+    filter {
+      prefix = local.batch_prefix
+    }
+
+    expiration {
+      days = local.batch_expiration_days
+    }
+  }
 }
 
 #-------------------
@@ -445,6 +468,13 @@ resource "aws_cloudwatch_event_rule" "input_bucket_object_created" {
     detail = {
       bucket = {
         name = ["${local.prefix}${local.document_data_extraction_config.input_bucket_name}"]
+      }
+      object = {
+        key = [{
+          anything-but = {
+            prefix = local.batch_prefix
+          }
+        }]
       }
     }
   })

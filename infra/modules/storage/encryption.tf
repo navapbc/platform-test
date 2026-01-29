@@ -1,17 +1,62 @@
+
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+data "aws_iam_policy_document" "kms_key_policy" {
+  # Root account admin access
+  statement {
+    sid    = "AllowAccountAdmin"
+    effect = "Allow"
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+    }
+    actions   = ["kms:*"]
+    resources = ["*"]
+  }
+
+  # Optional: Allow additional AWS services (eg. bedrock.amazonaws.com)
+  dynamic "statement" {
+    for_each = length(var.kms_s3_via_service_principals) > 0 ? [1] : []
+    content {
+      sid    = "AllowViaS3Service"
+      effect = "Allow"
+      principals {
+        type        = "Service"
+        identifiers = var.kms_s3_via_service_principals
+      }
+      actions = [
+        "kms:Decrypt",
+        "kms:GenerateDataKey",
+        "kms:DescribeKey"
+      ]
+      resources = ["*"]
+      condition {
+        test     = "StringEquals"
+        variable = "kms:ViaService"
+        values   = ["s3.${data.aws_region.current.name}.amazonaws.com"]
+      }
+    }
+  }
+}
+
 resource "aws_kms_key" "storage" {
+  count = var.use_aws_managed_encryption ? 0 : 1
+
   description = "KMS key for bucket ${var.name}"
   # The waiting period, specified in number of days. After the waiting period ends, AWS KMS deletes the KMS key.
   deletion_window_in_days = "10"
   # Generates new cryptographic material every 365 days, this is used to encrypt your data. The KMS key retains the old material for decryption purposes.
   enable_key_rotation = "true"
+
+  policy = data.aws_iam_policy_document.kms_key_policy.json
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "storage" {
   bucket = aws_s3_bucket.storage.id
   rule {
     apply_server_side_encryption_by_default {
-      kms_master_key_id = aws_kms_key.storage.arn
-      sse_algorithm     = "aws:kms"
+      kms_master_key_id = var.use_aws_managed_encryption ? null : aws_kms_key.storage[0].arn
+      sse_algorithm     = var.use_aws_managed_encryption ? "AES256" : "aws:kms"
     }
     bucket_key_enabled = true
   }

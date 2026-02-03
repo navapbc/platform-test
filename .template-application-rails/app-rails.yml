@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier
-_commit: v0.4.1-29-gba07bd8
+_commit: v0.4.1-30-gf1cb77f
 _src_path: https://github.com/navapbc/template-application-rails
 app_local_port: 3100
 app_name: app-rails

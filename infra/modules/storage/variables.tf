@@ -9,12 +9,6 @@ variable "name" {
   description = "Name of the AWS S3 bucket. Needs to be globally unique across all regions."
 }
 
-variable "use_aws_managed_encryption" {
-  description = "Use AWS-managed encryption (AES256) instead of customer-managed KMS keys"
-  type        = bool
-  default     = false
-}
-
 variable "kms_s3_via_service_principals" {
   description = "List of IAM role ARNs that should have KMS access via S3 service (e.g., for Bedrock Data Automation)"
   type        = list(string)

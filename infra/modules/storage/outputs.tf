@@ -3,5 +3,5 @@ output "access_policy_arn" {
 }
 
 output "kms_key_arn" {
-  value = var.use_aws_managed_encryption ? null : aws_kms_key.storage[0].arn
+  value = aws_kms_key.storage.arn
 }

@@ -19,13 +19,13 @@ data "aws_iam_policy_document" "kms_key_policy" {
 
   # Optional: Allow additional AWS services (eg. bedrock.amazonaws.com)
   dynamic "statement" {
-    for_each = length(var.kms_s3_via_service_principals) > 0 ? [1] : []
+    for_each = length(var.service_principals_with_access) > 0 ? [1] : []
     content {
       sid    = "AllowViaS3Service"
       effect = "Allow"
       principals {
         type        = "Service"
-        identifiers = var.kms_s3_via_service_principals
+        identifiers = var.service_principals_with_access
       }
       actions = [
         "kms:Decrypt",

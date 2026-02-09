@@ -9,8 +9,8 @@ variable "name" {
   description = "Name of the AWS S3 bucket. Needs to be globally unique across all regions."
 }
 
-variable "kms_s3_via_service_principals" {
-  description = "List of IAM role ARNs that should have KMS access via S3 service (e.g., for Bedrock Data Automation)"
+variable "service_principals_with_access" {
+  description = "List of AWS service principals that should have access to the S3 bucket via KMS (e.g., bedrock.amazonaws.com)"
   type        = list(string)
   default     = []
 }

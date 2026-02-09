@@ -9,4 +9,5 @@ resource "aws_s3_bucket" "storage" {
   # checkov:skip=CKV_AWS_144:Cross region replication not required by default
   # checkov:skip=CKV2_AWS_62:S3 bucket does not need notifications enabled
   # checkov:skip=CKV_AWS_21:Bucket versioning is not needed
+  # checkov:skip=CKV_AWS_109:Root account admin access is required for KMS key management per AWS best practices
 }

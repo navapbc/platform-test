@@ -1,5 +1,6 @@
 locals {
   notifications_config = local.environment_config.notifications_config
+  sms_config = local.environment_config.sms_config
 
   # If this is a temporary environment, re-use an existing email identity. Otherwise, create a new one.
   domain_identity_arn = local.notifications_config != null ? (
@@ -11,6 +12,24 @@ locals {
     AWS_SES_FROM_EMAIL = module.notifications[0].from_email
   } : {}
   notifications_app_name = local.notifications_config != null ? "${local.prefix}${local.notifications_config.name}" : ""
+
+  #SMS environment variables for notifications-sms module
+  sms_environment_variables = local.sms_config != null ? {
+    AWS_SMS_CONFIGURATION_SET_NAME = module.notifications_sms[0].configuration_set_name
+    AWS_SMS_OPT_OUT_LIST = module.notifications_sms[0].opt_out_list_name
+  } : {}
+  sms_app_name = local.sms_config != null ? "${local.prefix}${local.sms_config.name}" : ""
+}
+
+# If the app has `enable_sms_notifications` set to true, create SMS notification resources.
+# A new SMS configuration is created for all environments, including temporary environments.
+module "notifications_sms" {
+  count  = local.sms_config != null ? 1 : 0
+  source = "../../modules/notifications-sms/resources"
+
+  name                            = local.sms_app_name
+  enable_delivery_receipt_logging = true
+  enable_opt_out_list             = true
 }
 
 # If the app has `enable_notifications` set to true AND this is not a temporary

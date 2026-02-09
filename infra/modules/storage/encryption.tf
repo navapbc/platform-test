@@ -1,7 +1,12 @@
 
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
+
 data "aws_iam_policy_document" "kms_key_policy" {
+  # checkov:skip=CKV_AWS_109:Root account admin access is required for KMS key management per AWS best practices
+  # checkov:skip=CKV_AWS_111:Root account requires full KMS permissions to enable IAM-based access control
+  # checkov:skip=CKV_AWS_356:KMS key policy requires wildcard resource per AWS KMS policy requirements
+
   # Root account admin access.
   # This gives the AWS account that owns the KMS key full access to the KMS key,
   # deferring specific access rules to IAM roles.

@@ -15,4 +15,11 @@ locals {
     # Configure the REPLY-TO email address if it should be different from the sender.
     reply_to_email = "notifications@${var.domain_name}"
   } : null
+  sms_config = var.enable_sms_notifications ? {
+    # SMS configuration name.
+    name = "${var.app_name}-${var.environment}-sms"
+
+    # SMS message type: "Promotional" or "Transactional"
+    message_type = "Transactional"
+  } : null
 }

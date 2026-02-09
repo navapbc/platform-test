@@ -10,6 +10,8 @@ import storage
 from db import get_db_connection
 from feature_flags import is_feature_enabled
 
+import sms_notifications
+
 logging.basicConfig()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -106,6 +108,30 @@ def cron():
     conn.execute("SELECT 1")
     print("Hello from cron job")
 
+@app.route("/sms-notifications", methods=["GET", "POST"])
+def sms_notifications_page():
+    logger.info("Accessed /sms-notifications endpoint with method %s", request.method)
+    if request.method == "POST":
+        sender_number = request.form.get("originator_phone_number")
+        phone_number = request.form.get("phone_number")
+        message = "This is a test SMS from Strata Platform."
+
+        # Check opt-out status first
+        opt_out_status = sms_notifications.check_opt_out_status(phone_number)
+        if opt_out_status.get("opted_out"):
+            return f"Cannot send SMS: {phone_number} has opted out of messages."
+
+        # Send SMS
+        logger.info(f"Sending SMS to {phone_number} from {sender_number}")
+        result = sms_notifications.send_sms(sender_number, phone_number, message)
+        logger.info("SMS send result: %s", result)
+
+        if result["success"]:
+            return f"SMS sent successfully to {phone_number}. Message ID: {result['message_id']}"
+        else:
+            return f"Failed to send SMS: {result['error']} (Code: {result.get('error_code', 'Unknown')})"
+
+    return render_template("sms_form.html")
 
 if __name__ == "__main__":
     main()

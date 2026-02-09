@@ -39,6 +39,9 @@ locals {
 
   # Whether any of the applications in the network has enabled notifications
   enable_notifications = anytrue([for app in local.apps_in_network : app.enable_notifications])
+
+  # Whether any of the applications in the network has enabled SMS notifications
+  enable_sms_notifications = anytrue([for app in local.apps_in_network : app.enable_sms_notifications])
 }
 
 terraform {
@@ -99,6 +102,7 @@ module "network" {
   has_external_non_aws_service = local.has_external_non_aws_service
   enable_command_execution     = local.enable_command_execution
   enable_notifications         = local.enable_notifications
+  enable_sms_notifications     = local.enable_sms_notifications
 }
 
 module "domain" {

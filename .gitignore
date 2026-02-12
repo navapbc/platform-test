@@ -18,3 +18,8 @@
 
 # Python testing stuff
 *__pycache__*
+
+# Layer build artifacts
+infra/*/layers/*/output/
+infra/*/layers/*/*.zip
+infra/*/service/output/

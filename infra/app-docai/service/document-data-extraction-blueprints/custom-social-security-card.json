@@ -1,0 +1,29 @@
+{
+  "description": "A document issued by the Social Security Administration that provides the individual's Social Security Number (SSN) and name.",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "class": "Social-Security-Card",
+  "definitions": {},
+  "properties": {
+    "social_security_number": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The unique identifier assigned by the Social Security Administration to the individual."
+    },
+    "name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The full name of the individual to whom the Social Security Number is assigned."
+    },
+    "established_for_usa_administration": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The statement indicating that the number is established for the USA Social Security Administration."
+    },
+    "signature": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The signature of the individual or the authorized representative."
+    }
+  }
+}

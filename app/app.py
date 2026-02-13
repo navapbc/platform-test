@@ -112,7 +112,6 @@ def cron():
 def sms_notifications_page():
     logger.info("Accessed /sms-notifications endpoint with method %s", request.method)
     if request.method == "POST":
-        sender_number = request.form.get("originator_phone_number")
         phone_number = request.form.get("phone_number")
         message = "This is a test SMS from Strata Platform."
 
@@ -122,8 +121,7 @@ def sms_notifications_page():
             return f"Cannot send SMS: {phone_number} has opted out of messages."
 
         # Send SMS
-        logger.info(f"Sending SMS to {phone_number} from {sender_number}")
-        result = sms_notifications.send_sms(sender_number, phone_number, message)
+        result = sms_notifications.send_sms(phone_number, message)
         logger.info("SMS send result: %s", result)
 
         if result["success"]:

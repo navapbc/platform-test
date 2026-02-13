@@ -4,22 +4,25 @@ import boto3
 import json
 from botocore.exceptions import ClientError
 
+logging.basicConfig()
 logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
-def send_sms(sender_number, phone_number, message, message_type="TRANSACTIONAL"):
+def send_sms(phone_number, message, message_type="TRANSACTIONAL"):
     """
     Send SMS via AWS End User Messaging (PinpointSMSVoiceV2)
     """
     try:
         logger.info("Initializing AWS Pinpoint SMS Voice V2 client")
         client = boto3.client("pinpoint-sms-voice-v2")
-        #sender_number = os.environ["AWS_SMS_SENDER_PHONE_NUMBER"]
+        phone_pool_id = os.environ.get("AWS_SMS_PHONE_POOL_ID")
         configuration_set = os.environ.get("AWS_SMS_CONFIGURATION_SET_NAME")
-        logger.info("Using Configuration Set: %s", configuration_set)
+        logger.info("Sending SMS Using Configuration Set: %s", configuration_set)
+        logger.info("Sending SMS Using Phone Pool ID: %s", phone_pool_id)
 
         params = {
             "DestinationPhoneNumber": phone_number,
-            "OriginationIdentity": sender_number,
+            "OriginationIdentity": phone_pool_id,
             "MessageBody": message,
             "MessageType": message_type
         }
@@ -82,21 +85,3 @@ def check_opt_out_status(phone_number):
 
     except Exception as e:
         return {"error": str(e)}
-
-def get_sms_spending_limits():
-    """
-    Get current SMS spending limits
-    """
-    try:
-        client = boto3.client("pinpoint-sms-voice-v2")
-        response = client.describe_spend_limits()
-
-        return {
-            "success": True,
-            "spend_limits": response.get("SpendLimits", [])
-        }
-    except Exception as e:
-        return {
-            "success": False,
-            "error": str(e)
-        }

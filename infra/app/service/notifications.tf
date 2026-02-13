@@ -1,6 +1,6 @@
 locals {
   notifications_config = local.environment_config.notifications_config
-  sms_config = local.environment_config.sms_config
+  sms_config           = local.environment_config.sms_config
 
   # If this is a temporary environment, re-use an existing email identity. Otherwise, create a new one.
   domain_identity_arn = local.notifications_config != null ? (
@@ -16,7 +16,9 @@ locals {
   #SMS environment variables for notifications-sms module
   sms_environment_variables = local.sms_config != null ? {
     AWS_SMS_CONFIGURATION_SET_NAME = module.notifications_sms[0].configuration_set_name
-    AWS_SMS_OPT_OUT_LIST = module.notifications_sms[0].opt_out_list_name
+    AWS_SMS_PHONE_POOL_ARN = module.notifications_sms[0].sms_phone_pool_arn
+    AWS_SMS_PHONE_POOL_ID = module.notifications_sms[0].sms_phone_pool_id
+
   } : {}
   sms_app_name = local.sms_config != null ? "${local.prefix}${local.sms_config.name}" : ""
 }
@@ -27,9 +29,10 @@ module "notifications_sms" {
   count  = local.sms_config != null ? 1 : 0
   source = "../../modules/notifications-sms/resources"
 
-  name                            = local.sms_app_name
-  enable_delivery_receipt_logging = true
-  enable_opt_out_list             = true
+  name                                    = local.sms_app_name
+  sms_sender_phone_number_registration_id = local.sms_config.sms_sender_phone_number_registration_id
+  sms_number_type                         = local.sms_config.sms_number_type
+  sms_simulator_phone_number_id           = local.sms_config.sms_simulator_phone_number_id
 }
 
 # If the app has `enable_notifications` set to true AND this is not a temporary

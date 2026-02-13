@@ -41,7 +41,25 @@ variable "enable_sms_notifications" {
   type        = bool
   description = "Enables SMS notifications"
   default     = false
- }
+}
+
+variable "sms_number_type" {
+  type        = string
+  description = "The type of phone number to use for SMS notifications. Must be either 'LONG_CODE' or 'SHORT_CODE'."
+  default     = "SIMULATOR"
+}
+
+variable "sms_sender_phone_number_registration_id" {
+  type        = string
+  description = "The registration ID for the phone number to use as the sender in SMS messages. This value is obtain in AWS and the registration must be in APPROVED or COMPLETE status to be linked."
+  default     = null
+}
+
+variable "sms_simulator_phone_number_id" {
+  type        = string
+  description = "A simulator phone number to use for sending SMS messages (e.g., +12065557784). Used when sms_sender_phone_number_registration_id is not provided."
+  default     = null
+}
 
 variable "enable_notifications" {
   type        = bool

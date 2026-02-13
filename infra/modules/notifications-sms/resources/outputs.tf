@@ -8,7 +8,12 @@ output "access_policy_arn" {
   value       = aws_iam_policy.sms_access.arn
 }
 
-output "opt_out_list_name" {
-  description = "The name of the AWS End User Messaging SMS opt-out list."
-  value       = aws_pinpointsmsvoicev2_opt_out_list.sms_opt_out_list[0].name
+output "sms_phone_pool_arn" {
+  description = "The ARN of the AWS End User Messaging SMS phone pool."
+  value       = aws_cloudformation_stack.sms_config_set.outputs["PhonePoolArn"]
+}
+
+output "sms_phone_pool_id" {
+  description = "The ID of the AWS End User Messaging SMS phone pool."
+  value       = aws_cloudformation_stack.sms_config_set.outputs["PhonePoolId"]
 }

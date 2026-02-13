@@ -19,7 +19,14 @@ locals {
     # SMS configuration name.
     name = "${var.app_name}-${var.environment}-sms"
 
-    # SMS message type: "Promotional" or "Transactional"
-    message_type = "Transactional"
+    # Type of SMS number to use: "LONG_CODE", "TOLL_FREE". For more information, see https://docs.aws.amazon.com/sms-voice/latest/userguide/phone-number-types.html.
+    sms_number_type = var.sms_number_type
+
+    # The registration ID for the phone number to use as the sender in SMS messages. This is the registration ID provided by AWS when registering the phone number.
+    sms_sender_phone_number_registration_id = var.sms_sender_phone_number_registration_id
+
+    # The simulator phone number to use for sending SMS messages when sms_sender_phone_number_registration_id is not provided. This should be in E.164 format (e.g., +12065557784) and is only used for testing purposes.
+    sms_simulator_phone_number_id = var.sms_simulator_phone_number_id
+
   } : null
 }

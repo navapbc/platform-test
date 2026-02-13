@@ -57,13 +57,30 @@ resource "aws_iam_policy" "sms_access" {
       {
         Effect = "Allow"
         Action = [
-          "sms-voice:SendTextMessage",
+          "sms-voice:SendTextMessage"
+        ]
+        Resource = [
+          # Allow access to the phone pool created by CloudFormation
+          aws_cloudformation_stack.sms_config_set.outputs["PhonePoolArn"],
+          # Allow access to the configuration set created by this module
+          "arn:aws:sms-voice:*:${data.aws_caller_identity.current.account_id}:configuration-set/${var.name}-config-set"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
           "sms-voice:DescribePhoneNumbers",
           "sms-voice:DescribePools",
           "sms-voice:DescribeConfigurationSets",
           "sms-voice:DescribeOptOutLists"
         ]
-        Resource = "*"
+        Resource = [
+          # Allow read-only access to phone numbers, pools, configuration sets, and opt-out lists in this account
+          "arn:aws:sms-voice:*:${data.aws_caller_identity.current.account_id}:phone-number/*",
+          "arn:aws:sms-voice:*:${data.aws_caller_identity.current.account_id}:pool/*",
+          "arn:aws:sms-voice:*:${data.aws_caller_identity.current.account_id}:configuration-set/*",
+          "arn:aws:sms-voice:*:${data.aws_caller_identity.current.account_id}:opt-out-list/*"
+        ]
       }
     ]
   })

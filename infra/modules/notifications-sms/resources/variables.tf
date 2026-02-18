@@ -20,9 +20,6 @@ variable "sms_number_type" {
 
 variable "sms_simulator_phone_number_id" {
   type        = string
-  description = <<-EOF
-    A simulator phone number to use for sending SMS messages (e.g., +12065557784). Used when
-    sms_sender_phone_number_registration_id is not provided.
-  EOF
+  description = "A simulator phone number id to use for sending SMS messages. Used when sms_sender_phone_number_registration_id is not provided."
   default     = null
 }

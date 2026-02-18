@@ -17,9 +17,3 @@ variable "sms_number_type" {
   description = "The type of phone number to use for sending SMS messages (LONG_CODE, TOLL_FREE, TEN_DLC, SIMULATOR)."
   default     = "SIMULATOR"
 }
-
-variable "sms_simulator_phone_number_id" {
-  type        = string
-  description = "A simulator phone number id to use for sending SMS messages. Used when sms_sender_phone_number_registration_id is not provided."
-  default     = null
-}

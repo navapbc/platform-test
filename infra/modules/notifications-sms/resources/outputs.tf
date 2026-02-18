@@ -17,3 +17,13 @@ output "sms_phone_pool_id" {
   description = "The ID of the AWS End User Messaging SMS phone pool."
   value       = aws_cloudformation_stack.sms_config_set.outputs["PhonePoolId"]
 }
+
+output "sms_phone_number_id" {
+  description = "The ID of the SMS phone number created by CloudFormation."
+  value       = aws_cloudformation_stack.sms_config_set.outputs["PhoneNumberId"]
+}
+
+output "sms_phone_number_arn" {
+  description = "The ARN of the SMS phone number created by CloudFormation."
+  value       = aws_cloudformation_stack.sms_config_set.outputs["PhoneNumberArn"]
+}

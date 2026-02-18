@@ -47,7 +47,7 @@ variable "enable_sms_notifications" {
   type        = bool
   description = "Enables SMS notifications"
   default     = false
- }
+}
 
 variable "environment" {
   description = "name of the application environment (e.g. dev, staging, prod)"

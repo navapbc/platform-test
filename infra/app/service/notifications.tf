@@ -16,8 +16,8 @@ locals {
   #SMS environment variables for notifications-sms module
   sms_environment_variables = local.sms_config != null ? {
     AWS_SMS_CONFIGURATION_SET_NAME = module.notifications_sms[0].configuration_set_name
-    AWS_SMS_PHONE_POOL_ARN = module.notifications_sms[0].sms_phone_pool_arn
-    AWS_SMS_PHONE_POOL_ID = module.notifications_sms[0].sms_phone_pool_id
+    AWS_SMS_PHONE_POOL_ARN         = module.notifications_sms[0].sms_phone_pool_arn
+    AWS_SMS_PHONE_POOL_ID          = module.notifications_sms[0].sms_phone_pool_id
 
   } : {}
   sms_app_name = local.sms_config != null ? "${local.prefix}${local.sms_config.name}" : ""

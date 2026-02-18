@@ -41,7 +41,7 @@ variable "enable_sms_notifications" {
   type        = bool
   description = "Enables SMS notifications"
   default     = false
- }
+}
 
 variable "enable_notifications" {
   type        = bool

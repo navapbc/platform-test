@@ -37,6 +37,13 @@ def send_sms(phone_number, message, message_type="TRANSACTIONAL"):
             "Environment": "dev"
         }
 
+        if check_opt_out_status(phone_number).get("opted_out"):
+            logger.warning("Phone number %s has opted out of SMS messages. Aborting send.", phone_number)
+            return {
+                "success": False,
+                "error": f"Phone number {phone_number} has opted out of SMS messages."
+            }
+
         response = client.send_text_message(**params)
 
         return {
@@ -68,13 +75,9 @@ def check_opt_out_status(phone_number):
     """
     try:
         client = boto3.client("pinpoint-sms-voice-v2")
-        opt_out_list = os.environ.get("AWS_SMS_OPT_OUT_LIST")
-
-        if not opt_out_list:
-            return {"opted_out": False, "error": "No opt-out list configured"}
 
         response = client.describe_opted_out_numbers(
-            OptOutListName=opt_out_list,
+            OptOutListName="default",
             OptedOutNumbers=[phone_number]
         )
 

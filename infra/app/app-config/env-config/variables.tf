@@ -45,8 +45,8 @@ variable "enable_sms_notifications" {
 
 variable "sms_number_type" {
   type        = string
-  description = "The type of phone number to use for SMS notifications. Must be either 'LONG_CODE' or 'SHORT_CODE'."
-  default     = "SIMULATOR"
+  description = "The type of phone number to use for SMS notifications. Must be either 'LONG_CODE', 'TOLL_FREE', 'TEN_DLC', or 'SIMULATOR'."
+  default     = null
 }
 
 variable "sms_sender_phone_number_registration_id" {
@@ -57,7 +57,7 @@ variable "sms_sender_phone_number_registration_id" {
 
 variable "sms_simulator_phone_number_id" {
   type        = string
-  description = "A simulator phone number to use for sending SMS messages (e.g., +12065557784). Used when sms_sender_phone_number_registration_id is not provided."
+  description = "A simulator phone number id to use for sending SMS messages. Used when sms_sender_phone_number_registration_id is not provided."
   default     = null
 }
 

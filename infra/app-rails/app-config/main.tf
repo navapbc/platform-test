@@ -43,7 +43,7 @@ locals {
   # 2. Sets up IAM permissions for the application to send emails
   enable_notifications = true
 
-   # Whether or not the application should enable SMS notifications via AWS End User Messaging.
+  # Whether or not the application should enable SMS notifications via AWS End User Messaging.
   # If enabled:
   # 1. Creates AWS End User Messaging SMS configuration set
   # 2. Sets up IAM permissions for SMS sending

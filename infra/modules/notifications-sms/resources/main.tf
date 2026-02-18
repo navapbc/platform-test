@@ -13,7 +13,6 @@ locals {
     "arn:aws:sms-voice:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:phone-number"
   )
   registration_id_arn = var.sms_sender_phone_number_registration_id != null ? "${local.phone_number_arn_base}/${var.sms_sender_phone_number_registration_id}" : null
-  simulator_id_arn    = var.sms_simulator_phone_number_id != null ? "${local.phone_number_arn_base}/${var.sms_simulator_phone_number_id}" : null
 
   mandatory_keywords = {
     STOP = {
@@ -32,6 +31,10 @@ locals {
 }
 resource "aws_cloudformation_stack" "sms_config_set" {
   name = "${var.name}-config-set"
+
+  timeout_in_minutes = 5
+
+  on_failure = "ROLLBACK"
 
   template_body = jsonencode({
     Resources = merge(
@@ -56,32 +59,34 @@ resource "aws_cloudformation_stack" "sms_config_set" {
         SmsPhonePool = {
           Type = "AWS::SMSVOICE::Pool"
           Properties = {
-            OriginationIdentities = var.sms_sender_phone_number_registration_id != null ? [
-              local.registration_id_arn
-              ] : var.sms_simulator_phone_number_id != null ? [
-              local.simulator_id_arn
-            ] : []
+            # Reference the phone number ARN created within this stack
+            OriginationIdentities = [
+              {
+                "Fn::Sub" : "arn:aws:sms-voice:$${AWS::Region}:$${AWS::AccountId}:phone-number/$${SmsPhoneNumber}"
+              }
+            ]
             MandatoryKeywords = local.mandatory_keywords
           }
         }
       },
-      (var.sms_sender_phone_number_registration_id != null || var.sms_simulator_phone_number_id != null) ? {
+      # Always create a PhoneNumber resource within the CloudFormation stack
+      # Use registration ID if provided, otherwise create a simulator phone number
+      {
         SmsPhoneNumber = {
           Type = "AWS::SMSVOICE::PhoneNumber"
           Properties = merge(
             local.phone_number_base_properties,
             var.sms_sender_phone_number_registration_id != null ? {
-              # Use registration ID if provided (takes priority)
+              # Use registration ID to create a registered phone number
               RegistrationId = var.sms_sender_phone_number_registration_id
               NumberType     = var.sms_number_type
               } : {
-              # Use simulator phone number ID - reference existing phone number
-              PhoneNumberId = var.sms_simulator_phone_number_id
-              NumberType    = "SIMULATOR"
+              # Create a new simulator phone number
+              NumberType = "SIMULATOR"
             }
           )
         }
-      } : {}
+      }
     )
     Outputs = merge(
       {
@@ -102,8 +107,9 @@ resource "aws_cloudformation_stack" "sms_config_set" {
           }
         }
       },
-      (var.sms_sender_phone_number_registration_id != null || var.sms_simulator_phone_number_id != null) ? {
-        # The phone number ID (only if created)
+      # Always output phone number details since we always create the PhoneNumber resource
+      {
+        # The phone number ID
         PhoneNumberId = {
           Value = { "Ref" : "SmsPhoneNumber" }
         }
@@ -113,7 +119,7 @@ resource "aws_cloudformation_stack" "sms_config_set" {
             "Fn::Sub" : "arn:aws:sms-voice:$${AWS::Region}:$${AWS::AccountId}:phone-number/$${SmsPhoneNumber}"
           }
         }
-      } : {}
+      }
     )
   })
 }

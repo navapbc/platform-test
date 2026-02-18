@@ -55,12 +55,6 @@ variable "sms_sender_phone_number_registration_id" {
   default     = null
 }
 
-variable "sms_simulator_phone_number_id" {
-  type        = string
-  description = "A simulator phone number id to use for sending SMS messages. Used when sms_sender_phone_number_registration_id is not provided."
-  default     = null
-}
-
 variable "enable_notifications" {
   type        = bool
   description = "Enables notifications"

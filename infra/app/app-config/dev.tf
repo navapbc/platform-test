@@ -11,7 +11,6 @@ module "dev_config" {
   has_incident_management_service = local.has_incident_management_service
   enable_notifications            = local.enable_notifications
   enable_sms_notifications        = local.enable_sms_notifications
-  sms_simulator_phone_number_id   = "phone-413fa698425d4857b65b38a8d5ecc2d3"
 
   # Enable and configure identity provider.
   enable_identity_provider = local.enable_identity_provider

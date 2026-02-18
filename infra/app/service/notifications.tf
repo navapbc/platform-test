@@ -32,7 +32,6 @@ module "notifications_sms" {
   name                                    = local.sms_app_name
   sms_sender_phone_number_registration_id = local.sms_config.sms_sender_phone_number_registration_id
   sms_number_type                         = local.sms_config.sms_number_type
-  sms_simulator_phone_number_id           = local.sms_config.sms_simulator_phone_number_id
 }
 
 # If the app has `enable_notifications` set to true AND this is not a temporary

@@ -12,7 +12,7 @@ module "dev_config" {
   enable_notifications            = local.enable_notifications
   enable_document_data_extraction = local.enable_document_data_extraction
   enable_sms_notifications        = local.enable_sms_notifications
-  sms_simulator_phone_number_id   = "phone-800ac52c310e4270b9bf83c1acbcdac1"
+  sms_simulator_phone_number_id   = "phone-413fa698425d4857b65b38a8d5ecc2d3"
 
   # Enable and configure identity provider.
   enable_identity_provider = local.enable_identity_provider

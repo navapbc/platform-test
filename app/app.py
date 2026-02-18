@@ -6,11 +6,10 @@ import click
 from flask import Flask, redirect, render_template, request
 
 import notifications
+import sms_notifications
 import storage
 from db import get_db_connection
 from feature_flags import is_feature_enabled
-
-import sms_notifications
 
 logging.basicConfig()
 logger = logging.getLogger()

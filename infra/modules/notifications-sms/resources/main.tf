@@ -32,9 +32,20 @@ locals {
 resource "aws_cloudformation_stack" "sms_config_set" {
   name = "${var.name}-config-set"
 
+  # Use a dedicated service role for CloudFormation operations
+  iam_role_arn = aws_iam_role.cloudformation_service_role.arn
+
   timeout_in_minutes = 5
 
   on_failure = "ROLLBACK"
+
+  # Explicit dependencies to ensure IAM resources exist during both creation AND destruction
+  depends_on = [
+    aws_iam_role.cloudformation_service_role,
+    aws_iam_role_policy.cloudformation_sms_permissions,
+    aws_iam_role.logging_role,
+    aws_iam_role_policy.sms_logging_permissions
+  ]
 
   template_body = jsonencode({
     Resources = merge(
@@ -130,4 +141,12 @@ resource "aws_cloudwatch_log_group" "sms_logs" {
 
   # TODO(https://github.com/navapbc/template-infra/issues/164) Encrypt with customer managed KMS key
   # checkov:skip=CKV_AWS_158:Encrypt service logs with customer key in future work
+}
+
+# Data source to read CloudFormation stack outputs separately
+# This avoids the provider inconsistent plan issue
+data "aws_cloudformation_stack" "sms_config_set_outputs" {
+  name = aws_cloudformation_stack.sms_config_set.name
+
+  depends_on = [aws_cloudformation_stack.sms_config_set]
 }

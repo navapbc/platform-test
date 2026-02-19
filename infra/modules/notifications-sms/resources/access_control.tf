@@ -1,5 +1,50 @@
 data "aws_caller_identity" "current" {}
 
+# CloudFormation service role for SMS resource management
+resource "aws_iam_role" "cloudformation_service_role" {
+  name = "sms-cloudformation-role-${var.name}"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudformation.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "cloudformation_sms_permissions" {
+  name = "sms-cloudformation-policy-${var.name}"
+  role = aws_iam_role.cloudformation_service_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "sms-voice:*"
+        ]
+        Resource = [
+          "arn:aws:sms-voice:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:PassRole"
+        ]
+        Resource = aws_iam_role.logging_role.arn
+      }
+    ]
+  })
+}
+
 resource "aws_iam_role" "logging_role" {
   name = "sms-logging-role-${var.name}"
 
@@ -61,7 +106,7 @@ resource "aws_iam_policy" "sms_access" {
         ]
         Resource = [
           # Allow access to the phone pool created by CloudFormation
-          aws_cloudformation_stack.sms_config_set.outputs["PhonePoolArn"],
+          data.aws_cloudformation_stack.sms_config_set_outputs.outputs["PhonePoolArn"],
           # Allow access to the configuration set created by this module
           "arn:aws:sms-voice:*:${data.aws_caller_identity.current.account_id}:configuration-set/${var.name}-config-set"
         ]

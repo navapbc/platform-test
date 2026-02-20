@@ -84,6 +84,9 @@ locals {
     // Amazon Simple Email Service (SES) – An email sending and receiving service. Used for email notifications.
     "ses",
 
+    // AWS End User Messaging SMS – A service for sending SMS and voice messages. Used for SMS notifications.
+    "sms-voice",
+
     // Amazon Simple Notification Service (SNS) – A pub/sub messaging service.
     "sns",
 
@@ -98,5 +101,8 @@ locals {
 
     // AWS WAF v2 – An updated web application firewall service for filtering and securing traffic.
     "wafv2",
+
+    // AWS CloudFormation – Provides infrastructure as code for deploying and managing AWS resources. Used by Terraform's aws_cloudformation_stack resource for SMS configuration.
+    "cloudformation",
   ]
 }

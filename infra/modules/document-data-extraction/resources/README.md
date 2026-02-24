@@ -7,20 +7,19 @@ This module provisions AWS Bedrock Data Automation resources, including the data
 
 The module creates:
 - **Bedrock Data Automation Project** - Main project resource for data automation workflows
-- **Bedrock Blueprints** - Custom extraction blueprints configured via a map
+- **Bedrock Blueprints** - Custom extraction blueprints configured via a list
 
 ## Important Notes
 
 - **BDA uses its own internal service role** - This module does not create a custom IAM role for BDA. Bedrock Data Automation uses an AWS-managed internal service role for S3 access.
-- **S3 bucket encryption** - S3 buckets used with BDA should use AWS-managed encryption (AES256), not customer-managed KMS keys.
-- **Lambda permissions** - Any Lambda function invoking BDA must have S3 permissions for both input and output buckets directly attached to its execution role.
-- **No bucket policies needed** - BDA does not require bucket policies allowing the `bedrock.amazonaws.com` service principal.
+- **S3 bucket encryption** - S3 buckets used with BDA should use the KMS encryption key provided by the storage module.
+- **Lambda permissions** - Any Lambda function invoking BDA must have S3 permissions for both input and output buckets (to upload documents and retrieve results) and KMS permissions (for the storage module's encryption key) directly attached to its execution role.
 
 ## Features
 - Creates resources required for Bedrock Data Automation workflows
 - Uses a `name` variable to prefix all resource names for uniqueness and consistency
 - Supports both standard and custom output configurations
-- Flexible blueprint creation through a map of blueprint definitions
+- Flexible blueprint creation from file paths or ARNs
 - Complies with Checkov recommendations for security and compliance
 - Designed for cross-layer usage (see project module conventions)
 
@@ -32,16 +31,10 @@ module "bedrock_data_automation" {
   
   name  = "my-app-prod"
   
-  blueprints_map = {
-    invoice = {
-      schema = file("${path.module}/schemas/invoice.json")
-      type   = "DOCUMENT"
-      tags   = {
-          Environment = "production"
-          ManagedBy   = "terraform"
-      }
-    }
-  }
+  blueprints = [
+    "./schemas/invoice.json",
+    "arn:aws:bedrock:us-east-1::blueprint/aws-managed-blueprint-id"
+  ]
   
   standard_output_configuration = {
     document = {
@@ -54,8 +47,8 @@ module "bedrock_data_automation" {
   }
   
   tags = {
-          Environment = "production"
-          ManagedBy   = "terraform"
+    Environment = "production"
+    ManagedBy   = "terraform"
   }
 }
 ```
@@ -67,16 +60,8 @@ module "bedrock_data_automation" {
 | Name  | Description | Type | Required |
 |-------|-------------|------|----------|
 | `name` | Prefix to use for resource names (e.g., "my-app-prod") | `string` | yes |
-| `blueprints_map` | Map of unique blueprints with keys as blueprint identifiers and values as blueprint objects | `map(object)` | yes |
+| `blueprints` | List of blueprint file paths or ARNs. File paths create custom blueprints, ARNs reference existing blueprints. | `list(string)` | [] |
 
-#### `blueprints_map` Object Structure
-```hcl
-{
-  schema = string              # JSON schema defining the extraction structure
-  type   = string              # Blueprint type (e.g., "DOCUMENT")
-  tags   = map(string)         # Resource tags as key-value pairs
-}
-```
 
 ### Optional Variables
 
@@ -110,7 +95,7 @@ See `variables.tf` for complete structure details.
 ## Resources Created
 
 - `awscc_bedrock_data_automation_project.bda_project` - Main BDA project
-- `awscc_bedrock_blueprint.bda_blueprint` - One or more blueprints (created from `blueprints_map`)
+- `awscc_bedrock_blueprint.bda_blueprint` - One or more blueprints (created from `blueprints` list)
 
 ## Project Conventions
 
@@ -136,7 +121,7 @@ module "bedrock_data_automation" {
   
   name = "my-app"
   
-  blueprints_map = {}  # No custom blueprints
+  blueprints = [] # No custom blueprints
 }
 ```
 
@@ -145,9 +130,9 @@ module "bedrock_data_automation" {
 module "bedrock_data_automation" {
   source = "../../modules/document-data-extraction/resources"
   
-  name               = "my-app"
-  blueprints_map     = { /* ... */ }
-  
+  name       = "my-app"
+  blueprints = [] # Add file paths or ARNs here
+
   standard_output_configuration = {
     document = {
       extraction = {

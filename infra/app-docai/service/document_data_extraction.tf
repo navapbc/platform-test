@@ -22,7 +22,7 @@ locals {
     DOCUMENTAI_EXTERNAL_REF_ID_INDEX_NAME             = local.external_reference_id_index_name
     DOCUMENTAI_PROJECT_ARN                            = module.documentai[0].bda_project_arn
     DOCUMENTAI_REGION                                 = local.bda_region
-    
+
     # aws bedrock data automation requires users to use cross Region inference support 
     # when processing files. the following like the profile ARNs for different inference
     # profiles
@@ -149,8 +149,8 @@ module "documentai" {
       "${local.document_data_extraction_config.custom_blueprints_path}/${blueprint}"
     ],
     # AWS managed blueprint ARNs
-    local.document_data_extraction_config.aws_managed_blueprints != null ? 
-      local.document_data_extraction_config.aws_managed_blueprints : []
+    local.document_data_extraction_config.aws_managed_blueprints != null ?
+    local.document_data_extraction_config.aws_managed_blueprints : []
   )
 
   name = "${local.prefix}${local.document_data_extraction_config.name}"
@@ -206,7 +206,7 @@ resource "aws_dynamodb_table" "document_metadata" {
   global_secondary_index {
     name            = local.client_id_index_name
     hash_key        = "clientId"
-    range_key       = "createdAt"  # Sort by createdAt timestamp
+    range_key       = "createdAt" # Sort by createdAt timestamp
     projection_type = "ALL"
   }
 
@@ -325,7 +325,7 @@ resource "aws_iam_role_policy_attachment" "policy_attachments" {
             policy == "grantDynamoDb" ? aws_iam_policy.dynamodb_read_write[0].arn :
             policy == "grantDynamoStreams" ? aws_iam_policy.dynamodb_streams[0].arn :
             policy == "grantBedrockInvoke" ? aws_iam_policy.bedrock_invoke[0].arn :
-            policy == "grantSqsSendMessage" ? aws_iam_policy.sqs_send_message[0].arn :  
+            policy == "grantSqsSendMessage" ? aws_iam_policy.sqs_send_message[0].arn :
             policy == "grantMetricsBucket" ? module.documentai_metrics_bucket[0].access_policy_arn :
             policy == "grantAthenaResultsBucket" ? module.documentai_athena_results_bucket[0].access_policy_arn :
             policy == "grantMetricsProcessor" ? aws_iam_policy.documentai_metrics_processor[0].arn :

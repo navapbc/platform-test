@@ -4,7 +4,7 @@ locals {
   #
   # To isolate changes during infrastructure development by using manually created
   # terraform workspaces, see: /docs/infra/develop-and-test-infrastructure-in-isolation-using-workspaces.md
-  prefix = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
+  prefix            = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
   documentai_prefix = "${local.prefix}documentai-"
 
   # Add environment specific tags

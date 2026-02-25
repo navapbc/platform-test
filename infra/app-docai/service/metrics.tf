@@ -17,29 +17,29 @@ locals {
     { name = "process_status", type = "string" },
     { name = "error_message", type = "string" },
     { name = "response_code", type = "string" },
-    
+
     # Timestamps
     { name = "created_at", type = "string" },
     { name = "updated_at", type = "string" },
     { name = "bda_started_at", type = "string" },
     { name = "bda_completed_at", type = "string" },
-    
+
     # Performance metrics
     { name = "total_processing_time_seconds", type = "double" },
     { name = "bda_processing_time_seconds", type = "double" },
     { name = "bda_wait_time_seconds", type = "double" },
-    
+
     # Document metadata
     { name = "user_provided_document_category", type = "string" },
     { name = "file_size_bytes", type = "bigint" },
     { name = "content_type", type = "string" },
     { name = "pages_detected", type = "int" },
-    
+
     # Quality indicators
     { name = "is_document_blurry", type = "string" },
     { name = "is_password_protected", type = "string" },
     { name = "overall_blur_score", type = "double" },
-    
+
     # BDA results
     { name = "bda_region_used", type = "string" },
     { name = "matched_blueprint_name", type = "string" },
@@ -48,7 +48,7 @@ locals {
     { name = "matched_blueprint_field_count", type = "int" },
     { name = "matched_blueprint_field_count_not_empty", type = "int" },
     { name = "matched_blueprint_field_not_empty_avg_confidence", type = "double" },
-    
+
     # Operational
     { name = "retry_count", type = "int" },
   ]
@@ -60,6 +60,7 @@ locals {
     DOCUMENTAI_METRICS_QUEUE_URL          = aws_sqs_queue.documentai_job_completion_metrics[0].url
     DOCUMENTAI_METRICS_BUCKET_NAME        = module.documentai_metrics_bucket[0].bucket_name
     DOCUMENTAI_ATHENA_RESULTS_BUCKET_NAME = module.documentai_athena_results_bucket[0].bucket_name
+    DOCUMENTAI_ATHENA_WORKGROUP_NAME      = aws_athena_workgroup.documentai_metrics[0].name
   } : {}
 }
 
@@ -91,7 +92,7 @@ resource "aws_sqs_queue" "documentai_job_completion_metrics" {
   name                       = local.sqs_job_completion_queue_name
   visibility_timeout_seconds = 300
   message_retention_seconds  = (14 * 24 * 60 * 60) # 14 days
-  
+
   tags = local.tags
 }
 
@@ -131,7 +132,7 @@ resource "aws_glue_catalog_table" "documentai_metrics_job_status_table" {
     location      = "s3://${module.documentai_metrics_bucket[0].bucket_name}/raw"
     input_format  = "org.apache.hadoop.mapred.TextInputFormat"
     output_format = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
-    
+
     ser_de_info {
       serialization_library = "org.openx.data.jsonserde.JsonSerDe"
     }
@@ -139,8 +140,8 @@ resource "aws_glue_catalog_table" "documentai_metrics_job_status_table" {
     dynamic "columns" {
       for_each = local.ddb_table_columns
       content {
-        name    = columns.value.name
-        type    = columns.value.type
+        name = columns.value.name
+        type = columns.value.type
       }
     }
   }
@@ -156,13 +157,13 @@ resource "aws_glue_catalog_table" "documentai_metrics_job_status_table" {
   }
 
   parameters = {
-    "projection.enabled": "true",
-    "projection.date.type": "date",
-    "projection.date.range": "${local.current_year - 1}-01-01,${local.current_year + 5}-12-31",
-    "projection.date.format": "yyyy-MM-dd",
-    "projection.hour.type": "integer",
-    "projection.hour.range": "00,23",
-    "projection.hour.digits": "2",
+    "projection.enabled" : "true",
+    "projection.date.type" : "date",
+    "projection.date.range" : "${local.current_year - 1}-01-01,${local.current_year + 5}-12-31",
+    "projection.date.format" : "yyyy-MM-dd",
+    "projection.hour.type" : "integer",
+    "projection.hour.range" : "00,23",
+    "projection.hour.digits" : "2",
   }
 }
 
@@ -174,6 +175,11 @@ resource "aws_athena_workgroup" "documentai_metrics" {
   configuration {
     result_configuration {
       output_location = "s3://${module.documentai_athena_results_bucket[0].bucket_name}/"
+
+      encryption_configuration {
+        encryption_option = "SSE_KMS"
+        kms_key_arn       = module.documentai_athena_results_bucket[0].kms_key_arn
+      }
     }
   }
 
@@ -182,7 +188,7 @@ resource "aws_athena_workgroup" "documentai_metrics" {
 
 resource "aws_iam_policy" "sqs_send_message" {
   count = local.document_data_extraction_config != null ? 1 : 0
-  
+
   name = "${local.prefix}sqs-send-message"
   policy = jsonencode({
     Version = "2012-10-17"
@@ -250,6 +256,34 @@ resource "aws_iam_policy" "documentai_metrics_aggregator" {
           "arn:aws:glue:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:table/${local.glue_database_name}/*"
         ]
         Effect = "Allow"
+      },
+      {
+        Action = [
+          "s3:GetObject",
+          "s3:ListBucket",
+          "s3:GetBucketLocation"
+        ]
+        Resource = [
+          module.documentai_metrics_bucket[0].bucket_arn,
+          "${module.documentai_metrics_bucket[0].bucket_arn}/*"
+        ]
+        Effect = "Allow"
+      },
+      {
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject"
+        ]
+        Resource = "${module.documentai_athena_results_bucket[0].bucket_arn}/*"
+        Effect   = "Allow"
+      },
+      {
+        Action = [
+          "s3:ListBucket",
+          "s3:GetBucketLocation"
+        ]
+        Resource = module.documentai_athena_results_bucket[0].bucket_arn
+        Effect   = "Allow"
       }
     ]
   })

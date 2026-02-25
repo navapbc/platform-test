@@ -84,7 +84,7 @@ locals {
       policies           = ["grantMetricsAggregator", "grantMetricsBucket", "grantAthenaResultsBucket"]
       attachOpenCvLayer  = false
       attachPopplerLayer = false
-      timeout_seconds    = 60
+      timeout_seconds    = 300
       memory_size        = 512 # intentionally 512, no layers, but needs reasonable memory for JSON processing
     }
   } : {}

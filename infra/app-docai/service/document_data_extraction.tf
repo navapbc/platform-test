@@ -10,22 +10,25 @@ locals {
   # bda is only available in us-east-1, us-west-2, and us-gov-west-1.
   bda_region                       = "us-east-1"
   job_id_index_name                = "jobId-index"
+  client_id_index_name             = "clientId-index"
   external_reference_id_index_name = "externalReferenceId-index"
 
   document_data_extraction_environment_variables = local.document_data_extraction_config != null ? {
-    DDE_INPUT_LOCATION                      = "s3://${local.prefix}${local.document_data_extraction_config.input_bucket_name}"
-    DDE_OUTPUT_LOCATION                     = "s3://${local.prefix}${local.document_data_extraction_config.output_bucket_name}"
-    DDE_DOCUMENT_METADATA_TABLE_NAME        = "${local.prefix}${local.document_data_extraction_config.document_metadata_table_name}"
-    DDE_DOCUMENT_METADATA_JOB_ID_INDEX_NAME = local.job_id_index_name
-    DDE_EXTERNAL_REF_ID_INDEX_NAME          = local.external_reference_id_index_name
-    DDE_PROJECT_ARN                         = module.dde[0].bda_project_arn
-    DDE_REGION                              = local.bda_region
-
+    DOCUMENTAI_INPUT_LOCATION                         = "s3://${local.prefix}${local.document_data_extraction_config.input_bucket_name}"
+    DOCUMENTAI_OUTPUT_LOCATION                        = "s3://${local.prefix}${local.document_data_extraction_config.output_bucket_name}"
+    DOCUMENTAI_DOCUMENT_METADATA_TABLE_NAME           = "${local.prefix}${local.document_data_extraction_config.document_metadata_table_name}"
+    DOCUMENTAI_DOCUMENT_METADATA_JOB_ID_INDEX_NAME    = local.job_id_index_name
+    DOCUMENTAI_DOCUMENT_METADATA_CLIENT_ID_INDEX_NAME = local.client_id_index_name
+    DOCUMENTAI_EXTERNAL_REF_ID_INDEX_NAME             = local.external_reference_id_index_name
+    DOCUMENTAI_PROJECT_ARN                            = module.documentai[0].bda_project_arn
+    DOCUMENTAI_REGION                                 = local.bda_region
+    
     # aws bedrock data automation requires users to use cross Region inference support 
     # when processing files. the following like the profile ARNs for different inference
     # profiles
     # https://docs.aws.amazon.com/bedrock/latest/userguide/bda-cris.html
-    DDE_PROFILE_ARN = "arn:aws:bedrock:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:data-automation-profile/us.data-automation-v1"
+    DOCUMENTAI_PROFILE_ARN = "arn:aws:bedrock:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:data-automation-profile/us.data-automation-v1"
+
   } : {}
 
   lambda_functions = local.document_data_extraction_config != null ? {
@@ -56,7 +59,29 @@ locals {
       role_name          = "output-processor-role"
       handler            = "handler.handler"
       description        = "Processes BDA output and updates DynamoDB"
-      policies           = ["grantOutputBucket", "grantDynamoDb"]
+      policies           = ["grantOutputBucket", "grantDynamoDb", "grantSqsSendMessage"]
+      attachOpenCvLayer  = false
+      attachPopplerLayer = false
+      timeout_seconds    = 60
+      memory_size        = 512 # intentionally 512, no layers, but needs reasonable memory for JSON processing
+    },
+    documentai_metrics_processor = {
+      function_name      = "documentai-metrics-processor"
+      role_name          = "metrics-processor-role"
+      handler            = "handler.handler"
+      description        = "Reads messages from SQS and writes to S3 for Athena aggregation"
+      policies           = ["grantMetricsProcessor", "grantMetricsBucket"]
+      attachOpenCvLayer  = false
+      attachPopplerLayer = false
+      timeout_seconds    = 60
+      memory_size        = 512 # intentionally 512, no layers, but needs reasonable memory for JSON processing
+    },
+    documentai_metrics_aggregator = {
+      function_name      = "documentai-metrics-aggregator"
+      role_name          = "metrics-aggregator-role"
+      handler            = "handler.handler"
+      description        = "Aggregates metrics from S3 and writes to Athena"
+      policies           = ["grantMetricsAggregator", "grantMetricsBucket", "grantAthenaResultsBucket"]
       attachOpenCvLayer  = false
       attachPopplerLayer = false
       timeout_seconds    = 60
@@ -73,62 +98,60 @@ locals {
 }
 
 provider "aws" {
-  alias  = "dde"
+  alias  = "documentai"
   region = local.bda_region
 }
 
 provider "awscc" {
-  alias  = "dde"
+  alias  = "documentai"
   region = local.bda_region
 }
 
-module "dde_input_bucket" {
+module "documentai_input_bucket" {
   providers = {
-    aws = aws.dde
+    aws = aws.documentai
   }
 
-  count                      = local.document_data_extraction_config != null ? 1 : 0
-  source                     = "../../modules/storage"
-  name                       = "${local.prefix}${local.document_data_extraction_config.input_bucket_name}"
-  is_temporary               = local.is_temporary
-  use_aws_managed_encryption = true
+  count                          = local.document_data_extraction_config != null ? 1 : 0
+  source                         = "../../modules/storage"
+  name                           = "${local.prefix}${local.document_data_extraction_config.input_bucket_name}"
+  is_temporary                   = local.is_temporary
+  service_principals_with_access = ["bedrock.amazonaws.com"]
 }
 
-module "dde_output_bucket" {
+module "documentai_output_bucket" {
   providers = {
-    aws = aws.dde
+    aws = aws.documentai
   }
 
-  count                      = local.document_data_extraction_config != null ? 1 : 0
-  source                     = "../../modules/storage"
-  name                       = "${local.prefix}${local.document_data_extraction_config.output_bucket_name}"
-  is_temporary               = local.is_temporary
-  use_aws_managed_encryption = true
+  count                          = local.document_data_extraction_config != null ? 1 : 0
+  source                         = "../../modules/storage"
+  name                           = "${local.prefix}${local.document_data_extraction_config.output_bucket_name}"
+  is_temporary                   = local.is_temporary
+  service_principals_with_access = ["bedrock.amazonaws.com"]
 }
 
-module "dde" {
+module "documentai" {
   providers = {
-    aws   = aws.dde
-    awscc = awscc.dde
+    aws   = aws.documentai
+    awscc = awscc.documentai
   }
 
   count  = local.document_data_extraction_config != null ? 1 : 0
   source = "../../modules/document-data-extraction/resources"
 
   standard_output_configuration = local.document_data_extraction_config.standard_output_configuration
-  aws_managed_blueprints        = local.document_data_extraction_config.aws_managed_blueprints
   tags                          = local.tags
 
-  blueprints_map = {
-    # JPG/PNG can be processed as DOCUMENT or IMAGE types, but IMAGE types can only 
-    # have a single custom blueprint so generally the blueprints will be for the DOCUMENT type
-    for blueprint in fileset(local.document_data_extraction_config.custom_blueprints_path, "*") :
-    split(".", blueprint)[0] => {
-      schema = file("${local.document_data_extraction_config.custom_blueprints_path}/${blueprint}")
-      type   = "DOCUMENT"
-      tags   = local.tags
-    }
-  }
+  blueprints = concat(
+    # Custom blueprints from files
+    [for blueprint in fileset(local.document_data_extraction_config.custom_blueprints_path, "*") :
+      "${local.document_data_extraction_config.custom_blueprints_path}/${blueprint}"
+    ],
+    # AWS managed blueprint ARNs
+    local.document_data_extraction_config.aws_managed_blueprints != null ? 
+      local.document_data_extraction_config.aws_managed_blueprints : []
+  )
 
   name = "${local.prefix}${local.document_data_extraction_config.name}"
 }
@@ -139,7 +162,7 @@ module "dde" {
 resource "aws_s3_bucket" "lambda_artifacts" {
   count = local.document_data_extraction_config != null ? 1 : 0
 
-  bucket = "${local.prefix}documentai-lambda-artifacts"
+  bucket = "${local.documentai_prefix}lambda-artifacts"
 }
 
 resource "aws_dynamodb_table" "document_metadata" {
@@ -160,13 +183,30 @@ resource "aws_dynamodb_table" "document_metadata" {
   }
 
   attribute {
+    name = "clientId"
+    type = "S"
+  }
+
+  attribute {
     name = "externalReferenceId"
+    type = "S"
+  }
+
+  attribute {
+    name = "createdAt"
     type = "S"
   }
 
   global_secondary_index {
     name            = local.job_id_index_name
     hash_key        = "jobId"
+    projection_type = "ALL"
+  }
+
+  global_secondary_index {
+    name            = local.client_id_index_name
+    hash_key        = "clientId"
+    range_key       = "createdAt"  # Sort by createdAt timestamp
     projection_type = "ALL"
   }
 
@@ -231,8 +271,8 @@ resource "aws_iam_policy" "bedrock_invoke" {
     Statement = [{
       Action = "bedrock:InvokeDataAutomationAsync"
       Resource = [
-        module.dde[0].bda_project_arn,
-        local.document_data_extraction_environment_variables.DDE_PROFILE_ARN,
+        module.documentai[0].bda_project_arn,
+        local.document_data_extraction_environment_variables.DOCUMENTAI_PROFILE_ARN,
         "arn:aws:bedrock:us-east-2:${data.aws_caller_identity.current.account_id}:data-automation-profile/us.data-automation-v1",
         "arn:aws:bedrock:us-west-1:${data.aws_caller_identity.current.account_id}:data-automation-profile/us.data-automation-v1",
         "arn:aws:bedrock:us-west-2:${data.aws_caller_identity.current.account_id}:data-automation-profile/us.data-automation-v1"
@@ -280,11 +320,16 @@ resource "aws_iam_role_policy_attachment" "policy_attachments" {
           key       = "${func_config.role_name}-${policy}"
           role_name = func_config.role_name
           policy_arn = (
-            policy == "grantInputBucket" ? module.dde_input_bucket[0].access_policy_arn :
-            policy == "grantOutputBucket" ? module.dde_output_bucket[0].access_policy_arn :
+            policy == "grantInputBucket" ? module.documentai_input_bucket[0].access_policy_arn :
+            policy == "grantOutputBucket" ? module.documentai_output_bucket[0].access_policy_arn :
             policy == "grantDynamoDb" ? aws_iam_policy.dynamodb_read_write[0].arn :
             policy == "grantDynamoStreams" ? aws_iam_policy.dynamodb_streams[0].arn :
-            policy == "grantBedrockInvoke" ? aws_iam_policy.bedrock_invoke[0].arn : null
+            policy == "grantBedrockInvoke" ? aws_iam_policy.bedrock_invoke[0].arn :
+            policy == "grantSqsSendMessage" ? aws_iam_policy.sqs_send_message[0].arn :  
+            policy == "grantMetricsBucket" ? module.documentai_metrics_bucket[0].access_policy_arn :
+            policy == "grantAthenaResultsBucket" ? module.documentai_athena_results_bucket[0].access_policy_arn :
+            policy == "grantMetricsProcessor" ? aws_iam_policy.documentai_metrics_processor[0].arn :
+            policy == "grantMetricsAggregator" ? aws_iam_policy.documentai_metrics_aggregator[0].arn : null
           )
         }
       ]
@@ -433,6 +478,7 @@ resource "aws_lambda_function" "functions" {
   environment {
     variables = merge(
       local.document_data_extraction_environment_variables,
+      local.metrics_environment_variables,
       each.value.attachPopplerLayer ? {
         PATH            = "/opt/bin:/usr/local/bin:/usr/bin:/bin"
         LD_LIBRARY_PATH = "/opt/lib64:/lib64:/usr/lib64"

@@ -5,6 +5,7 @@ locals {
   # To isolate changes during infrastructure development by using manually created
   # terraform workspaces, see: /docs/infra/develop-and-test-infrastructure-in-isolation-using-workspaces.md
   prefix = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
+  documentai_prefix = "${local.prefix}documentai-"
 
   # Add environment specific tags
   tags = merge(module.project_config.default_tags, {
@@ -120,10 +121,10 @@ module "service" {
       storage_access = module.storage.access_policy_arn
     },
     module.app_config.enable_document_data_extraction ? {
-      dde_input_bucket_access  = module.dde_input_bucket[0].access_policy_arn
-      dde_output_bucket_access = module.dde_output_bucket[0].access_policy_arn,
-      dde_bedrock_access       = module.dde[0].access_policy_arn,
-      dde_dynamodb_access      = aws_iam_policy.dynamodb_read_write[0].arn
+      documentai_input_bucket_access  = module.documentai_input_bucket[0].access_policy_arn
+      documentai_output_bucket_access = module.documentai_output_bucket[0].access_policy_arn,
+      documentai_bedrock_access       = module.documentai[0].access_policy_arn,
+      documentai_dynamodb_access      = aws_iam_policy.dynamodb_read_write[0].arn
     } : {},
     module.app_config.enable_identity_provider ? {
       identity_provider_access = module.identity_provider_client[0].access_policy_arn,
@@ -132,6 +133,7 @@ module "service" {
       notifications_access = module.notifications[0].access_policy_arn,
     } : {},
   )
+
 
   ephemeral_write_volumes = local.service_config.ephemeral_write_volumes
 

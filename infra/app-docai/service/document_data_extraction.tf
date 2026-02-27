@@ -17,6 +17,7 @@ locals {
     DOCUMENTAI_INPUT_LOCATION                         = "s3://${local.prefix}${local.document_data_extraction_config.input_bucket_name}"
     DOCUMENTAI_OUTPUT_LOCATION                        = "s3://${local.prefix}${local.document_data_extraction_config.output_bucket_name}"
     DOCUMENTAI_DOCUMENT_METADATA_TABLE_NAME           = "${local.prefix}${local.document_data_extraction_config.document_metadata_table_name}"
+    DOCUMENTAI_MULTIPAGE_UPLOAD_SESSIONS_TABLE_NAME   = "${local.prefix}${local.document_data_extraction_config.multipage_upload_sessions_table_name}"
     DOCUMENTAI_DOCUMENT_METADATA_JOB_ID_INDEX_NAME    = local.job_id_index_name
     DOCUMENTAI_DOCUMENT_METADATA_CLIENT_ID_INDEX_NAME = local.client_id_index_name
     DOCUMENTAI_EXTERNAL_REF_ID_INDEX_NAME             = local.external_reference_id_index_name
@@ -222,6 +223,55 @@ resource "aws_dynamodb_table" "document_metadata" {
   tags = local.tags
 }
 
+resource "aws_dynamodb_table" "multipage_upload_sessions" {
+  count = local.document_data_extraction_config != null ? 1 : 0
+
+  name         = "${local.prefix}${local.document_data_extraction_config.multipage_upload_sessions_table_name}"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "sessionId"
+
+  range_key = "pageNumber"
+
+  attribute {
+    name = "sessionId"
+    type = "S"
+  }
+  attribute {
+    name = "pageNumber"
+    type = "N"
+  }
+
+  attribute {
+    name = "clientId"
+    type = "S"
+  }
+
+  attribute {
+    name = "externalReferenceId"
+    type = "S"
+  }
+
+  attribute {
+    name = "createdAt"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name            = local.client_id_index_name
+    hash_key        = "clientId"
+    range_key       = "createdAt" # Sort by createdAt timestamp
+    projection_type = "ALL"
+  }
+
+  global_secondary_index {
+    name            = local.external_reference_id_index_name
+    hash_key        = "externalReferenceId"
+    projection_type = "ALL"
+  }
+
+  tags = local.tags
+}
+
 #-------------------
 # IAM Policies
 #-------------------
@@ -238,7 +288,9 @@ resource "aws_iam_policy" "dynamodb_read_write" {
       ]
       Resource = [
         aws_dynamodb_table.document_metadata[0].arn,
-        "${aws_dynamodb_table.document_metadata[0].arn}/index/*"
+        "${aws_dynamodb_table.document_metadata[0].arn}/index/*",
+        aws_dynamodb_table.multipage_upload_sessions[0].arn,
+        "${aws_dynamodb_table.multipage_upload_sessions[0].arn}/index/*"
       ]
       Effect = "Allow"
     }]
@@ -502,6 +554,11 @@ resource "aws_cloudwatch_event_rule" "input_bucket_object_created" {
     detail = {
       bucket = {
         name = ["${local.prefix}${local.document_data_extraction_config.input_bucket_name}"]
+      },
+      object : {
+        key = [{
+          prefix = "input/"
+        }]
       }
     }
   })

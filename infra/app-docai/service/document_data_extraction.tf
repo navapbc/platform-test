@@ -8,11 +8,12 @@ locals {
   # Provider configurations must be known at plan time, but 
   # local.document_data_extraction_config.bda_region depends on module outputs.
   # bda is only available in us-east-1, us-west-2, and us-gov-west-1.
-  bda_region                       = "us-east-1"
-  job_id_index_name                = "jobId-index"
-  tenant_index_name                = "tenantId-index"
-  external_reference_id_index_name = "externalReferenceId-index"
-  batch_id_index_name              = "batchId-index"
+  bda_region                        = "us-east-1"
+  job_id_index_name                 = "jobId-index"
+  tenant_index_name                 = "tenantId-index"
+  external_reference_id_index_name  = "externalReferenceId-index"
+  batch_id_index_name               = "batchId-index"
+  lambda_concurrent_execution_limit = 100
 
   document_data_extraction_environment_variables = local.document_data_extraction_config != null ? {
     DOCUMENTAI_INPUT_LOCATION                         = "s3://${local.prefix}${local.document_data_extraction_config.input_bucket_name}"
@@ -161,12 +162,58 @@ module "documentai" {
 }
 
 #-------------------
-# Storage Resources
+# Dead Letter Queue
 #-------------------
-resource "aws_s3_bucket" "lambda_artifacts" {
+resource "aws_sqs_queue" "lambda_dlq" {
   count = local.document_data_extraction_config != null ? 1 : 0
 
-  bucket = "${local.documentai_prefix}lambda-artifacts"
+  name                      = "${local.prefix}lambda-dlq"
+  message_retention_seconds = 1209600 # 14 days
+
+  tags = local.tags
+}
+
+#-------------------
+# KMS Key for DynamoDB Encryption
+#-------------------
+data "aws_iam_policy_document" "dynamodb_kms_key_policy" {
+  #checkov:skip=CKV_AWS_109:Root account requires full KMS permissions to enable IAM-based access control
+  #checkov:skip=CKV_AWS_111:Root account requires full KMS permissions to enable IAM-based access control
+  #checkov:skip=CKV_AWS_356:Wildcard in Resource element represents the KMS key to which the key policy is attached
+
+  statement {
+    sid    = "Enable IAM User Permissions"
+    effect = "Allow"
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+    }
+    actions   = ["kms:*"]
+    resources = ["*"]
+  }
+}
+
+resource "aws_kms_key" "dynamodb" {
+  count = local.document_data_extraction_config != null ? 1 : 0
+
+  description             = "KMS key for DocumentAI DynamoDB tables"
+  deletion_window_in_days = 10
+  enable_key_rotation     = true
+
+  policy = data.aws_iam_policy_document.dynamodb_kms_key_policy.json
+
+  tags = local.tags
+}
+
+#-------------------
+# Storage Resources
+#-------------------
+module "lambda_artifacts_bucket" {
+  count = local.document_data_extraction_config != null ? 1 : 0
+
+  source       = "../../modules/storage"
+  name         = "${local.documentai_prefix}lambda-artifacts"
+  is_temporary = local.is_temporary
 }
 
 resource "aws_dynamodb_table" "document_metadata" {
@@ -234,6 +281,16 @@ resource "aws_dynamodb_table" "document_metadata" {
   stream_enabled   = true
   stream_view_type = "NEW_AND_OLD_IMAGES"
 
+  server_side_encryption {
+    enabled     = true
+    kms_key_arn = aws_kms_key.dynamodb[0].arn
+  }
+
+  point_in_time_recovery {
+    enabled = true
+  }
+
+
   tags = local.tags
 }
 
@@ -283,6 +340,15 @@ resource "aws_dynamodb_table" "document_builds" {
     projection_type = "ALL"
   }
 
+  server_side_encryption {
+    enabled     = true
+    kms_key_arn = aws_kms_key.dynamodb[0].arn
+  }
+
+  point_in_time_recovery {
+    enabled = true
+  }
+
   tags = local.tags
 }
 
@@ -330,6 +396,15 @@ resource "aws_dynamodb_table" "documentai_batches" {
     hash_key        = "tenantId"
     range_key       = "createdAt" # Sort by createdAt timestamp
     projection_type = "ALL"
+  }
+
+  server_side_encryption {
+    enabled     = true
+    kms_key_arn = aws_kms_key.dynamodb[0].arn
+  }
+
+  point_in_time_recovery {
+    enabled = true
   }
 
   tags = local.tags
@@ -395,6 +470,43 @@ resource "aws_iam_policy" "bedrock_invoke" {
         "arn:aws:bedrock:us-west-2:${data.aws_caller_identity.current.account_id}:data-automation-profile/us.data-automation-v1"
       ]
       Effect = "Allow"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "lambda_kms_policy" {
+  for_each = local.lambda_roles
+
+  name = "kms-access"
+  role = aws_iam_role.lambda_roles[each.key].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "kms:Decrypt",
+        "kms:DescribeKey"
+      ]
+      Resource = aws_kms_key.dynamodb[0].arn
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "lambda_dlq_policy" {
+  for_each = local.lambda_roles
+
+  name = "dlq-access"
+  role = aws_iam_role.lambda_roles[each.key].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "sqs:SendMessage"
+      ]
+      Resource = aws_sqs_queue.lambda_dlq[0].arn
     }]
   })
 }
@@ -474,7 +586,7 @@ data "archive_file" "placeholder_lambda" {
 resource "aws_s3_object" "lambda_code" {
   count = local.document_data_extraction_config != null ? 1 : 0
 
-  bucket = aws_s3_bucket.lambda_artifacts[0].bucket
+  bucket = module.lambda_artifacts_bucket[0].bucket_name
   key    = "handlers.zip"
   source = data.archive_file.placeholder_lambda[0].output_path
 }
@@ -518,7 +630,7 @@ data "external" "opencv_layer_build" {
       public.ecr.aws/lambda/python:3.11 \
       /bin/bash -c "pip install --no-cache-dir --platform manylinux2014_x86_64 --only-binary=:all: --implementation cp --python-version 311 -r /workspace/requirements.txt -t /asset-output/python" >&2
     cd output && zip -r opencv-layer.zip python/ >&2
-    aws s3 cp opencv-layer.zip s3://${aws_s3_bucket.lambda_artifacts[0].bucket}/opencv-layer.zip >&2
+    aws s3 cp opencv-layer.zip s3://${module.lambda_artifacts_bucket[0].bucket_name}/opencv-layer.zip >&2
     echo '{"status": "success"}'
   EOT
   ]
@@ -536,7 +648,7 @@ data "external" "poppler_layer_build" {
     mkdir -p output
     docker run --rm -v $(pwd)/output:/output poppler-layer sh -c "cp -r /opt/. /output/" >&2
     cd output && zip -r poppler-layer.zip . >&2
-    aws s3 cp poppler-layer.zip s3://${aws_s3_bucket.lambda_artifacts[0].bucket}/poppler-layer.zip >&2
+    aws s3 cp poppler-layer.zip s3://${module.lambda_artifacts_bucket[0].bucket_name}/poppler-layer.zip >&2
     echo '{"status": "success"}'
   EOT
   ]
@@ -549,7 +661,7 @@ resource "aws_lambda_layer_version" "opencv_layer" {
   description         = "OpenCV, NumPy, and Pillow libraries for image processing"
   compatible_runtimes = ["python3.11"]
 
-  s3_bucket = aws_s3_bucket.lambda_artifacts[0].bucket
+  s3_bucket = module.lambda_artifacts_bucket[0].bucket_name
   s3_key    = "opencv-layer.zip"
 
   depends_on = [data.external.opencv_layer_build]
@@ -563,7 +675,7 @@ resource "aws_lambda_layer_version" "poppler_layer" {
   compatible_runtimes      = ["python3.11"]
   compatible_architectures = ["x86_64"]
 
-  s3_bucket = aws_s3_bucket.lambda_artifacts[0].bucket
+  s3_bucket = module.lambda_artifacts_bucket[0].bucket_name
   s3_key    = "poppler-layer.zip"
 
   depends_on = [data.external.poppler_layer_build]
@@ -575,7 +687,7 @@ resource "aws_lambda_layer_version" "poppler_layer" {
 resource "aws_lambda_function" "functions" {
   for_each = local.lambda_functions
 
-  s3_bucket     = aws_s3_bucket.lambda_artifacts[0].bucket
+  s3_bucket     = module.lambda_artifacts_bucket[0].bucket_name
   s3_key        = "handlers.zip"
   function_name = "${local.prefix}${each.value.function_name}"
   role          = aws_iam_role.lambda_roles[each.value.role_name].arn
@@ -592,6 +704,15 @@ resource "aws_lambda_function" "functions" {
     each.value.attachPopplerLayer ? aws_lambda_layer_version.poppler_layer[0].arn : null
   ])
 
+  tracing_config {
+    mode = "Active" # enable X-Ray
+  }
+
+  dead_letter_config {
+    target_arn = aws_sqs_queue.lambda_dlq[0].arn
+  }
+
+  reserved_concurrent_executions = local.lambda_concurrent_execution_limit
   environment {
     variables = merge(
       local.document_data_extraction_environment_variables,

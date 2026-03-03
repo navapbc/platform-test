@@ -92,6 +92,7 @@ resource "aws_sqs_queue" "documentai_job_completion_metrics" {
   name                       = local.sqs_job_completion_queue_name
   visibility_timeout_seconds = 300
   message_retention_seconds  = (14 * 24 * 60 * 60) # 14 days
+  kms_master_key_id          = aws_kms_key.dynamodb[0].arn
 
   tags = local.tags
 }

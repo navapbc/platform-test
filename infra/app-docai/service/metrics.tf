@@ -10,7 +10,7 @@ locals {
     { name = "file_name", type = "string" },
     { name = "job_id", type = "string" },
     { name = "trace_id", type = "string" },
-    { name = "client_id", type = "string" },
+    { name = "tenant_id", type = "string" },
     { name = "external_reference_id", type = "string" },
 
     # Status & results

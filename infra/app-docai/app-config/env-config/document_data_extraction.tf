@@ -5,6 +5,7 @@ locals {
     output_bucket_name                   = "${var.app_name}-${var.environment}-bda-output"
     document_metadata_table_name         = "${var.app_name}-${var.environment}-document-metadata"
     multipage_upload_sessions_table_name = "${var.app_name}-${var.environment}-multipage-upload-sessions"
+    batch_table_name                     = "${var.app_name}-${var.environment}-batches"
     custom_blueprints_path               = "./document-data-extraction-blueprints/"
 
 

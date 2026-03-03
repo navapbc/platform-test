@@ -10,16 +10,19 @@ locals {
   # bda is only available in us-east-1, us-west-2, and us-gov-west-1.
   bda_region                       = "us-east-1"
   job_id_index_name                = "jobId-index"
-  client_id_index_name             = "clientId-index"
+  tenant_index_name                = "tenantId-index"
   external_reference_id_index_name = "externalReferenceId-index"
+  batch_id_index_name              = "batchId-index"
 
   document_data_extraction_environment_variables = local.document_data_extraction_config != null ? {
     DOCUMENTAI_INPUT_LOCATION                         = "s3://${local.prefix}${local.document_data_extraction_config.input_bucket_name}"
     DOCUMENTAI_OUTPUT_LOCATION                        = "s3://${local.prefix}${local.document_data_extraction_config.output_bucket_name}"
     DOCUMENTAI_DOCUMENT_METADATA_TABLE_NAME           = "${local.prefix}${local.document_data_extraction_config.document_metadata_table_name}"
     DOCUMENTAI_MULTIPAGE_UPLOAD_SESSIONS_TABLE_NAME   = "${local.prefix}${local.document_data_extraction_config.multipage_upload_sessions_table_name}"
+    DOCUMENTAI_BATCH_TABLE_NAME                       = "${local.prefix}${local.document_data_extraction_config.batch_table_name}"
     DOCUMENTAI_DOCUMENT_METADATA_JOB_ID_INDEX_NAME    = local.job_id_index_name
-    DOCUMENTAI_DOCUMENT_METADATA_CLIENT_ID_INDEX_NAME = local.client_id_index_name
+    DOCUMENTAI_DOCUMENT_METADATA_TENANT_ID_INDEX_NAME = local.tenant_index_name
+    DOCUMENTAI_DOCUMENT_METADATA_BATCH_ID_INDEX_NAME  = local.batch_id_index_name
     DOCUMENTAI_EXTERNAL_REF_ID_INDEX_NAME             = local.external_reference_id_index_name
     DOCUMENTAI_PROJECT_ARN                            = module.documentai[0].bda_project_arn
     DOCUMENTAI_REGION                                 = local.bda_region
@@ -184,12 +187,17 @@ resource "aws_dynamodb_table" "document_metadata" {
   }
 
   attribute {
-    name = "clientId"
+    name = "tenantId"
     type = "S"
   }
 
   attribute {
     name = "externalReferenceId"
+    type = "S"
+  }
+
+  attribute {
+    name = "batchId"
     type = "S"
   }
 
@@ -205,8 +213,8 @@ resource "aws_dynamodb_table" "document_metadata" {
   }
 
   global_secondary_index {
-    name            = local.client_id_index_name
-    hash_key        = "clientId"
+    name            = local.tenant_index_name
+    hash_key        = "tenantId"
     range_key       = "createdAt" # Sort by createdAt timestamp
     projection_type = "ALL"
   }
@@ -214,6 +222,12 @@ resource "aws_dynamodb_table" "document_metadata" {
   global_secondary_index {
     name            = local.external_reference_id_index_name
     hash_key        = "externalReferenceId"
+    projection_type = "ALL"
+  }
+
+  global_secondary_index {
+    name            = local.batch_id_index_name
+    hash_key        = "batchId"
     projection_type = "ALL"
   }
 
@@ -242,7 +256,7 @@ resource "aws_dynamodb_table" "multipage_upload_sessions" {
   }
 
   attribute {
-    name = "clientId"
+    name = "tenantId"
     type = "S"
   }
 
@@ -257,8 +271,8 @@ resource "aws_dynamodb_table" "multipage_upload_sessions" {
   }
 
   global_secondary_index {
-    name            = local.client_id_index_name
-    hash_key        = "clientId"
+    name            = local.tenant_index_name
+    hash_key        = "tenantId"
     range_key       = "createdAt" # Sort by createdAt timestamp
     projection_type = "ALL"
   }
@@ -266,6 +280,55 @@ resource "aws_dynamodb_table" "multipage_upload_sessions" {
   global_secondary_index {
     name            = local.external_reference_id_index_name
     hash_key        = "externalReferenceId"
+    projection_type = "ALL"
+  }
+
+  tags = local.tags
+}
+
+resource "aws_dynamodb_table" "documentai_batches" {
+  count = local.document_data_extraction_config != null ? 1 : 0
+
+  name         = "${local.prefix}${local.document_data_extraction_config.batch_table_name}"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "batchId"
+
+  attribute {
+    name = "batchId"
+    type = "S"
+  }
+
+  attribute {
+    name = "tenantId"
+    type = "S"
+  }
+
+  attribute {
+    name = "createdAt"
+    type = "S"
+  }
+
+  attribute {
+    name = "status"
+    type = "S"
+  }
+
+  ttl {
+    attribute_name = "ttl"
+    enabled        = true
+  }
+
+  global_secondary_index {
+    name            = "StatusCreatedAtIndex"
+    hash_key        = "status"
+    range_key       = "createdAt"
+    projection_type = "ALL"
+  }
+
+  global_secondary_index {
+    name            = local.tenant_index_name
+    hash_key        = "tenantId"
+    range_key       = "createdAt" # Sort by createdAt timestamp
     projection_type = "ALL"
   }
 
@@ -290,7 +353,9 @@ resource "aws_iam_policy" "dynamodb_read_write" {
         aws_dynamodb_table.document_metadata[0].arn,
         "${aws_dynamodb_table.document_metadata[0].arn}/index/*",
         aws_dynamodb_table.multipage_upload_sessions[0].arn,
-        "${aws_dynamodb_table.multipage_upload_sessions[0].arn}/index/*"
+        "${aws_dynamodb_table.multipage_upload_sessions[0].arn}/index/*",
+        aws_dynamodb_table.documentai_batches[0].arn,
+        "${aws_dynamodb_table.documentai_batches[0].arn}/index/*"
       ]
       Effect = "Allow"
     }]

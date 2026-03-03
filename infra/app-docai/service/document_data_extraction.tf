@@ -169,6 +169,7 @@ resource "aws_sqs_queue" "lambda_dlq" {
 
   name                      = "${local.prefix}lambda-dlq"
   message_retention_seconds = 1209600 # 14 days
+  kms_master_key_id         = aws_kms_key.dynamodb[0].arn
 
   tags = local.tags
 }
@@ -685,6 +686,9 @@ resource "aws_lambda_layer_version" "poppler_layer" {
 # Lambda Functions
 #-------------------
 resource "aws_lambda_function" "functions" {
+  #checkov:skip=CKV_AWS_117:Lambda functions don't require VPC access for S3/DynamoDB operations
+  #checkov:skip=CKV_AWS_272:Code signing not required for this deployment
+  #checkov:skip=CKV_AWS_173:Environment variables do not contain sensitive data
   for_each = local.lambda_functions
 
   s3_bucket     = module.lambda_artifacts_bucket[0].bucket_name

@@ -20,6 +20,8 @@ locals {
       job_name => merge({ source_bucket = local.bucket_name }, job_config)
     }
 
-    ephemeral_write_volumes = []
+    # /tmp is required for pdf2image and other document processing libraries
+    # that need to create temporary files during PDF conversion
+    ephemeral_write_volumes = ["/tmp"]
   }
 }

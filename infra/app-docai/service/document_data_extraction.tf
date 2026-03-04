@@ -8,12 +8,11 @@ locals {
   # Provider configurations must be known at plan time, but 
   # local.document_data_extraction_config.bda_region depends on module outputs.
   # bda is only available in us-east-1, us-west-2, and us-gov-west-1.
-  bda_region                        = "us-east-1"
-  job_id_index_name                 = "jobId-index"
-  tenant_index_name                 = "tenantId-index"
-  external_reference_id_index_name  = "externalReferenceId-index"
-  batch_id_index_name               = "batchId-index"
-  lambda_concurrent_execution_limit = 100
+  bda_region                       = "us-east-1"
+  job_id_index_name                = "jobId-index"
+  tenant_index_name                = "tenantId-index"
+  external_reference_id_index_name = "externalReferenceId-index"
+  batch_id_index_name              = "batchId-index"
 
   document_data_extraction_environment_variables = local.document_data_extraction_config != null ? {
     DOCUMENTAI_INPUT_LOCATION                         = "s3://${local.prefix}${local.document_data_extraction_config.input_bucket_name}"
@@ -35,71 +34,6 @@ locals {
     DOCUMENTAI_PROFILE_ARN = "arn:aws:bedrock:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:data-automation-profile/us.data-automation-v1"
 
   } : {}
-
-  lambda_functions = local.document_data_extraction_config != null ? {
-    ddb_insert_file_name = {
-      function_name      = "ddb-insert-file-name"
-      role_name          = "ddb-insert-role"
-      handler            = "handler.handler"
-      description        = "Inserts file name into DynamoDB when files are uploaded"
-      policies           = ["grantInputBucket", "grantDynamoDb"]
-      attachOpenCvLayer  = true
-      attachPopplerLayer = true
-      timeout_seconds    = 60
-      memory_size        = 5120
-    }
-    bda_invoker = {
-      function_name      = "bda-invoker"
-      role_name          = "bda-invoker-role"
-      handler            = "handler.handler"
-      description        = "Invokes BDA job when DynamoDB record is created"
-      policies           = ["grantInputBucket", "grantOutputBucket", "grantDynamoDb", "grantDynamoStreams", "grantBedrockInvoke"]
-      attachOpenCvLayer  = true
-      attachPopplerLayer = true
-      timeout_seconds    = 60
-      memory_size        = 5120
-    }
-    bda_output_processor = {
-      function_name      = "bda-output-processor"
-      role_name          = "output-processor-role"
-      handler            = "handler.handler"
-      description        = "Processes BDA output and updates DynamoDB"
-      policies           = ["grantOutputBucket", "grantDynamoDb", "grantSqsSendMessage"]
-      attachOpenCvLayer  = false
-      attachPopplerLayer = false
-      timeout_seconds    = 60
-      memory_size        = 512 # intentionally 512, no layers, but needs reasonable memory for JSON processing
-    },
-    documentai_metrics_processor = {
-      function_name      = "documentai-metrics-processor"
-      role_name          = "metrics-processor-role"
-      handler            = "handler.handler"
-      description        = "Reads messages from SQS and writes to S3 for Athena aggregation"
-      policies           = ["grantMetricsProcessor", "grantMetricsBucket"]
-      attachOpenCvLayer  = false
-      attachPopplerLayer = false
-      timeout_seconds    = 60
-      memory_size        = 512 # intentionally 512, no layers, but needs reasonable memory for JSON processing
-    },
-    documentai_metrics_aggregator = {
-      function_name      = "documentai-metrics-aggregator"
-      role_name          = "metrics-aggregator-role"
-      handler            = "handler.handler"
-      description        = "Aggregates metrics from S3 and writes to Athena"
-      policies           = ["grantMetricsAggregator", "grantMetricsBucket", "grantAthenaResultsBucket"]
-      attachOpenCvLayer  = false
-      attachPopplerLayer = false
-      timeout_seconds    = 300
-      memory_size        = 512 # intentionally 512, no layers, but needs reasonable memory for JSON processing
-    }
-  } : {}
-
-
-  # derive unique roles from lambda functions defined above
-  lambda_roles = {
-    for func_key, func_config in local.lambda_functions :
-    func_config.role_name => func_config.role_name
-  }
 }
 
 provider "aws" {
@@ -162,19 +96,6 @@ module "documentai" {
 }
 
 #-------------------
-# Dead Letter Queue
-#-------------------
-resource "aws_sqs_queue" "lambda_dlq" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  name                      = "${local.prefix}lambda-dlq"
-  message_retention_seconds = 1209600 # 14 days
-  kms_master_key_id         = aws_kms_key.dynamodb[0].arn
-
-  tags = local.tags
-}
-
-#-------------------
 # KMS Key for DynamoDB Encryption
 #-------------------
 data "aws_iam_policy_document" "dynamodb_kms_key_policy" {
@@ -209,14 +130,6 @@ resource "aws_kms_key" "dynamodb" {
 #-------------------
 # Storage Resources
 #-------------------
-module "lambda_artifacts_bucket" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  source       = "../../modules/storage"
-  name         = "${local.documentai_prefix}lambda-artifacts"
-  is_temporary = local.is_temporary
-}
-
 resource "aws_dynamodb_table" "document_metadata" {
   count = local.document_data_extraction_config != null ? 1 : 0
 
@@ -278,9 +191,6 @@ resource "aws_dynamodb_table" "document_metadata" {
     hash_key        = "batchId"
     projection_type = "ALL"
   }
-
-  stream_enabled   = true
-  stream_view_type = "NEW_AND_OLD_IMAGES"
 
   server_side_encryption {
     enabled     = true
@@ -434,23 +344,14 @@ resource "aws_iam_policy" "dynamodb_read_write" {
         "${aws_dynamodb_table.documentai_batches[0].arn}/index/*"
       ]
       Effect = "Allow"
-    }]
-  })
-}
-
-resource "aws_iam_policy" "dynamodb_streams" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  name = "${local.prefix}dynamodb-streams"
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Action = ["dynamodb:DescribeStream", "dynamodb:GetRecords", "dynamodb:GetShardIterator", "dynamodb:ListStreams"]
-      Resource = [
-        aws_dynamodb_table.document_metadata[0].arn,
-        "${aws_dynamodb_table.document_metadata[0].arn}/stream/*"
-      ]
-      Effect = "Allow"
+      },
+      {
+        Action = [
+          "kms:Decrypt",
+          "kms:DescribeKey"
+        ]
+        Resource = aws_kms_key.dynamodb[0].arn
+        Effect   = "Allow"
     }]
   })
 }
@@ -473,344 +374,4 @@ resource "aws_iam_policy" "bedrock_invoke" {
       Effect = "Allow"
     }]
   })
-}
-
-resource "aws_iam_role_policy" "lambda_kms_policy" {
-  for_each = local.lambda_roles
-
-  name = "kms-access"
-  role = aws_iam_role.lambda_roles[each.key].id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Action = [
-        "kms:Decrypt",
-        "kms:DescribeKey"
-      ]
-      Resource = aws_kms_key.dynamodb[0].arn
-    }]
-  })
-}
-
-resource "aws_iam_role_policy" "lambda_dlq_policy" {
-  for_each = local.lambda_roles
-
-  name = "dlq-access"
-  role = aws_iam_role.lambda_roles[each.key].id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Action = [
-        "sqs:SendMessage"
-      ]
-      Resource = aws_sqs_queue.lambda_dlq[0].arn
-    }]
-  })
-}
-
-#-------------------
-# IAM Roles
-#-------------------
-resource "aws_iam_role" "lambda_roles" {
-  for_each = local.lambda_roles
-
-  name = "${local.prefix}${each.value}"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Principal = {
-        Service = "lambda.amazonaws.com"
-      }
-    }]
-  })
-}
-
-#-------------------
-# Attach IAM Policies to Roles
-#-------------------
-resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
-  for_each = local.lambda_roles
-
-  role       = aws_iam_role.lambda_roles[each.key].name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
-
-# custom policies based on lambda definitions above
-resource "aws_iam_role_policy_attachment" "policy_attachments" {
-  for_each = {
-    for pair in flatten([
-      for func_key, func_config in local.lambda_functions : [
-        for policy in func_config.policies : {
-          key       = "${func_config.role_name}-${policy}"
-          role_name = func_config.role_name
-          policy_arn = (
-            policy == "grantInputBucket" ? module.documentai_input_bucket[0].access_policy_arn :
-            policy == "grantOutputBucket" ? module.documentai_output_bucket[0].access_policy_arn :
-            policy == "grantDynamoDb" ? aws_iam_policy.dynamodb_read_write[0].arn :
-            policy == "grantDynamoStreams" ? aws_iam_policy.dynamodb_streams[0].arn :
-            policy == "grantBedrockInvoke" ? aws_iam_policy.bedrock_invoke[0].arn :
-            policy == "grantSqsSendMessage" ? aws_iam_policy.sqs_send_message[0].arn :
-            policy == "grantMetricsBucket" ? module.documentai_metrics_bucket[0].access_policy_arn :
-            policy == "grantAthenaResultsBucket" ? module.documentai_athena_results_bucket[0].access_policy_arn :
-            policy == "grantMetricsProcessor" ? aws_iam_policy.documentai_metrics_processor[0].arn :
-            policy == "grantMetricsAggregator" ? aws_iam_policy.documentai_metrics_aggregator[0].arn : null
-          )
-        }
-      ]
-    ]) : pair.key => pair
-  }
-
-  role       = aws_iam_role.lambda_roles[each.value.role_name].name
-  policy_arn = each.value.policy_arn
-}
-
-#-------------------
-# Placeholder Lambda Code (will be replaced with actual app code during full app/infra deployment)
-#-------------------
-data "archive_file" "placeholder_lambda" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  type        = "zip"
-  output_path = "/tmp/handlers.zip"
-  source {
-    content  = "def handler(event, context): pass"
-    filename = "handler.py"
-  }
-}
-
-resource "aws_s3_object" "lambda_code" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  bucket = module.lambda_artifacts_bucket[0].bucket_name
-  key    = "handlers.zip"
-  source = data.archive_file.placeholder_lambda[0].output_path
-}
-
-#-------------------
-# Lambda Permissions for EventBridge
-#-------------------
-resource "aws_lambda_permission" "allow_eventbridge_ddb_insert" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  statement_id  = "AllowExecutionFromEventBridge"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.functions["ddb_insert_file_name"].function_name
-  principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.input_bucket_object_created[0].arn
-}
-
-resource "aws_lambda_permission" "allow_eventbridge_output_processor" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  statement_id  = "AllowExecutionFromEventBridge"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.functions["bda_output_processor"].function_name
-  principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.output_bucket_object_created[0].arn
-}
-
-
-#-------------------
-# Lambda Layers
-#-------------------
-data "external" "opencv_layer_build" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  program = ["bash", "-c", <<-EOT
-    set -e
-    cd "${path.module}/../layers/opencv"
-    rm -rf output
-    mkdir -p output/python
-    docker run --rm --entrypoint="" -v $(pwd):/workspace -v $(pwd)/output:/asset-output \
-      public.ecr.aws/lambda/python:3.11 \
-      /bin/bash -c "pip install --no-cache-dir --platform manylinux2014_x86_64 --only-binary=:all: --implementation cp --python-version 311 -r /workspace/requirements.txt -t /asset-output/python" >&2
-    cd output && zip -r opencv-layer.zip python/ >&2
-    aws s3 cp opencv-layer.zip s3://${module.lambda_artifacts_bucket[0].bucket_name}/opencv-layer.zip >&2
-    echo '{"status": "success"}'
-  EOT
-  ]
-}
-
-
-data "external" "poppler_layer_build" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  program = ["bash", "-c", <<-EOT
-    set -e
-    cd "${path.module}/../layers/poppler"
-    docker build --platform linux/amd64 -t poppler-layer . >&2
-    rm -rf output
-    mkdir -p output
-    docker run --rm -v $(pwd)/output:/output poppler-layer sh -c "cp -r /opt/. /output/" >&2
-    cd output && zip -r poppler-layer.zip . >&2
-    aws s3 cp poppler-layer.zip s3://${module.lambda_artifacts_bucket[0].bucket_name}/poppler-layer.zip >&2
-    echo '{"status": "success"}'
-  EOT
-  ]
-}
-
-resource "aws_lambda_layer_version" "opencv_layer" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  layer_name          = "${local.prefix}opencv-numpy-pillow"
-  description         = "OpenCV, NumPy, and Pillow libraries for image processing"
-  compatible_runtimes = ["python3.11"]
-
-  s3_bucket = module.lambda_artifacts_bucket[0].bucket_name
-  s3_key    = "opencv-layer.zip"
-
-  depends_on = [data.external.opencv_layer_build]
-}
-
-resource "aws_lambda_layer_version" "poppler_layer" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  layer_name               = "${local.prefix}poppler-utils"
-  description              = "Poppler utilities for PDF processing"
-  compatible_runtimes      = ["python3.11"]
-  compatible_architectures = ["x86_64"]
-
-  s3_bucket = module.lambda_artifacts_bucket[0].bucket_name
-  s3_key    = "poppler-layer.zip"
-
-  depends_on = [data.external.poppler_layer_build]
-}
-
-#-------------------
-# Lambda Functions
-#-------------------
-resource "aws_lambda_function" "functions" {
-  #checkov:skip=CKV_AWS_117:Lambda functions don't require VPC access for S3/DynamoDB operations
-  #checkov:skip=CKV_AWS_272:Code signing not required for this deployment
-  #checkov:skip=CKV_AWS_173:Environment variables do not contain sensitive data
-  for_each = local.lambda_functions
-
-  s3_bucket     = module.lambda_artifacts_bucket[0].bucket_name
-  s3_key        = "handlers.zip"
-  function_name = "${local.prefix}${each.value.function_name}"
-  role          = aws_iam_role.lambda_roles[each.value.role_name].arn
-  handler       = each.value.handler
-  runtime       = "python3.11"
-  description   = each.value.description
-  timeout       = each.value.timeout_seconds
-  memory_size   = each.value.memory_size
-  depends_on    = [aws_s3_object.lambda_code]
-
-  # add layers as needed
-  layers = compact([
-    each.value.attachOpenCvLayer ? aws_lambda_layer_version.opencv_layer[0].arn : null,
-    each.value.attachPopplerLayer ? aws_lambda_layer_version.poppler_layer[0].arn : null
-  ])
-
-  tracing_config {
-    mode = "Active" # enable X-Ray
-  }
-
-  dead_letter_config {
-    target_arn = aws_sqs_queue.lambda_dlq[0].arn
-  }
-
-  reserved_concurrent_executions = local.lambda_concurrent_execution_limit
-  environment {
-    variables = merge(
-      local.document_data_extraction_environment_variables,
-      local.metrics_environment_variables,
-      each.value.attachPopplerLayer ? {
-        PATH            = "/opt/bin:/usr/local/bin:/usr/bin:/bin"
-        LD_LIBRARY_PATH = "/opt/lib64:/lib64:/usr/lib64"
-      } : {}
-    )
-  }
-}
-
-
-#-------------------
-# Event Handlers
-#-------------------
-#------------------- Input Bucket Write -------------------
-resource "aws_cloudwatch_event_rule" "input_bucket_object_created" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  name = "${local.prefix}input-bucket-object-created"
-  event_pattern = jsonencode({
-    detail-type = ["Object Created"]
-    source      = ["aws.s3"]
-    detail = {
-      bucket = {
-        name = ["${local.prefix}${local.document_data_extraction_config.input_bucket_name}"]
-      },
-      object : {
-        key = [{
-          prefix = "input/"
-        }]
-      }
-    }
-  })
-}
-
-resource "aws_cloudwatch_event_target" "ddb_insert_file_name_target" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  rule      = aws_cloudwatch_event_rule.input_bucket_object_created[0].name
-  target_id = "DdbInsertFileName"
-  arn       = aws_lambda_function.functions["ddb_insert_file_name"].arn
-}
-
-#------------------- DynamoDB Write -------------------
-resource "aws_lambda_event_source_mapping" "bda_invoker_target" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  event_source_arn  = aws_dynamodb_table.document_metadata[0].stream_arn
-  function_name     = aws_lambda_function.functions["bda_invoker"].arn
-  starting_position = "LATEST"
-  batch_size        = 1
-
-  filter_criteria {
-    filter {
-      pattern = jsonencode({
-        dynamodb = {
-          NewImage = {
-            processStatus = {
-              S = ["not_started"]
-            }
-          }
-        }
-      })
-    }
-  }
-}
-
-#------------------- BDA Output Bucket Write -------------------
-resource "aws_cloudwatch_event_rule" "output_bucket_object_created" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  name = "${local.prefix}output-bucket-object-created"
-  event_pattern = jsonencode({
-    detail-type = ["Object Created"]
-    source      = ["aws.s3"]
-    detail = {
-      bucket = {
-        name = ["${local.prefix}${local.document_data_extraction_config.output_bucket_name}"]
-      }
-      object = {
-        key = [{
-          suffix = "job_metadata.json"
-        }]
-      }
-    }
-  })
-}
-
-resource "aws_cloudwatch_event_target" "bda_output_processor_target" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  rule      = aws_cloudwatch_event_rule.output_bucket_object_created[0].name
-  target_id = "BdaOutputProcessor"
-  arn       = aws_lambda_function.functions["bda_output_processor"].arn
 }

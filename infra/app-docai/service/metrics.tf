@@ -97,24 +97,6 @@ resource "aws_sqs_queue" "documentai_job_completion_metrics" {
   tags = local.tags
 }
 
-resource "aws_sqs_queue_policy" "documentai_job_completion_metrics" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  queue_url = aws_sqs_queue.documentai_job_completion_metrics[0].id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Principal = {
-        Service = "lambda.amazonaws.com"
-      }
-      Action   = "sqs:SendMessage"
-      Resource = aws_sqs_queue.documentai_job_completion_metrics[0].arn
-    }]
-  })
-}
-
 resource "aws_glue_catalog_database" "documentai_metrics_database" {
   count = local.document_data_extraction_config != null ? 1 : 0
 
@@ -288,63 +270,4 @@ resource "aws_iam_policy" "documentai_metrics_aggregator" {
       }
     ]
   })
-}
-
-#-------------------
-# EventBridge Schedules
-#-------------------
-resource "aws_cloudwatch_event_rule" "metrics_processor_schedule" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  name                = "${local.documentai_prefix}metrics-processor-schedule"
-  description         = "Trigger metrics processor every 5 minutes"
-  schedule_expression = "rate(5 minutes)"
-
-  tags = local.tags
-}
-
-resource "aws_cloudwatch_event_target" "metrics_processor_target" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  rule      = aws_cloudwatch_event_rule.metrics_processor_schedule[0].name
-  target_id = "MetricsProcessor"
-  arn       = aws_lambda_function.functions["documentai_metrics_processor"].arn
-}
-
-resource "aws_lambda_permission" "allow_eventbridge_metrics_processor" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  statement_id  = "AllowExecutionFromEventBridge"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.functions["documentai_metrics_processor"].function_name
-  principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.metrics_processor_schedule[0].arn
-}
-
-resource "aws_cloudwatch_event_rule" "metrics_aggregator_schedule" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  name                = "${local.documentai_prefix}metrics-aggregator-schedule"
-  description         = "Trigger metrics aggregator daily at 1 AM UTC"
-  schedule_expression = "cron(0 1 * * ? *)"
-
-  tags = local.tags
-}
-
-resource "aws_cloudwatch_event_target" "metrics_aggregator_target" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  rule      = aws_cloudwatch_event_rule.metrics_aggregator_schedule[0].name
-  target_id = "MetricsAggregator"
-  arn       = aws_lambda_function.functions["documentai_metrics_aggregator"].arn
-}
-
-resource "aws_lambda_permission" "allow_eventbridge_metrics_aggregator" {
-  count = local.document_data_extraction_config != null ? 1 : 0
-
-  statement_id  = "AllowExecutionFromEventBridge"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.functions["documentai_metrics_aggregator"].function_name
-  principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.metrics_aggregator_schedule[0].arn
 }

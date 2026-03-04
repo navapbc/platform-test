@@ -78,8 +78,20 @@ module "service" {
   desired_instance_count   = local.service_config.desired_instance_count
   enable_command_execution = local.service_config.enable_command_execution
 
-  file_upload_jobs = local.service_config.file_upload_jobs
-  scheduled_jobs   = local.environment_config.scheduled_jobs
+  file_upload_jobs = {
+    for job_name, job_config in local.service_config.file_upload_jobs :
+    job_name => merge(job_config, {
+      source_bucket = (
+        job_config.source_bucket == local.document_data_extraction_config.input_bucket_name ?
+        "${local.prefix}${local.document_data_extraction_config.input_bucket_name}" :
+        job_config.source_bucket == local.document_data_extraction_config.output_bucket_name ?
+        "${local.prefix}${local.document_data_extraction_config.output_bucket_name}" :
+        job_config.source_bucket
+      )
+    })
+  }
+
+  scheduled_jobs = local.environment_config.scheduled_jobs
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = module.database[0].security_group_ids
@@ -127,6 +139,7 @@ module "service" {
       documentai_metrics_bucket_access = module.documentai_metrics_bucket[0].access_policy_arn,
       documentai_bedrock_access        = module.documentai[0].access_policy_arn,
       documentai_dynamodb_access       = aws_iam_policy.dynamodb_read_write[0].arn
+      documentai_sqs_send_message      = aws_iam_policy.sqs_send_message[0].arn
     } : {},
     module.app_config.enable_identity_provider ? {
       identity_provider_access = module.identity_provider_client[0].access_policy_arn,

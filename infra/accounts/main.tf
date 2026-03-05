@@ -52,3 +52,11 @@ module "auth_github_actions" {
   github_repository        = module.project_config.code_repository
   allowed_actions          = [for aws_service in module.project_config.aws_services : "${aws_service}:*"]
 }
+
+# GuardDuty module - account-wide security detector
+module "threatdetection" {
+  source = "../modules/threatdetection"
+
+  enable_detector              = var.enable_threatdetection
+  finding_publishing_frequency = var.threatdetection_finding_publishing_frequency
+}

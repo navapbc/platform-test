@@ -8,12 +8,12 @@ locals {
     document_processor = {
       source_bucket = local.document_data_extraction_config != null ? local.document_data_extraction_config.input_bucket_name : null
       path_prefix   = "input/"
-      task_command  = ["python", "-m", "documentai_api.jobs.document_processor.main", "<object_key>", "<bucket_name>"]
+      task_command  = ["python", "-m", "documentai_api.jobs.document_processor.cli", "<object_key>", "<bucket_name>"]
     }
     bda_result_processor = {
       source_bucket = local.document_data_extraction_config != null ? local.document_data_extraction_config.output_bucket_name : null
       path_prefix   = "processed/"
-      task_command  = ["python", "-m", "documentai_api.jobs.bda_result_processor.main", "<bucket_name>", "<object_key>"]
+      task_command  = ["python", "-m", "documentai_api.jobs.bda_result_processor.cli", "<bucket_name>", "<object_key>"]
     }
   }
 }

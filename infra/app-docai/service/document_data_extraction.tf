@@ -26,14 +26,14 @@ locals {
     DOCUMENTAI_DOCUMENT_METADATA_TENANT_ID_INDEX_NAME = local.tenant_index_name
     DOCUMENTAI_DOCUMENT_METADATA_BATCH_ID_INDEX_NAME  = local.batch_id_index_name
     DOCUMENTAI_EXTERNAL_REF_ID_INDEX_NAME             = local.external_reference_id_index_name
-    DOCUMENTAI_PROJECT_ARN                            = module.documentai[0].bda_project_arn
-    DOCUMENTAI_REGION                                 = local.bda_region
+    BDA_PROJECT_ARN                                   = module.documentai[0].bda_project_arn
+    BDA_REGION                                        = local.bda_region
 
     # aws bedrock data automation requires users to use cross Region inference support 
     # when processing files. the following like the profile ARNs for different inference
     # profiles
     # https://docs.aws.amazon.com/bedrock/latest/userguide/bda-cris.html
-    DOCUMENTAI_PROFILE_ARN = "arn:aws:bedrock:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:data-automation-profile/us.data-automation-v1"
+    BDA_PROFILE_ARN = "arn:aws:bedrock:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:data-automation-profile/us.data-automation-v1"
 
   } : {}
 }
@@ -368,7 +368,7 @@ resource "aws_iam_policy" "bedrock_invoke" {
       Action = "bedrock:InvokeDataAutomationAsync"
       Resource = [
         module.documentai[0].bda_project_arn,
-        local.document_data_extraction_environment_variables.DOCUMENTAI_PROFILE_ARN,
+        local.document_data_extraction_environment_variables.BDA_PROFILE_ARN,
         "arn:aws:bedrock:us-east-2:${data.aws_caller_identity.current.account_id}:data-automation-profile/us.data-automation-v1",
         "arn:aws:bedrock:us-west-1:${data.aws_caller_identity.current.account_id}:data-automation-profile/us.data-automation-v1",
         "arn:aws:bedrock:us-west-2:${data.aws_caller_identity.current.account_id}:data-automation-profile/us.data-automation-v1"

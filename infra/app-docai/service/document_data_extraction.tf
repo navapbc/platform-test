@@ -16,7 +16,6 @@ locals {
 
   document_data_extraction_environment_variables = local.document_data_extraction_config != null ? {
     DOCUMENTAI_INPUT_LOCATION                         = "s3://${local.prefix}${local.document_data_extraction_config.input_bucket_name}/input"
-    DOCUMENTAI_BATCH_INPUT_LOCATION                   = "s3://${local.prefix}${local.document_data_extraction_config.input_bucket_name}/batch"
     DOCUMENTAI_BUILD_INPUT_LOCATION                   = "s3://${local.prefix}${local.document_data_extraction_config.input_bucket_name}/build"
     DOCUMENTAI_OUTPUT_LOCATION                        = "s3://${local.prefix}${local.document_data_extraction_config.output_bucket_name}/processed"
     DOCUMENTAI_DOCUMENT_METADATA_TABLE_NAME           = "${local.prefix}${local.document_data_extraction_config.document_metadata_table_name}"

@@ -13,10 +13,12 @@ locals {
   tenant_index_name                = "tenantId-index"
   external_reference_id_index_name = "externalReferenceId-index"
   batch_id_index_name              = "batchId-index"
+  max_batch_size                   = 50
+  max_bda_invoke_retry_attempts    = 3
 
   document_data_extraction_environment_variables = local.document_data_extraction_config != null ? {
     DOCUMENTAI_INPUT_LOCATION                         = "s3://${local.prefix}${local.document_data_extraction_config.input_bucket_name}/input"
-    DOCUMENTAI_BUILD_INPUT_LOCATION                   = "s3://${local.prefix}${local.document_data_extraction_config.input_bucket_name}/build"
+    DOCUMENTAI_PREPROCESSING_LOCATION                 = "s3://${local.prefix}${local.document_data_extraction_config.input_bucket_name}/preprocessing"
     DOCUMENTAI_OUTPUT_LOCATION                        = "s3://${local.prefix}${local.document_data_extraction_config.output_bucket_name}/processed"
     DOCUMENTAI_DOCUMENT_METADATA_TABLE_NAME           = "${local.prefix}${local.document_data_extraction_config.document_metadata_table_name}"
     DOCUMENTAI_DOCUMENT_BUILDS_TABLE_NAME             = "${local.prefix}${local.document_data_extraction_config.document_builds_table_name}"
@@ -25,8 +27,10 @@ locals {
     DOCUMENTAI_DOCUMENT_METADATA_TENANT_ID_INDEX_NAME = local.tenant_index_name
     DOCUMENTAI_DOCUMENT_METADATA_BATCH_ID_INDEX_NAME  = local.batch_id_index_name
     DOCUMENTAI_EXTERNAL_REF_ID_INDEX_NAME             = local.external_reference_id_index_name
+    DOCUMENTAI_MAX_BATCH_SIZE                         = local.max_batch_size
     BDA_PROJECT_ARN                                   = module.documentai[0].bda_project_arn
     BDA_REGION                                        = local.bda_region
+    MAX_BDA_INVOKE_RETRY_ATTEMPTS                     = local.max_bda_invoke_retry_attempts
 
     # aws bedrock data automation requires users to use cross Region inference support 
     # when processing files. the following like the profile ARNs for different inference

@@ -105,7 +105,7 @@ variable "service_desired_instance_count" {
 
 variable "service_memory" {
   type    = number
-  default = 512
+  default = 2048
 }
 
 variable "service_override_extra_environment_variables" {

@@ -4,20 +4,47 @@ The application can send SMS notifications to users using AWS End User Messaging
 
 ## Requirements
 
-1. **Phone Number Registration**: All originating phone numbers must be requested and approved through AWS End User Messaging service
-2. **Approval Timeline**: Phone number registration takes 1-15 days depending on region and use case
-3. **Verification Setup**: For testing in sandbox environments, destination phone numbers must be verified
+1. **AWS End User Messaging SMS Registration**: An AWS End User Messaging SMS registration form must be completed, submitted, and approved by AWS prior to requesting an originator phone number. This approved registration is required to request an originator phone number.
+2. **Approval Timeline**: AWS End User Messaging Registration requests takes 1-15 days depending on region and use case
+5. **Verification Setup**: For testing in sandbox environments, destination phone numbers must be verified
 
 ## Phone Number Registration Process
 
-### 1. Create Phone Number Registration
+### 1. Create AWS End User Messaging Registration
 
-Phone numbers must be registered and approved before use. Follow AWS documentation for creating registrations:
+A company or entity must be registered and approved in AWS End User Messaging before using the service for SMS notifications.
 
-- [Creating Phone Number Registrations](https://docs.aws.amazon.com/sms-voice/latest/userguide/registrations-create.html)
+**Important Regional Considerations:**
+- Registration and phone numbers are region-specific
+- You must create separate registrations for each AWS region where you plan to send SMS
+- Phone numbers provisioned in one region cannot be used in other regions
+- Phone numbers must be provisioned by AWS through the End User Messaging service.  You cannot bring existing phone numbers from other carriers or services.
+
+Follow AWS documentation for creating registrations:
+
+- [Creating AWS End User Messaging SMS Registrations](https://docs.aws.amazon.com/sms-voice/latest/userguide/registrations-create.html)
 - [Registration Status Reference](https://docs.aws.amazon.com/sms-voice/latest/userguide/registrations-status.html)
 
-#### Using AWS CLI to Create Phone Number Registration
+#### Using AWS CLI to Create AWS End User Messaging Registration
+You can also choose to use AWS CLI to create the Registration:
+
+#### Registration Types
+
+**Available Registration Types for `--registration-type` parameter:**
+
+To see all available registration types for your region, run:
+```bash
+aws pinpoint-sms-voice-v2 describe-registration-type-definitions \
+  --query 'RegistrationTypeDefinitions[?contains(SupportedAssociations[*].IsoCountryCode, `US`)].RegistrationType' \
+  --output table
+```
+
+**Common Registration Types:**
+- **`COMPANY_LONG_CODE`**: Standard 10-digit phone numbers (e.g., +1-555-123-4567) for business SMS messaging. Suitable for person-to-person messaging and low-to-medium volume SMS sending. Requires AWS approval (1-15 days).
+- **`COMPANY_TOLL_FREE`**: Toll-free numbers (e.g., +1-800-555-1234) for business SMS messaging. Requires AWS approval (1-15 days).
+- **`COMPANY_10DLC`**: 10-digit long code numbers requiring additional brand and campaign registration for high-volume application-to-person messaging. Requires AWS approval (1-15 days).
+
+**Note**: Use the exact registration type string (e.g., `"COMPANY_LONG_CODE"`) as the value for the `--registration-type` parameter.
 
 **Option 1: Using inline parameters (recommended for simple cases):**
 ```bash
@@ -61,12 +88,6 @@ aws pinpoint-sms-voice-v2 create-registration \
   --additional-information file://registration-details.json
 ```
 
-For all Possible US Registration Types:
-```bash
-aws pinpoint-sms-voice-v2 describe-registration-type-definitions \
---query 'RegistrationTypeDefinitions[?contains(SupportedAssociations[*].IsoCountryCode, `US`)]' \
---output json
-```
 ### 2. Monitor Registration Status
 
 Track your registration status until approved:
@@ -81,10 +102,20 @@ Registration must be in **APPROVED** or **COMPLETE** status before linking to in
 
 ### 3. Phone Number Types
 
+**All phone numbers are:**
+- **Region-specific**: Numbers can only be used within the AWS region where they were provisioned
+- **AWS-provisioned only**: You cannot bring existing numbers from other carriers or services
+
+**Available number types:**
 - **LONG_CODE**: Standard 10-digit phone numbers for low-volume messaging
 - **TOLL_FREE**: Toll-free numbers (800, 888, etc.) for higher volume
 - **TEN_DLC**: 10-digit long codes for business messaging (US only)
 - **SIMULATOR**: Test numbers for development (immediate approval, limited recipients)
+
+### Simulator Phone Numbers
+AWS Allows to use **simulator** phone numbers as originator to send text. This simulator phone numbers are only allowed to send SMS text to:
+- `+14254147755` → Simulates successful delivery (`TEXT_SUCCESS`)
+- `+14254147167` → Simulates carrier block/failure (`TEXT_BLOCKED`)
 
 ## Infrastructure Configuration
 
@@ -115,10 +146,11 @@ module "dev_config" {
 
   # SMS Configuration
   enable_sms_notifications = local.enable_sms_notifications
-  sms_sender_phone_number_registration_id = null  # Enter Phone Number Registration ID when available; otherwise leave empty to use simulator phone number for dev
+  sms_sender_phone_number_registration_id = null  # Enter AWS End User SMS Registration ID when available; otherwise leave empty to use simulator phone number for dev
   sms_number_type                        = null # Enter SMS Number Type (e.g: 'SHORT_CODE', 'LONG_CODE', 'TOLL_FREE', 'TEN_DLC', 'SIMULATOR') when available; otherwise leave empty to use simulator number type
 }
 ```
+*__Note:__* if an AWS End User SMS Registration ID is not provided, a simulator phone number will be automatically provisioned.
 ### 3. Deploy SMS notification infrastructure
 
 ```bash
@@ -126,7 +158,8 @@ make infra-update-app-service APP_NAME=<APP_NAME> ENVIRONMENT=<ENVIRONMENT>
 ```
 
 This creates:
-- CloudFormation stack with SMS configuration set and phone pool
+- SMS configuration set
+- Phone pool - it will reuse existing phone number pool in temporary environments
 - CloudWatch log groups for delivery tracking
 - IAM policies with least-privilege access
 - VPC endpoint for SMS service access
@@ -160,11 +193,13 @@ def send_sms_notification(phone_number, message):
     return response['MessageId']
 ```
 
+
 ## Testing Setup
 
+*__Note:__* This assumes your AWS End User Messaging SMS Registration has been approved and configured in `infra/<APP_NAME>/app-config/env-config/dev.tf|staging.tf|prod.tf`
 ### 1. Verify Destination Numbers (Sandbox Accounts)
 
-In sandbox environments, you can only send SMS to up to 10 verified phone numbers:
+In sandbox environments, you can only send SMS to up to 10 verified phone numbers. Steps to register destination phone numbers:
 
 ```bash
 # 1. Register the destination phone number

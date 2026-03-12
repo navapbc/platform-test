@@ -1,3 +1,5 @@
+data "aws_region" "current" {}
+
 locals {
   notifications_config = local.environment_config.notifications_config
   sms_config           = local.environment_config.sms_config
@@ -13,25 +15,78 @@ locals {
   } : {}
   notifications_app_name = local.notifications_config != null ? "${local.prefix}${local.notifications_config.name}" : ""
 
-  #SMS environment variables for notifications-sms module
+  # Phone pool logic:
+  # - Permanent environments: always create new
+  # - Temporary environments: reuse existing if found in current region, otherwise create new
+
+  # Get pool from current region (for temporary environments)
+  current_region_pool = local.sms_config != null && local.is_temporary ? try(
+    module.existing_notifications_phone_pool[0].pools_by_region[data.aws_region.current.name],
+    null
+  ) : null
+
+  phone_pool_arn = local.sms_config != null ? (
+    !local.is_temporary ?
+    module.notifications_phone_pool[0].phone_pool_arn :
+    (local.current_region_pool != null && local.current_region_pool.exists ?
+      local.current_region_pool.pool_arn :
+    module.notifications_phone_pool_temp[0].phone_pool_arn)
+  ) : null
+
+  phone_pool_id = local.sms_config != null ? (
+    !local.is_temporary ?
+    module.notifications_phone_pool[0].phone_pool_id :
+    (local.current_region_pool != null && local.current_region_pool.exists ?
+      local.current_region_pool.pool_id :
+    module.notifications_phone_pool_temp[0].phone_pool_id)
+  ) : null
+
+  # SMS environment variables for notifications-sms module
   sms_environment_variables = local.sms_config != null ? {
     AWS_SMS_CONFIGURATION_SET_NAME = module.notifications_sms[0].configuration_set_name
-    AWS_SMS_PHONE_POOL_ARN         = module.notifications_sms[0].sms_phone_pool_arn
-    AWS_SMS_PHONE_POOL_ID          = module.notifications_sms[0].sms_phone_pool_id
-
+    AWS_SMS_PHONE_POOL_ARN         = local.phone_pool_arn
+    AWS_SMS_PHONE_POOL_ID          = local.phone_pool_id
   } : {}
   sms_app_name = local.sms_config != null ? "${local.prefix}${local.sms_config.name}" : ""
 }
 
-# If the app has `enable_sms_notifications` set to true, create SMS notification resources.
-# A new SMS configuration is created for all environments, including temporary environments.
-module "notifications_sms" {
-  count  = local.sms_config != null ? 1 : 0
-  source = "../../modules/notifications-sms/resources"
+# If the app has `enable_sms_notifications` set to true AND this is not a temporary
+# environment, then create SMS phone pool resources.
+module "notifications_phone_pool" {
+  count  = local.sms_config != null && !local.is_temporary ? 1 : 0
+  source = "../../modules/notifications-phone-pool/resources"
 
   name                                    = local.sms_app_name
   sms_sender_phone_number_registration_id = local.sms_config.sms_sender_phone_number_registration_id
   sms_number_type                         = local.sms_config.sms_number_type
+}
+
+# If the app has `enable_sms_notifications` set to true AND this *is* a temporary
+# environment, then find existing phone pool resources.
+module "existing_notifications_phone_pool" {
+  count  = local.sms_config != null && local.is_temporary ? 1 : 0
+  source = "../../modules/notifications-phone-pool/data"
+}
+
+# If the app has `enable_sms_notifications` set to true AND this is a temporary
+# environment AND no existing phone pool was found, then create SMS phone pool resources.
+module "notifications_phone_pool_temp" {
+  count  = local.sms_config != null && local.is_temporary && !(local.current_region_pool != null && local.current_region_pool.exists) ? 1 : 0
+  source = "../../modules/notifications-phone-pool/resources"
+
+  name                                    = local.sms_app_name
+  sms_sender_phone_number_registration_id = local.sms_config.sms_sender_phone_number_registration_id
+  sms_number_type                         = local.sms_config.sms_number_type
+}
+
+# If the app has `enable_sms_notifications` set to true, create SMS configuration set and IAM policies.
+# A new configuration set and policy are created for all environments, including temporary environments.
+module "notifications_sms" {
+  count  = local.sms_config != null ? 1 : 0
+  source = "../../modules/notifications-sms/resources"
+
+  name           = local.sms_app_name
+  phone_pool_arn = local.phone_pool_arn
 }
 
 # If the app has `enable_notifications` set to true AND this is not a temporary

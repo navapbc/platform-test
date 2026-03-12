@@ -28,7 +28,7 @@ Implement SMS notification enablement using **Infrastructure-Provisioned Phone N
 
 1. A new infrastructure module: `notifications-sms`
 2. CloudFormation-managed SMS resources (via Terraform)
-3. A Phone Number Pool with associated phone numbers
+3. A Phone Number Pool module `notifications-phone-pool` with associated phone numbers
 4. Carrier-level delivery event logging to CloudWatch
 5. IAM policies scoped to the Phone Pool ARN (least privilege)
 6. Conditional VPC Interface Endpoint for `sms-voice`
@@ -111,7 +111,3 @@ Option 4 provides:
 - Alignment with AWS best practices
 
 It balances reliability, security, and observability while managing Terraform provider limitations.
-
-## Implementation Overview
-
- [See Tech Spec](https://docs.google.com/document/d/1opNLoOEWWgcwepBONaQW8R9vcVVvlt-LWMsDbdh5EV0/edit?usp=sharing)

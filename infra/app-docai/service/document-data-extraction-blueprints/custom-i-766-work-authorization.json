@@ -1,0 +1,54 @@
+{
+  "description": "A United States Employment Authorization Document issued to non-citizens authorizing them to work in the United States.",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "class": "US-Employment-Authorization-Document",
+  "definitions": {},
+  "properties": {
+    "card_number": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The unique card number printed on the Employment Authorization Document. It may be labeled as Card Number or USCIS Number."
+    },
+    "uscis_number": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The USCIS number printed on the card. It may appear as USCIS# or USCIS Number."
+    },
+    "category": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The employment authorization category printed on the card such as C03B, A12, C09, or other eligibility category."
+    },
+    "cardholder_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The full name of the individual listed on the Employment Authorization Document."
+    },
+    "date_of_birth": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The date of birth of the cardholder."
+    },
+    "country_of_birth": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The country where the cardholder was born."
+    },
+    "valid_from": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The start date of the employment authorization validity period printed on the card."
+    },
+    "card_expires": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The expiration date printed on the Employment Authorization Document."
+    },
+    "sex": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The sex or gender listed on the card."
+    }
+  }
+}

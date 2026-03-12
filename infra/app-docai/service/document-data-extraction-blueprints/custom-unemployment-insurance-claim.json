@@ -1,0 +1,64 @@
+{
+  "description": "A document used to file or process a claim for unemployment insurance benefits.",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "class": "Unemployment-Insurance-Claim-Form",
+  "definitions": {},
+  "properties": {
+    "claimant_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The full legal name of the person filing the unemployment claim."
+    },
+    "claimant_id": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The unique identifier for the claimant. This may be labeled as Claimant ID, Customer ID, SSN, or Social Security Number on the document."
+    },
+    "date_of_birth": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The date of birth of the claimant."
+    },
+    "claim_date": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The date the unemployment claim was filed."
+    },
+    "employer_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The name of the claimant's most recent employer."
+    },
+    "employer_address": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The address of the claimant's most recent employer."
+    },
+    "employment_start_date": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The date the claimant started working for the employer."
+    },
+    "employment_end_date": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The date the claimant stopped working for the employer."
+    },
+    "job_title": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The job title or position held by the claimant."
+    },
+    "reason_for_separation": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The reason the claimant is no longer employed such as layoff, termination, resignation, or reduction in hours."
+    },
+    "weekly_benefit_amount": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The weekly unemployment benefit amount approved or requested."
+    }
+  }
+}

@@ -21,8 +21,11 @@ locals {
       # Identity Documents
       "arn:aws:bedrock:us-east-1:aws:blueprint/bedrock-data-automation-public-us-driver-license",
       "arn:aws:bedrock:us-east-1:aws:blueprint/bedrock-data-automation-public-us-passport",
+      "arn:aws:bedrock:us-east-1:aws:blueprint/bedrock-data-automation-public-birth-certificate",
 
       # Tax/Employment Documents
+      "arn:aws:bedrock:us-east-1:aws:blueprint/bedrock-data-automation-public-form-1040",
+      "arn:aws:bedrock:us-east-1:aws:blueprint/bedrock-data-automation-public-form-1099-int",
       "arn:aws:bedrock:us-east-1:aws:blueprint/bedrock-data-automation-public-form-1099-misc",
       "arn:aws:bedrock:us-east-1:aws:blueprint/bedrock-data-automation-public-payslip",
       "arn:aws:bedrock:us-east-1:aws:blueprint/bedrock-data-automation-public-w2-form",

@@ -18,3 +18,14 @@ variable "finding_publishing_frequency" {
     error_message = "Finding publishing frequency must be one of: FIFTEEN_MINUTES, ONE_HOUR, SIX_HOURS."
   }
 }
+
+# TODO: When upgrading to AWS provider >= 5.7.0, uncomment for multi-region support:
+# variable "utilized_regions" {
+#   description = <<-EOF
+#   List of AWS regions that GuardDuty should be enabled in.
+#   This should typically include all regions that are being used in the project,
+#   especially if there are resources in those regions that GuardDuty can monitor for security threats.
+#   EOF
+#   type        = list(string)
+#   default     = []
+# }

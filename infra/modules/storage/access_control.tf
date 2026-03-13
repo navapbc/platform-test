@@ -20,10 +20,7 @@ data "aws_iam_policy_document" "storage" {
     sid     = "RestrictToTLSRequestsOnly"
     effect  = "Deny"
     actions = ["s3:*"]
-    resources = [
-      aws_s3_bucket.storage.arn,
-      "${aws_s3_bucket.storage.arn}/*"
-    ]
+    resources = [aws_s3_bucket.storage.arn]
     principals {
       type        = "*"
       identifiers = ["*"]

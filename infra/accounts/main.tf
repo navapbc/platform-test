@@ -59,4 +59,6 @@ module "threatdetection" {
 
   enable_detector              = var.enable_threatdetection
   finding_publishing_frequency = var.threatdetection_finding_publishing_frequency
+  # TODO: When upgrading to AWS provider >= 5.7.0, uncomment for multi-region support:
+  # utilized_regions             = module.project_config.utilized_regions
 }

@@ -46,3 +46,7 @@ output "project_name" {
 output "system_notifications_config" {
   value = local.system_notifications_config
 }
+
+output "utilized_regions" {
+  value = local.utilized_regions
+}

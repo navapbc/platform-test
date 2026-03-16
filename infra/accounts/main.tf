@@ -52,3 +52,13 @@ module "auth_github_actions" {
   github_repository        = module.project_config.code_repository
   allowed_actions          = [for aws_service in module.project_config.aws_services : "${aws_service}:*"]
 }
+
+# GuardDuty module - account-wide security detector
+module "threat_detection" {
+  source = "../modules/threat_detection"
+
+  enable_detector              = var.enable_threatdetection
+  finding_publishing_frequency = var.threatdetection_finding_publishing_frequency
+  # TODO: When upgrading to AWS provider >= 5.7.0, uncomment for multi-region support:
+  # utilized_regions             = module.project_config.utilized_regions
+}

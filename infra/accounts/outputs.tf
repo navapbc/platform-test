@@ -22,7 +22,7 @@ output "tf_state_bucket_name" {
   value = module.backend.tf_state_bucket_name
 }
 
-output "threatdetection_detector_id" {
+output "threat_detection_detector_id" {
   description = "ThreatDetection detector ID for account-wide security monitoring"
-  value       = module.threatdetection.detector_id
+  value       = module.threat_detection.detector_id
 }

@@ -17,9 +17,9 @@ resource "aws_s3_bucket_policy" "storage" {
 data "aws_iam_policy_document" "storage" {
   # Require HTTPS connections
   statement {
-    sid     = "RestrictToTLSRequestsOnly"
-    effect  = "Deny"
-    actions = ["s3:*"]
+    sid       = "RestrictToTLSRequestsOnly"
+    effect    = "Deny"
+    actions   = ["s3:*"]
     resources = [aws_s3_bucket.storage.arn]
     principals {
       type        = "*"

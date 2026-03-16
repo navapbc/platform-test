@@ -54,8 +54,8 @@ module "auth_github_actions" {
 }
 
 # GuardDuty module - account-wide security detector
-module "threatdetection" {
-  source = "../modules/threatdetection"
+module "threat_detection" {
+  source = "../modules/threat_detection"
 
   enable_detector              = var.enable_threatdetection
   finding_publishing_frequency = var.threatdetection_finding_publishing_frequency

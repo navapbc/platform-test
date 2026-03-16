@@ -8,7 +8,7 @@ resource "aws_guardduty_detector" "main" {
   finding_publishing_frequency = var.finding_publishing_frequency
 }
 
-# TODO: When upgrading to AWS provider >= 5.7.0, uncomment the following for multi-region support:
+# TODO: When upgrading to AWS provider >= 5.7.0, uncomment the following for multi-region support: templaat-infra issue #1004
 # resource "aws_guardduty_detector" "main" {
 #   for_each = toset(var.utilized_regions)
 #   # checkov:skip=CKV2_AWS_3:GuardDuty is enabled for this specific region/account - org-level management not required for single-account setup

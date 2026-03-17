@@ -48,7 +48,7 @@ locals {
   # 1. Creates AWS End User Messaging SMS configuration set
   # 2. Sets up IAM permissions for SMS sending
   # 3. Configures SMS delivery tracking and opt-out management
-  enable_sms_notifications = true
+  enable_sms_notifications = false
 
   # Whether or not the application should enable WAF for the load balancer.
   # If enabled:

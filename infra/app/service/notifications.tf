@@ -25,10 +25,13 @@ locals {
     null
   ) : null
 
+  # Check if existing pool exists in current region
+  has_existing_pool = local.current_region_pool != null ? try(local.current_region_pool.exists, false) : false
+
   phone_pool_arn = local.sms_config != null ? (
     !local.is_temporary ?
     module.notifications_phone_pool[0].phone_pool_arn :
-    (local.current_region_pool != null && local.current_region_pool.exists ?
+    (local.has_existing_pool ?
       local.current_region_pool.pool_arn :
     module.notifications_phone_pool_temp[0].phone_pool_arn)
   ) : null
@@ -36,7 +39,7 @@ locals {
   phone_pool_id = local.sms_config != null ? (
     !local.is_temporary ?
     module.notifications_phone_pool[0].phone_pool_id :
-    (local.current_region_pool != null && local.current_region_pool.exists ?
+    (local.has_existing_pool ?
       local.current_region_pool.pool_id :
     module.notifications_phone_pool_temp[0].phone_pool_id)
   ) : null
@@ -71,7 +74,7 @@ module "existing_notifications_phone_pool" {
 # If the app has `enable_sms_notifications` set to true AND this is a temporary
 # environment AND no existing phone pool was found, then create SMS phone pool resources.
 module "notifications_phone_pool_temp" {
-  count  = local.sms_config != null && local.is_temporary && !(local.current_region_pool != null && local.current_region_pool.exists) ? 1 : 0
+  count  = local.sms_config != null && local.is_temporary && !local.has_existing_pool ? 1 : 0
   source = "../../modules/notifications-phone-pool/resources"
 
   name                                    = local.sms_app_name

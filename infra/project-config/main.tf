@@ -16,7 +16,16 @@ locals {
 
   # List of AWS regions that may be used for this project.
   # Used for multi-region deployments or to scope down other resources that need to interact with multiple regions.
-  utilized_regions = [local.default_region]
+  # TODO: When upgrading to AWS provider >= 5.7.0, update to include all regions that GuardDuty should be enabled in for multi-region support:
+  # Ticket: https://github.com/navapbc/template-infra/issues/1004#issue-4083076747
+  #regions = [local.default_region]
 
   github_actions_role_name = "${local.project_name}-github-actions"
+
+  # Whether to enable the Threat Detection detector for the account
+  # Finding publishing frequency must be one of: FIFTEEN_MINUTES, ONE_HOUR, SIX_HOURS.
+  enable_threat_detection                       = true
+  threat_detection_finding_publishing_frequency = "FIFTEEN_MINUTES"
+
+
 }

@@ -1,28 +1,14 @@
 # Threat Detection (AWS GuardDuty)
 
-The infrastructure includes AWS GuardDuty for comprehensive threat detection and security monitoring across the AWS account. This document describes how GuardDuty is configured, its capabilities, and troubleshooting procedures.
-
-## How threat detection works
-
-GuardDuty analyzes tens of billions of events across multiple AWS data sources to detect malicious activity and unauthorized behavior:
+The infrastructure uses AWS GuardDuty for threat detection and security monitoring across the AWS account. GuardDuty by default continuously analyzes the following data sources:
 
 - **AWS CloudTrail event logs** - API calls and user activities
 - **Amazon VPC Flow Logs** - Network traffic patterns
 - **DNS logs** - Domain name resolution requests
-- **S3 data events** - Object-level operations for malware detection
-
-GuardDuty uses machine learning, anomaly detection, and integrated threat intelligence to identify threats including:
-
-- Compromised instances communicating with malicious IPs
-- Cryptocurrency mining activities
-- Data exfiltration attempts
-- Malware in S3 objects
-- Reconnaissance attacks
-- Unusual API call patterns
 
 ## Malware detection for S3 storage
 
-GuardDuty's malware detection feature continuously scans files uploaded to S3 buckets for malicious content. When malware is detected:
+The infratructure leverages GuardDuty's malware detection feature to continuously scans files uploaded to S3 buckets for malicious content. When malware is detected:
 
 1. **File access is blocked** - Downloads of infected files are prevented
 2. **Findings are generated** - Security findings are created in the GuardDuty service with detailed information including:
@@ -80,59 +66,40 @@ done
 - Filter by finding type, severity, or resource
 - View detailed finding information and evidence
 
-## Deployment
-
-GuardDuty is deployed as part of the account layer infrastructure:
-
-```bash
-make infra-update-current-account
-```
-
 ## Configuration
 
 **Threat detection is enabled by default** for all environments. The configuration can be customized through Terraform variables in the accounts layer.
 
 ### Disabling Threat Detection
 
-To disable GuardDuty threat detection entirely:
+To disable threat detection entirely:
 
-1. Edit your Terraform workspace configuration file for the account layer:
-   ```bash
-   # Example: infra/accounts/envs/dev.tfvars or the appropriate environment file
-   ```
+1. Edit your Terraform workspace configuration file for the account layer,`infra/project-config/main.tf`
 
 2. Set the threat detection variable to `false`:
    ```hcl
-   enable_threatdetection = false
+   enable_threat_detection = false
    ```
 
-3. Apply the changes:
+3. Set finding publishing frequency (FIFTEEN_MINUTES, ONE_HOUR, SIX_HOURS)
+```hcl
+threat_detection_finding_publishing_frequency = "FIFTEEN_MINUTES"
+```
+4. Apply the changes:
    ```bash
-   cd infra/accounts
-   make plan ENV=<your-environment>
-   make apply ENV=<your-environment>
+   make infra-update-current-account
    ```
 
 ### Available Configuration Options
 
 | Variable | Description | Default | Options |
 |----------|-------------|---------|---------|
-| `enable_threatdetection` | Enable/disable GuardDuty threat detection | `true` | `true`, `false` |
-| `threatdetection_finding_publishing_frequency` | How often GuardDuty publishes findings to CloudWatch Events | `"FIFTEEN_MINUTES"` | `"FIFTEEN_MINUTES"`, `"ONE_HOUR"`, `"SIX_HOURS"` |
-
-### Configuration Example
-
-```hcl
-# infra/accounts/envs/production.tfvars
-enable_threatdetection = true
-threatdetection_finding_publishing_frequency = "ONE_HOUR"
-```
+| `enable_threat_detection` | Enable/disable GuardDuty threat detection | `true` | `true`, `false` |
+| `threat_detection_finding_publishing_frequency` | How often GuardDuty publishes findings to CloudWatch Events | `"FIFTEEN_MINUTES"` | `"FIFTEEN_MINUTES"`, `"ONE_HOUR"`, `"SIX_HOURS"` |
 
 ### Malware Detection Errors
 
-When GuardDuty detects malware in uploaded files, users may encounter the following errors:
-
-#### File Download Blocked
+When GuardDuty detects malware in uploaded files, users may encounter the following error:
 
 **Error Message:**
 ```

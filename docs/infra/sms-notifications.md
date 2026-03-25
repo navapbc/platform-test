@@ -151,6 +151,7 @@ module "dev_config" {
 }
 ```
 *__Note:__* if an AWS End User SMS Registration ID is not provided, a simulator phone number will be automatically provisioned.
+
 ### 3. Deploy SMS notification infrastructure
 
 ```bash

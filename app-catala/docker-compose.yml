@@ -1,0 +1,21 @@
+services:
+  app-catala:
+    build:
+      context: ./
+      target: dev
+      args:
+        - RUN_UID=${RUN_UID:-4000}
+        - RUN_USER=${RUN_USER:-app}
+    env_file:
+      - path: ./local.env
+        required: true
+      - path: ./override.env
+        required: false
+    environment:
+      - PY_RUN_APPROACH=local
+      - PYTHONPATH=/app/
+    ports:
+      - 3001:3001
+    volumes:
+      - ./:/app/
+      - /app/.venv

@@ -1,0 +1,131 @@
+# Paid Leave — Leave Balance Test Scenarios
+
+> Using Paidleave
+
+## Test Scenario 1: Medical Leave — Sufficient Balance
+
+Applicant has taken 5 weeks of medical leave so far this benefit year.
+They are requesting two additional periods of 4 and 3 weeks (7 total).
+
+- Max entitlement for medical: 20 weeks
+- Balance: 20 − 5 = 15 weeks
+- Requested: 4 + 3 = 7 weeks
+- Per-type check: 7 ≤ 15 ✓
+- Overall cap: 5 + 7 = 12 ≤ 26 ✓ → sufficient
+
+```catala
+#[test]
+declaration scope TestMedicalSufficientBalance:
+  pl scope Paidleave.LeaveBalance
+
+scope TestMedicalSufficientBalance:
+  definition pl.application_leave_type equals MedicalLeave
+  definition pl.leave_taken_in_benefit_year equals 5
+  definition pl.total_leave_taken_all_types equals 5
+  definition pl.leave_periods equals
+    [
+      Paidleave.LeavePeriod {
+        -- length_in_weeks: 4
+      };
+      Paidleave.LeavePeriod {
+        -- length_in_weeks: 3
+      }
+    ]
+  assertion pl.has_sufficient_leave_balance
+```
+
+## Test Scenario 2: Bonding Leave — Insufficient Balance
+
+Applicant has taken 8 weeks of bonding leave so far this benefit year.
+They are requesting two periods of 3 and 4 weeks (7 total).
+
+- Max entitlement for bonding: 12 weeks
+- Balance: 12 − 8 = 4 weeks
+- Requested: 3 + 4 = 7 weeks
+- Per-type check: 7 > 4 ✗ → insufficient
+
+```catala
+#[test]
+declaration scope TestBondingInsufficientBalance:
+  pl scope Paidleave.LeaveBalance
+
+scope TestBondingInsufficientBalance:
+  definition pl.application_leave_type equals BondingLeave
+  definition pl.leave_taken_in_benefit_year equals 8
+  definition pl.total_leave_taken_all_types equals 8
+  definition pl.leave_periods equals
+    [
+      Paidleave.LeavePeriod {
+        -- length_in_weeks: 3
+      };
+      Paidleave.LeavePeriod {
+        -- length_in_weeks: 4
+      }
+    ]
+  assertion not pl.has_sufficient_leave_balance
+```
+
+## Test Scenario 3: Care for Family — Sufficient Balance
+
+Applicant has not taken any care-for-family leave this benefit year.
+They are requesting two periods of 6 and 4 weeks (10 total).
+
+- Max entitlement for care for family: 12 weeks
+- Balance: 12 − 0 = 12 weeks
+- Requested: 6 + 4 = 10 weeks
+- Per-type check: 10 ≤ 12 ✓
+- Overall cap: 0 + 10 = 10 ≤ 26 ✓ → sufficient
+
+```catala
+#[test]
+declaration scope TestCareForFamilySufficientBalance:
+  pl scope Paidleave.LeaveBalance
+
+scope TestCareForFamilySufficientBalance:
+  definition pl.application_leave_type equals CareForFamily
+  definition pl.leave_taken_in_benefit_year equals 0
+  definition pl.total_leave_taken_all_types equals 0
+  definition pl.leave_periods equals
+    [
+      Paidleave.LeavePeriod {
+        -- length_in_weeks: 6
+      };
+      Paidleave.LeavePeriod {
+        -- length_in_weeks: 4
+      }
+    ]
+  assertion pl.has_sufficient_leave_balance
+```
+
+## Test Scenario 4: Multiple Leave Types Taken — Overall Cap Exceeded
+
+Applicant has taken 20 weeks of medical leave and 2 weeks of
+care-for-family leave this benefit year (22 weeks total across all
+types). They are now requesting 6 more weeks of care-for-family leave.
+
+The per-type balance is sufficient, but the overall 26-week cap across
+all leave types is exceeded.
+
+- Max entitlement for care for family: 12 weeks
+- Balance: 12 − 2 = 10 weeks
+- Requested: 6 weeks
+- Per-type check: 6 ≤ 10 ✓
+- Overall cap: 22 + 6 = 28 > 26 ✗ → insufficient
+
+```catala
+#[test]
+declaration scope TestMultipleTypesOverallCapExceeded:
+  pl scope Paidleave.LeaveBalance
+
+scope TestMultipleTypesOverallCapExceeded:
+  definition pl.application_leave_type equals CareForFamily
+  definition pl.leave_taken_in_benefit_year equals 2
+  definition pl.total_leave_taken_all_types equals 22
+  definition pl.leave_periods equals
+    [
+      Paidleave.LeavePeriod {
+        -- length_in_weeks: 6
+      }
+    ]
+  assertion not pl.has_sufficient_leave_balance
+```

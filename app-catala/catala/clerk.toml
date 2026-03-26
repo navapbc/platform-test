@@ -1,0 +1,10 @@
+[project]
+include_dirs = ["src"]
+build_dir = "_build"
+target_dir = "_target"
+
+[[target]]
+name = "paidleave"
+modules = ["Paidleave"]
+tests = ["tests/paidleave_test.catala_en"]
+backends = ["python"]

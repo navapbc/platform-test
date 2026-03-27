@@ -27,7 +27,7 @@ A simple [docker-compose.yml](/app-catala/docker-compose.yml) has been included 
 **Note:** Run everything from within the `/app-catala` folder:
 
 1. Run `make init start` to build the image and start the container.
-2. Navigate to `localhost:3001/docs` to access the API documentation (Swagger UI).
+2. Navigate to `localhost:3400/docs` to access the API documentation (Swagger UI).
 3. Run `make run-logs` to see the logs of the running container.
 4. Run `make stop` when you are done to stop the container.
 

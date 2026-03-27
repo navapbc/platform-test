@@ -15,7 +15,7 @@ services:
       - PY_RUN_APPROACH=local
       - PYTHONPATH=/app/
     ports:
-      - 3001:3001
+      - 3400:3400
     volumes:
       - ./:/app/
       - /app/.venv

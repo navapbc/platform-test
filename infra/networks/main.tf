@@ -10,7 +10,7 @@ locals {
 
   # List of configuration for all applications, even ones that are not in the current network
   # If project has multiple applications, add other app configs to this list
-  app_configs = [module.app_config, module.app-flask_config, module.app-nextjs_config, module.app-rails_config]
+  app_configs = [module.app_config, module.app-catala_config, module.app-flask_config, module.app-nextjs_config, module.app-rails_config]
 
   # List of configuration for applications that are in the current network
   # An application is in the current network if at least one of its environments
@@ -78,6 +78,10 @@ module "project_config" {
 
 module "app_config" {
   source = "../app/app-config"
+}
+
+module "app-catala_config" {
+  source = "../app-catala/app-config"
 }
 
 module "app-flask_config" {

@@ -1,0 +1,301 @@
+# Dates
+
+> Module Date_en
+
+> Using Date_internal as D
+> Using List_en as List
+
+## Helper functions
+
+```catala-metadata
+## Returns the earlier of two dates.
+declaration min
+  content date
+  depends on
+    d1 content date,
+    d2 content date
+  equals
+    if d1 <= d2 then d1 else d2
+
+## Returns the latter of two dates.
+declaration max
+  content date
+  depends on
+    d1 content date,
+    d2 content date
+  equals
+    if d1 >= d2 then d1 else d2
+```
+
+## Dates and years, months and days
+
+```catala-metadata
+## Builds a date from the number of the year, month (starting from 1)
+## and day (starting from 1).
+declaration of_year_month_day
+  content date
+  depends on
+    #[implicit_position_argument]
+    pos content code_location,
+    dyear content integer,
+    dmonth content integer,
+    dday content integer
+  equals
+    D.of_ymd of pos, dyear, dmonth, dday
+
+## Returns the number of the year, month (1-12) and day (1-31) from the date.
+declaration to_year_month_day
+  content (integer, integer, integer)
+  depends on d content date
+  equals
+    D.to_ymd of d
+
+## Returns the year number from a date.
+declaration get_year
+  content integer
+  depends on d content date
+  equals
+    (to_year_month_day of d).1
+
+## Returns the month number (1-12) from a date.
+declaration get_month
+  content integer
+  depends on d content date
+  equals
+    (to_year_month_day of d).2
+
+## Returns the day number from a date (starting from 1).
+declaration get_day
+  content integer
+  depends on d content date
+  equals
+    (to_year_month_day of d).3
+```
+
+## Getting to the past or future
+
+```catala-metadata
+## Returns the first day of the current month from the given date.
+## **Example:** `first_day_of_month of |2024-01-21| = |2024-01-01|`
+declaration first_day_of_month
+  content date
+  depends on d content date
+  equals
+    let ymd equals to_year_month_day of d in
+    of_year_month_day of (ymd.1, ymd.2, 1)
+
+## Returns the last day of the current month from the given date.
+## **Example:** `last_day_of_month of |2024-01-21| = |2024-01-31|`
+declaration last_day_of_month
+  content date
+  depends on d content date
+  equals
+    D.last_day_of_month of d
+
+## Returns the first day of the current year from the given date.
+## **Example:** `first_day_of_year of |2024-03-21| = |2024-01-01|`.
+declaration first_day_of_year
+  content date
+  depends on d content date
+  equals
+    let ymd equals to_year_month_day of d in
+    of_year_month_day of (ymd.1, 1, 1)
+
+## Returns the last day of the year from the given date.
+## **Example:** `last_day_of_year of |2024-03-21| = |2024-12-31|`.
+declaration last_day_of_year
+  content date
+  depends on d content date
+  equals
+    let ymd equals to_year_month_day of d in
+    of_year_month_day of (ymd.1, 12, 31)
+```
+
+## Named months
+
+```catala-metadata
+declaration enumeration Month:
+  -- January
+  -- February
+  -- March
+  -- April
+  -- May
+  -- June
+  -- July
+  -- August
+  -- September
+  -- October
+  -- November
+  -- December
+
+## Returns the month number (1-12) associated to a named month.
+declaration month_to_integer
+  content integer
+  depends on m content Month
+  equals
+    match m with pattern
+    -- January : 1
+    -- February : 2
+    -- March : 3
+    -- April : 4
+    -- May : 5
+    -- June : 6
+    -- July : 7
+    -- August : 8
+    -- September : 9
+    -- October : 10
+    -- November : 11
+    -- December : 12
+
+## Returns the named month corresponding to the month number (1-12).
+## **Aborts:** if the input is not between 1 and 12
+declaration integer_to_month
+  content Month
+  depends on
+    #[implicit_position_argument]
+    pos content code_location,
+    i content integer
+  equals
+    if i = 1 then      January
+    else if i = 2 then February
+    else if i = 3 then March
+    else if i = 4 then April
+    else if i = 5 then May
+    else if i = 6 then June
+    else if i = 7 then July
+    else if i = 8 then August
+    else if i = 9 then September
+    else if i = 10 then October
+    else if i = 11 then November
+    else if i = 12 then December
+    else let error equals D.of_ymd of (pos, -1, -1, -1) in impossible
+```
+
+## Date comparisons
+
+```catala-metadata
+## Checks whether a person born at `birth_date` is at least `age` old at
+## `at_date`. This function rounds **down** when computing the birthday.
+## **Examples:**
+## - `is_old_enough_rounding_down of |2000-06-01|, 24 year, |2024-06-15| = true`
+## - `is_old_enough_rounding_down of |2000-06-01|, 24 year, |2024-05-15| =
+##   false`
+## - `is_old_enough_rounding_down of |2000-01-31|, 1 month, |2000-02-29| = true`
+declaration is_old_enough_rounding_down
+  content boolean
+  depends on
+    birth_date content date,
+    age content duration,
+    at_date content date
+  equals
+    at_date >= D.add_rounded_down of birth_date, age
+
+## Checks whether a person born at `birth_date` is at least `age` old at
+## `at_date`. This function rounds **up** when computing the birthday.
+## **Examples:**
+## - `is_old_enough_rounding_up of |2000-06-01|, 24 year, |2024-06-15| = true`
+## - `is_old_enough_rounding_up of |2000-06-01|, 24 year, |2024-05-15| = false`
+## - `is_old_enough_rounding_up of |2000-01-31|, 1 month, |2000-02-29| = false`
+declaration is_old_enough_rounding_up
+  content boolean
+  depends on
+    birth_date content date,
+    age content duration,
+    at_date content date
+  equals
+    at_date >= D.add_rounded_up of birth_date, age
+
+## Checks whether a person born at `birth_date` is strictly less than
+## `age` old at `at_date`. This function rounds **down** when computing
+## the birthday.
+## **Examples:**
+## - `is_young_enough_rounding_down of |2000-06-01|, 24 year, |2024-06-15| =
+##   false`
+## - `is_young_enough_rounding_down of |2000-06-01|, 24 year, |2024-05-15| =
+##   true`
+## - `is_young_enough_rounding_down of |2000-01-31|, 1 month, |2000-02-29| =
+##   false`
+declaration is_young_enough_rounding_down
+  content boolean
+  depends on
+    birth_date content date,
+    age content duration,
+    at_date content date
+  equals
+    not (is_old_enough_rounding_down of birth_date, age, at_date)
+# Note: it would be tempting to write a function that tests if the person
+# is "at most" a given age instead. But that would be misleading, because by
+# "at most n years old", we actually mean "less than (n+1) years old",
+# implicitly rounding the age down. The function can't do that since it allows
+# durations in months or days as well.
+
+## Checks whether a person born at `birth_date` is strictly less than
+## `age` old at `at_date`. This function rounds **down** when computing
+## the birthday.
+## **Examples:**
+## - `is_young_enough_rounding_up of |2000-06-01|, 24 year, |2024-06-15| =
+##   false`
+## - `is_young_enough_rounding_up of |2000-06-01|, 24 year, |2024-05-15| = true`
+## - `is_young_enough_rounding_up of |2000-01-31|, 1 month, |2000-02-29| = true`
+declaration is_young_enough_rounding_up
+  content boolean
+  depends on
+    birth_date content date,
+    age content duration,
+    at_date content date
+  equals
+    not (is_old_enough_rounding_up of birth_date, age, at_date)
+```
+
+## Days of the week enumeration
+```catala-metadata
+declaration enumeration Day_of_week:
+  -- Monday
+  -- Tuesday
+  -- Wednesday
+  -- Thursday
+  -- Friday
+  -- Saturday
+  -- Sunday
+```
+
+## Find the Day of the week for a given date (Tomohiko Sakamoto Algorithm)
+
+```catala-metadata
+declaration day_of_week content Day_of_week
+  depends on given_date content date
+  equals
+  let weekdays equals [Sunday; Monday; Tuesday; Wednesday; Thursday; Friday; Saturday] in
+  let sakamoto_list equals [0; 3; 2; 5; 0; 3; 5; 1; 4; 6; 2; 4] in
+  let month_number equals get_month of given_date in
+  let year_number equals
+    if month_number < 3
+    then get_year of given_date - 1
+    else get_year of given_date
+  in
+  let n_number equals
+    match (List.nth_element of sakamoto_list, month_number) with pattern
+    -- Present content n: n
+    -- Absent: impossible
+  in
+  let day_number equals
+    (year_number
+     + integer of (year_number / 4)
+     - integer of (year_number / 100)
+     + integer of (year_number / 400)
+     + n_number
+     + get_day of given_date)
+    - 7 * integer of (
+      (year_number
+       + integer of (year_number / 4)
+       - integer of (year_number / 100)
+       + integer of (year_number / 400)
+       + n_number
+       + get_day of given_date)
+      / 7
+    )
+  in
+  match (List.nth_element of weekdays, (day_number + 1)) with pattern
+  -- Present content d: d
+  -- Absent: impossible
+```

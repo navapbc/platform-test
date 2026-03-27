@@ -1,0 +1,295 @@
+# Dates
+
+> Module Date_fr
+
+> Usage de Date_internal en tant que D
+> Usage de List_fr en tant que Liste
+
+## Fonctions utilitaires
+
+```catala-metadata
+## Renvoie la plus ancienne des deux dates.
+déclaration min
+  contenu date
+  dépend de
+    d1 contenu date,
+    d2 contenu date
+  égal à
+    si d1 <= d2 alors d1 sinon d2
+
+## Renvoie la plus récente des deux dates.
+déclaration max
+  contenu date
+  dépend de
+    d1 contenu date,
+    d2 contenu date
+  égal à
+    si d1 >= d2 alors d1 sinon d2
+```
+
+## Dates et années, mois et jours
+
+```catala-metadata
+## Construit une date à partir du numéro de l'année, du mois (à partir de 1)
+## et du jour (à partir de 1).
+déclaration depuis_année_mois_jour
+  contenu date
+  dépend de
+    #[implicit_position_argument]
+    pos contenu position_source,
+    dannée contenu entier,
+    dmois contenu entier,
+    djour contenu entier
+  égal à
+    D.of_ymd de pos, dannée, dmois, djour
+
+## Renvoie le numéro de l'année, du mois (1-12) et du jour (1-31) de la date
+## passée en argument.
+déclaration vers_année_mois_jour
+  contenu (entier, entier, entier)
+  dépend de d contenu date
+  égal à
+    D.to_ymd de d
+
+## Renvoie le numéro de l'année d'une date.
+déclaration accès_année
+  contenu entier
+  dépend de d contenu date
+  égal à
+    (vers_année_mois_jour de d).1
+
+## Renvoie le numéro du mois (1-12) d'une date.
+déclaration accès_mois
+  contenu entier
+  dépend de d contenu date
+  égal à
+    (vers_année_mois_jour de d).2
+
+## Renvoie le numéro du jour (1-31) d'une date.
+déclaration accès_jour
+  contenu entier
+  dépend de d contenu date
+  égal à
+    (vers_année_mois_jour de d).3
+```
+
+## Aller vers le passé ou le futur
+
+```catala-metadata
+## Renvoie le premier jour du mois de la date passée en argument.
+## **Exemple:** `premier_jour_du_mois de |2024-01-21| = |2024-01-01|`.
+déclaration premier_jour_du_mois
+  contenu date
+  dépend de d contenu date
+  égal à
+    soit ymd égal à vers_année_mois_jour de d dans
+    depuis_année_mois_jour de (ymd.1, ymd.2, 1)
+
+## Renvoie le dernier jour du mois de la date passée en argument.
+## **Exemple:** `dernier_jour_du_mois de |2024-01-21| = |2024-01-31|`
+déclaration dernier_jour_du_mois
+  contenu date
+  dépend de d contenu date
+  égal à
+    D.last_day_of_month de d
+
+## Renvoie le premier jour de l'année de la date passée en argument.
+## **Exemple:** `premier_jour_de_l_année de |2024-03-21| = |2024-01-01|`
+déclaration premier_jour_de_l_année
+  contenu date
+  dépend de d contenu date
+  égal à
+    soit ymd égal à (vers_année_mois_jour de d) dans
+    depuis_année_mois_jour de (ymd.1, (1), (1))
+
+## Renvoie le dernier jour de l'année de la date passée en argument.
+## **Exemple:** `dernier_jour_de_l_année de |2024-03-21| = |2024-12-31|`
+déclaration dernier_jour_de_l_année
+  contenu date
+  dépend de d contenu date
+  égal à
+    soit ymd égal à vers_année_mois_jour de d dans
+    depuis_année_mois_jour de (ymd.1, (12), (31))
+```
+
+## Mois nommés
+
+```catala-metadata
+déclaration énumération Mois:
+  -- Janvier
+  -- Février
+  -- Mars
+  -- Avril
+  -- Mai
+  -- Juin
+  -- Juillet
+  -- Août
+  -- Septembre
+  -- Octobre
+  -- Novembre
+  -- Décembre
+
+## Renvoie le numéro de mois (1-12) associé à un mois nommé.
+déclaration mois_vers_entier
+  contenu entier
+  dépend de m contenu Mois
+  égal à
+    selon m sous forme
+    -- Janvier : 1
+    -- Février : 2
+    -- Mars : 3
+    -- Avril : 4
+    -- Mai : 5
+    -- Juin : 6
+    -- Juillet : 7
+    -- Août : 8
+    -- Septembre : 9
+    -- Octobre : 10
+    -- Novembre : 11
+    -- Décembre : 12
+
+## Renvoie le mois nommé correspondant au numéro de mois (1-12).
+## **Échoue:** si l'argument n'est pas entre 1 et 12
+déclaration entier_vers_mois
+  contenu Mois
+  dépend de
+    #[implicit_position_argument]
+    pos contenu position_source,
+    i contenu entier
+  égal à
+    si i = 1 alors Janvier
+    sinon si i = 2 alors Février
+    sinon si i = 3 alors Mars
+    sinon si i = 4 alors Avril
+    sinon si i = 5 alors Mai
+    sinon si i = 6 alors Juin
+    sinon si i = 7 alors Juillet
+    sinon si i = 8 alors Août
+    sinon si i = 9 alors Septembre
+    sinon si i = 10 alors Octobre
+    sinon si i = 11 alors Novembre
+    sinon si i = 12 alors Décembre
+    sinon soit erreur égal à D.of_ymd de (pos, -1, -1, -1) dans impossible
+```
+
+## Comparaisons de dates
+
+```catala-metadata
+## Teste si une personne née à `date_de_naissance` est au moins âgée de `âge` à
+## la date `à_date`. Cette fonction calcule l'anniversaire en arrondissant à
+## l'**inférieur**.
+## **Exemples:**
+## - `est_assez_âgé_arrondi_inférieur de |2000-06-01|, 24 an, |2024-06-15| = vrai`
+## - `est_assez_âgé_arrondi_inférieur de |2000-06-01|, 24 an, |2024-05-15| = faux`
+## - `est_assez_âgé_arrondi_inférieur de |2000-01-31|, 1 mois, |2000-02-29| = vrai`
+déclaration est_assez_âgé_arrondi_inférieur
+  contenu booléen
+  dépend de
+    date_de_naissance contenu date,
+    âge contenu durée,
+    à_date contenu date
+  égal à
+    à_date >= D.add_rounded_down de date_de_naissance, âge
+
+## Teste si une personne née à `date_de_naissance` est au moins âgée de `âge` à
+## la date `à_date`. Cette fonction calcule l'anniversaire en arrondissant au
+## **supérieur**.
+## **Exemples:**
+## - `est_assez_âgé_arrondi_supérieur de |2000-06-01|, 24 an, |2024-06-15| = vrai`
+## - `est_assez_âgé_arrondi_supérieur de |2000-06-01|, 24 an, |2024-05-15| = faux`
+## - `est_assez_âgé_arrondi_supérieur de |2000-01-31|, 1 mois, |2000-02-29| = faux`
+déclaration est_assez_âgé_arrondi_supérieur
+  contenu booléen
+  dépend de
+    date_de_naissance contenu date,
+    âge contenu durée,
+    à_date contenu date
+  égal à
+    à_date >= D.add_rounded_up de date_de_naissance, âge
+
+## Teste si une personne née à `date_de_naissance` a un âge strictement
+## inférieur à `âge` à la date `à_date`. Cette fonction calcule l'anniversaire
+## en arrondissant à l'**inférieur**.
+## **Exemples:**
+## - `est_assez_jeune_arrondi_inférieur de |2000-06-01|, 24 an, |2024-06-15| = faux`
+## - `est_assez_jeune_arrondi_inférieur de |2000-06-01|, 24 an, |2024-05-15| = vrai`
+## - `est_assez_jeune_arrondi_inférieur de |2000-01-31|, 1 mois, |2000-02-29| = faux`
+déclaration est_assez_jeune_arrondi_inférieur
+  contenu booléen
+  dépend de
+    date_de_naissance contenu date,
+    âge contenu durée,
+    à_date contenu date
+  égal à
+    non (est_assez_âgé_arrondi_inférieur de date_de_naissance, âge, à_date)
+
+## Teste si une personne née à `date_de_naissance` a un âge strictement
+## inférieur à `âge` à la date `à_date`. Cette fonction calcule l'anniversaire
+## en arrondissant au **supérieur**.
+## **Exemples:**
+## - `est_assez_jeune_arrondi_supérieur de |2000-06-01|, 24 an, |2024-06-15| = faux`
+## - `est_assez_jeune_arrondi_supérieur de |2000-06-01|, 24 an, |2024-05-15| = vrai`
+## - `est_assez_jeune_arrondi_supérieur de |2000-01-31|, 1 mois, |2000-02-29| = vrai`
+déclaration est_assez_jeune_arrondi_supérieur
+  contenu booléen
+  dépend de
+    date_de_naissance contenu date,
+    âge contenu durée,
+    à_date contenu date
+  égal à
+    non (est_assez_âgé_arrondi_supérieur de date_de_naissance, âge, à_date)
+```
+
+
+## Gestion des jours de la semaine et des jours fériés
+```catala-metadata
+déclaration énumération Jour_de_la_semaine:
+  -- Lundi
+  -- Mardi
+  -- Mercredi
+  -- Jeudi
+  -- Vendredi
+  -- Samedi
+  -- Dimanche
+```
+
+## Détermination du jour de la semaine d'une date donnée (algorithme de Sakamoto)
+
+```catala-metadata
+déclaration jour_de_la_semaine contenu Jour_de_la_semaine
+  dépend de date_donnée contenu date
+  égal à
+  soit weekdays égal à [Lundi; Mardi; Mercredi; Jeudi; Vendredi; Samedi; Dimanche] dans
+  soit sakamoto_list égal à [0; 3; 2; 5; 0; 3; 5; 1; 4; 6; 2; 4] dans
+  soit month_number égal à accès_mois de date_donnée dans
+  soit year_number égal à
+    si month_number < 3
+    alors accès_année de date_donnée - 1
+    sinon accès_année de date_donnée
+  dans
+  soit n_number égal à
+    selon (Liste.nième_élément de sakamoto_list, month_number) sous forme
+    -- Présent contenu n: n
+    -- Absent: impossible
+  dans
+  soit day_number égal à
+    (year_number
+     + entier de (year_number / 4)
+     - entier de (year_number / 100)
+     + entier de (year_number / 400)
+     + n_number
+     + accès_jour de date_donnée)
+    - 7 * entier de (
+      (year_number
+       + entier de (year_number / 4)
+       - entier de (year_number / 100)
+       + entier de (year_number / 400)
+       + n_number
+       + accès_jour de date_donnée)
+      / 7
+    )
+  dans
+  selon (Liste.nième_élément de weekdays, (day_number + 1)) sous forme
+  -- Présent contenu d: d
+  -- Absent: impossible
+```

@@ -1,0 +1,84 @@
+# Lists
+
+> Module List_en
+> Using List_internal
+
+## Helper functions
+
+```catala-metadata
+## Returns a list made of the consecutive integers from `begin` to `end`.
+## If `end <= begin`, the returned list is empty.
+## **Example:** `sequence of 3, 6 = [ 3; 4; 5; 6 ]`
+declaration sequence
+  content list of integer
+  depends on
+    begin content integer,
+    end content integer
+  equals
+    List_internal.sequence of begin, end
+
+## Returns the element at the given `index` in the list, encapsulated within
+## constructor `Present`.
+## If the index is less than 1, or otherwise outside of the list, `Absent` is
+## returned.
+## **Example**: `nth_element of [$101; $102; $103], 2 = Present content $102`
+declaration nth_element
+  content optional of anything of type t
+  depends on
+    l content list of anything of type t,
+    index content integer
+  equals
+    List_internal.nth_element of l, index
+
+## Returns the first element of the list encapsulated within constructor
+## `Present`.
+## If the list is empty, returns `Absent` instead.
+declaration first_element
+  content optional of anything of type t
+  depends on l content list of anything of type t
+  equals
+    nth_element of l, 1
+
+## Returns the last element of the list encapsulated within constructor
+## `Present`.
+## If the list is empty, returns `Absent`
+declaration last_element
+  content optional of anything of type t
+  depends on l content list of anything of type t
+  equals
+    nth_element of l, (number of l)
+
+## Removes the element at `index` within the list. The indexes of the
+## following elements are shifted.
+## If the index is invalid, the list is returned unchanged.
+declaration remove_nth_element
+  content list of anything of type t
+  depends on
+    l content list of anything of type t,
+    index content integer
+  equals
+    List_internal.remove_nth_element of l, index
+
+## Returns the given list, without its first element.
+## An empty list is returned unchanged.
+declaration remove_first_element
+  content list of anything of type t
+  depends on l content list of anything of type t
+  equals
+    List_internal.remove_nth_element of l, 1
+
+## Returns the given list, without its last element.
+## An empty list is returned unchanged.
+declaration remove_last_element
+  content list of anything of type t
+  depends on l content list of anything of type t
+  equals
+    List_internal.remove_nth_element of l, (number of l)
+
+## Reverse the elements of the given list.
+declaration reverse
+  content list of anything of type t
+  depends on l content list of anything of type t
+  equals
+    List_internal.reverse of l
+```

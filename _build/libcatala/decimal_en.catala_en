@@ -1,0 +1,117 @@
+# Decimals
+
+> Module Decimal_en
+
+> Using Decimal_internal as D
+
+## Helper functions
+
+```catala-metadata
+## Returns the smaller of the two arguments.
+declaration min
+  content decimal
+  depends on
+    d1 content decimal,
+    d2 content decimal
+  equals
+    if d1 > d2 then d2 else d1
+
+## Returns the bigger of the two arguments.
+declaration max
+  content decimal
+  depends on
+    d1 content decimal,
+    d2 content decimal
+  equals
+    if d1 > d2 then d1 else d2
+
+## Caps `d`, returning a value that never exceeds `max_value`.
+declaration ceiling
+  content decimal
+  depends on
+    d content decimal,
+    max_value content decimal
+  equals
+    min of d, max_value
+
+## Applies a lower cap on `d`, and returns a value that is never smaller
+## than `min_value`.
+declaration floor
+  content decimal
+  depends on
+    d content decimal,
+    min_value content decimal
+  equals
+    max of d, min_value
+
+## Returns the argument if it is positive, 0.0 otherwise.
+declaration positive
+  content decimal
+  depends on d content decimal
+  equals
+    floor of d, 0.0
+
+## Removes decimal digits from a number.
+## **Examples:**
+## - `truncate of 7.61 = 7.0`
+## - `truncate of -7.61 = -7.0`
+declaration truncate
+  content decimal
+  depends on d content decimal
+  equals
+    if d = 0.0 then
+      0.0
+    else if d > 0.0 then
+      round of (d - 0.5)
+    else
+      round of (d + 0.5)
+
+## Rounds a number to the next greater integer.
+## **Examples:**
+## - `round_by_excess of 4.34 = 5`
+## - `round_by_excess of -4.34 = -4.0`
+declaration round_by_excess
+  content decimal
+  depends on d content decimal
+  equals
+    if d >= 0.0 then
+      if truncate of d = d then
+        d
+      else
+        truncate of (d + 1.0)
+    else round of (d + 0.5)
+
+## Rounds a number to the previous lesser integer.
+## **Examples:**
+## - `round_by_default of 3.78 = 3`
+## - `round_by_default of -3.78 = -4.0`
+declaration round_by_default
+  content decimal
+  depends on d content decimal
+  equals
+    if d > 0.0 then
+      truncate of d
+    else if truncate of d = d then
+      d
+    else
+      truncate of (d - 1.0)
+
+## Rounds a number to the specified `nth_decimal`. `nth_decimal` may be a
+## negative value.
+## **Examples:**
+## - `round_to_decimal of 123.4567,  3 = 123.457`
+## - `round_to_decimal of 123.4567, -2 = 100.0`
+declaration round_to_decimal
+  content decimal
+  depends on
+    d content decimal,
+    nth_decimal content integer
+  equals
+    D.round_to_decimal of d, nth_decimal
+
+## Sums the elements of a list of Decimal
+declaration sum
+  content decimal
+  depends on l content list of decimal
+  equals combine all x among l in total initially 0.0 with total + x
+```

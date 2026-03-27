@@ -1,0 +1,84 @@
+# Listes
+
+> Module List_fr
+> Usage de List_internal
+
+## Fonctions utilitaires
+
+```catala-metadata
+## Donne la liste constituée des entiers consécutifs de `début` à `fin`.
+## Si `fin <= début`, le résultat est une liste vide.
+## **Exemple**: `séquence de 3, 6` donne la liste `[ 3; 4; 5; 6 ]`
+déclaration séquence
+  contenu liste de entier
+  dépend de
+    début contenu entier,
+    fin contenu entier
+  égal à
+    List_internal.sequence de début, fin
+
+## Donne l'élément à l'`index` donné dans la liste, encapsulé dans
+## le constructeur `Présent`.
+## Si l'index est plus petit que 1, ou en-dehors de la liste, la valeur
+## `Absent` est retournée
+## **Exemple**: `nième_élément de [101€; 102€; 103€], 2 = Présent contenu 102€`
+déclaration nième_élément
+  contenu optionnel de n'importe quel de type t
+  dépend de
+    l contenu liste de n'importe quel de type t,
+    index contenu entier
+  égal à
+    List_internal.nth_element de l, index
+
+## Donne le premier élément de la liste encapsulé dans le constructeur
+## `Présent`.
+## Si la liste est vide, retourne `Absent`.
+déclaration premier_élément
+  contenu optionnel de n'importe quel de type t
+  dépend de l contenu liste de n'importe quel de type t
+  égal à
+    nième_élément de l, 1
+
+## Donne le dernier élément de la liste encapsulé dans le constructeur
+## `Présent`.
+## Si la liste est vide, retourne `Absent`.
+déclaration dernier_élément
+  contenu optionnel de n'importe quel de type t
+  dépend de l contenu liste de n'importe quel de type t
+  égal à
+    nième_élément de l, (nombre de l)
+
+## Supprime l'élément à l'`index` donné de la liste. Les index des éléments
+## suivants sont décalés.
+## Si l'index donné est invalide, retourne la liste sans modification.
+déclaration retire_nième_élément
+  contenu liste de n'importe quel de type t
+  dépend de
+    l contenu liste de n'importe quel de type t,
+    index contenu entier
+  égal à
+    List_internal.remove_nth_element de l, index
+
+## Retourne la liste sans son premier élément.
+## La liste vide est retournée inchangée.
+déclaration retire_premier_élément
+  contenu liste de n'importe quel de type t
+  dépend de l contenu liste de n'importe quel de type t
+  égal à
+    List_internal.remove_nth_element de l, 1
+
+## Retourne la liste sans son dernier élément.
+## La liste vide est retournée inchangée.
+déclaration retire_dernier_élément
+  contenu liste de n'importe quel de type t
+  dépend de l contenu liste de n'importe quel de type t
+  égal à
+    List_internal.remove_nth_element de l, (nombre de l)
+
+## Inverse l'ordre des éléments la liste donnée.
+déclaration inverse
+  contenu liste de n'importe quel de type t
+  dépend de l contenu liste de n'importe quel de type t
+  égal à
+    List_internal.reverse de l
+```

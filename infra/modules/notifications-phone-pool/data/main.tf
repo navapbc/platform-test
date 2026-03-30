@@ -10,5 +10,5 @@ locals {
 # Check for existing phone pools in each specified region
 data "external" "existing_pools" {
   for_each = toset(local.search_regions)
-  program  = ["${path.module}/find-existing-pools.sh", each.value]
+  program  = ["${path.module}/find-existing-pool.sh", each.value]
 }

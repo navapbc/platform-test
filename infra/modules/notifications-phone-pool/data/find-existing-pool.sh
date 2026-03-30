@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-# find-existing-pools.sh
+# find-existing-pool.sh
 # Script to find existing SMS phone pools in a specified AWS region
 # Called once per region by Terraform for multi-region support
 #
-# Usage: find-existing-pools.sh <region>
+# Usage: find-existing-pool.sh <region>
 #
 # Parameters:
 #   region (required): AWS region to search in

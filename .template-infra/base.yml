@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier
-_commit: v0.16.0-21-g3af6525
+_commit: v0.16.0-22-g8141122
 _src_path: https://github.com/navapbc/template-infra
 base_code_repository_url: git@github.com:navapbc/platform-test.git
 base_default_region: us-east-1

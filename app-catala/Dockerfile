@@ -11,6 +11,8 @@ FROM python:3.13-slim AS base
 
 RUN pip install --no-cache-dir poetry==2.1.1
 
+# Ignore pinning apt package dependencies
+# hadolint ignore=DL3008
 RUN apt-get update \
     && apt-get upgrade --yes \
     && apt-get install --no-install-recommends --yes \
@@ -23,10 +25,11 @@ ARG RUN_UID
 ARG RUN_USER
 
 RUN : "${RUN_USER:?RUN_USER and RUN_UID need to be set and non-empty.}" && \
-    [ "${RUN_USER}" = "root" ] || \
-    (useradd --create-home --create --user-group --home "/home/${RUN_USER}" --uid ${RUN_UID} "${RUN_USER}" \
+    if [ "${RUN_USER}" != "root" ]; then \
+    useradd --create-home --create --user-group --home "/home/${RUN_USER}" --uid ${RUN_UID} "${RUN_USER}" \
     && mkdir /app \
-    && chown -R ${RUN_UID} "/home/${RUN_USER}" /app)
+    && chown -R ${RUN_UID} "/home/${RUN_USER}" /app; \
+    fi
 
 # -----------
 # Dev image

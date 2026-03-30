@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: 4f60dcd
-_src_path: https://github.com/navapbc/strata-template-rules-engine-catala
+_commit: acc47c5
+_src_path: ../strata-template-rules-engine-catala
 app_local_port: 3400
 app_name: app-catala

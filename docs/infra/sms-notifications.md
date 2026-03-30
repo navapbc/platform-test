@@ -14,11 +14,11 @@ The application can send SMS notifications to users using AWS End User Messaging
 
 A company or entity must be registered and approved in AWS End User Messaging before using the service for SMS notifications.
 
-**Important Regional Considerations:**
-- Registration and phone numbers are region-specific
-- You must create separate registrations for each AWS region where you plan to send SMS
-- Phone numbers provisioned in one region cannot be used in other regions
-- Phone numbers must be provisioned by AWS through the End User Messaging service.  You cannot bring existing phone numbers from other carriers or services.
+**Important Considerations:**
+- Registrations and phone numbers are region-specific
+    - You must create separate registrations for each AWS region where you plan to send SMS
+    - Phone numbers provisioned in one region cannot be used in other regions
+- Phone numbers must be provisioned by AWS through the End User Messaging service. You cannot bring existing phone numbers from other carriers or services.
 
 Follow AWS documentation for creating registrations:
 
@@ -198,6 +198,7 @@ def send_sms_notification(phone_number, message):
 ## Testing Setup
 
 *__Note:__* This assumes your AWS End User Messaging SMS Registration has been approved and configured in `infra/<APP_NAME>/app-config/env-config/dev.tf|staging.tf|prod.tf`
+
 ### 1. Verify Destination Numbers (Sandbox Accounts)
 
 In sandbox environments, you can only send SMS to up to 10 verified phone numbers. Steps to register destination phone numbers:

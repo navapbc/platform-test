@@ -1,0 +1,2 @@
+# Ignore apt-get cache not being cleared in python base image
+DKL-DI-0005

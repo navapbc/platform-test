@@ -1,0 +1,10 @@
+ignore:
+  # These settings ignore any findings that fall into these categories
+  - fix-state: not-fixed
+  - fix-state: wont-fix
+  - fix-state: unknown
+
+  # We dont use imaplib
+  - vulnerability: CVE-2025-15366
+  # We dont use poplib
+  - vulnerability: CVE-2025-15367

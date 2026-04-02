@@ -13,6 +13,7 @@ locals {
   tenant_index_name                = "tenantId-index"
   external_reference_id_index_name = "externalReferenceId-index"
   batch_id_index_name              = "batchId-index"
+  build_id_index_name              = "buildId-index"
   max_batch_size                   = 50
   max_bda_invoke_retry_attempts    = 3
 
@@ -21,11 +22,12 @@ locals {
     DOCUMENTAI_PREPROCESSING_LOCATION                 = "s3://${local.prefix}${local.document_data_extraction_config.input_bucket_name}/preprocessing"
     DOCUMENTAI_OUTPUT_LOCATION                        = "s3://${local.prefix}${local.document_data_extraction_config.output_bucket_name}/processed"
     DOCUMENTAI_DOCUMENT_METADATA_TABLE_NAME           = "${local.prefix}${local.document_data_extraction_config.document_metadata_table_name}"
-    DOCUMENTAI_DOCUMENT_BUILDS_TABLE_NAME             = "${local.prefix}${local.document_data_extraction_config.document_builds_table_name}"
+    DOCUMENTAI_BUILD_TABLE_NAME                       = "${local.prefix}${local.document_data_extraction_config.document_build_table_name}"
     DOCUMENTAI_BATCH_TABLE_NAME                       = "${local.prefix}${local.document_data_extraction_config.batch_table_name}"
     DOCUMENTAI_DOCUMENT_METADATA_JOB_ID_INDEX_NAME    = local.job_id_index_name
     DOCUMENTAI_DOCUMENT_METADATA_TENANT_ID_INDEX_NAME = local.tenant_index_name
     DOCUMENTAI_DOCUMENT_METADATA_BATCH_ID_INDEX_NAME  = local.batch_id_index_name
+    DOCUMENTAI_DOCUMENT_METADATA_BUILD_ID_INDEX_NAME  = local.build_id_index_name
     DOCUMENTAI_EXTERNAL_REF_ID_INDEX_NAME             = local.external_reference_id_index_name
     DOCUMENTAI_MAX_BATCH_SIZE                         = local.max_batch_size
     BDA_PROJECT_ARN                                   = module.documentai[0].bda_project_arn
@@ -168,8 +170,18 @@ resource "aws_dynamodb_table" "document_metadata" {
   }
 
   attribute {
+    name = "buildId"
+    type = "S"
+  }
+
+  attribute {
     name = "createdAt"
     type = "S"
+  }
+
+  ttl {
+    attribute_name = "ttl"
+    enabled        = true
   }
 
   global_secondary_index {
@@ -197,6 +209,12 @@ resource "aws_dynamodb_table" "document_metadata" {
     projection_type = "ALL"
   }
 
+  global_secondary_index {
+    name            = local.build_id_index_name
+    hash_key        = "buildId"
+    projection_type = "ALL"
+  }
+
   server_side_encryption {
     enabled     = true
     kms_key_arn = aws_kms_key.dynamodb[0].arn
@@ -213,7 +231,7 @@ resource "aws_dynamodb_table" "document_metadata" {
 resource "aws_dynamodb_table" "document_builds" {
   count = local.document_data_extraction_config != null ? 1 : 0
 
-  name         = "${local.prefix}${local.document_data_extraction_config.document_builds_table_name}"
+  name         = "${local.prefix}${local.document_data_extraction_config.document_build_table_name}"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "buildId"
 
@@ -243,6 +261,11 @@ resource "aws_dynamodb_table" "document_builds" {
     type = "S"
   }
 
+  ttl {
+    attribute_name = "ttl"
+    enabled        = true
+  }
+
   global_secondary_index {
     name            = local.tenant_index_name
     hash_key        = "tenantId"
@@ -268,7 +291,7 @@ resource "aws_dynamodb_table" "document_builds" {
   tags = local.tags
 }
 
-resource "aws_dynamodb_table" "documentai_batches" {
+resource "aws_dynamodb_table" "document_batches" {
   count = local.document_data_extraction_config != null ? 1 : 0
 
   name         = "${local.prefix}${local.document_data_extraction_config.batch_table_name}"
@@ -345,8 +368,8 @@ resource "aws_iam_policy" "dynamodb_read_write" {
         "${aws_dynamodb_table.document_metadata[0].arn}/index/*",
         aws_dynamodb_table.document_builds[0].arn,
         "${aws_dynamodb_table.document_builds[0].arn}/index/*",
-        aws_dynamodb_table.documentai_batches[0].arn,
-        "${aws_dynamodb_table.documentai_batches[0].arn}/index/*"
+        aws_dynamodb_table.document_batches[0].arn,
+        "${aws_dynamodb_table.document_batches[0].arn}/index/*"
       ]
       Effect = "Allow"
       },

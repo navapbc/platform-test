@@ -87,6 +87,7 @@ module "documentai" {
   source = "../../modules/document-data-extraction/resources"
 
   standard_output_configuration = local.document_data_extraction_config.standard_output_configuration
+  override_configuration        = local.document_data_extraction_config.override_configuration
   tags                          = local.tags
 
   blueprints = concat(

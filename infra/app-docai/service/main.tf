@@ -134,12 +134,14 @@ module "service" {
       storage_access = module.storage.access_policy_arn
     },
     module.app_config.enable_document_data_extraction ? {
-      documentai_input_bucket_access   = module.documentai_input_bucket[0].access_policy_arn
-      documentai_output_bucket_access  = module.documentai_output_bucket[0].access_policy_arn,
-      documentai_metrics_bucket_access = module.documentai_metrics_bucket[0].access_policy_arn,
-      documentai_bedrock_access        = module.documentai[0].access_policy_arn,
-      documentai_dynamodb_access       = aws_iam_policy.dynamodb_read_write[0].arn
-      documentai_sqs_send_message      = aws_iam_policy.sqs_send_message[0].arn
+      documentai_input_bucket_access            = module.documentai_input_bucket[0].access_policy_arn
+      documentai_output_bucket_access           = module.documentai_output_bucket[0].access_policy_arn,
+      documentai_metrics_bucket_access          = module.documentai_metrics_bucket[0].access_policy_arn,
+      documentai_bedrock_access                 = module.documentai[0].access_policy_arn,
+      documentai_dynamodb_access                = aws_iam_policy.dynamodb_read_write[0].arn
+      documentai_sqs_send_message               = aws_iam_policy.sqs_send_message[0].arn
+      documentai_bedrock_data_automation_invoke = aws_iam_policy.bedrock_data_automation_invoke[0].arn
+      documentai_bedrock_runtime_invoke         = aws_iam_policy.bedrock_runtime_invoke[0].arn
     } : {},
     module.app_config.enable_identity_provider ? {
       identity_provider_access = module.identity_provider_client[0].access_policy_arn,

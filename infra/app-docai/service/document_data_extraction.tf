@@ -87,7 +87,6 @@ module "documentai" {
   source = "../../modules/document-data-extraction/resources"
 
   standard_output_configuration = local.document_data_extraction_config.standard_output_configuration
-  override_configuration        = local.document_data_extraction_config.override_configuration
   tags                          = local.tags
 
   blueprints = concat(
@@ -351,6 +350,44 @@ resource "aws_dynamodb_table" "document_batches" {
 }
 
 #-------------------
+# Bedrock Classification Config (SSM)
+#-------------------
+resource "aws_ssm_parameter" "bedrock_classification_model_id" {
+  count = local.document_data_extraction_config != null ? 1 : 0
+
+  name  = "/service/${local.service_name}/bedrock/classification-model-id"
+  type  = "String"
+  value = "anthropic.claude-3-haiku-20240307-v1:0"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+# <<DOCUMENT_TYPES>> in the classification prompt needs to be dynamically 
+# replaced with the document types that BDA is configured to extract. Store prompt 
+# in SSM Parameter Store; application reads and update it at runtime.
+resource "aws_ssm_parameter" "bedrock_classification_prompt" {
+  count = local.document_data_extraction_config != null ? 1 : 0
+
+  name  = "/service/${local.service_name}/bedrock/classification-prompt"
+  type  = "String"
+  value = <<-EOT
+Analyze this image. Respond in JSON only:
+{"document_type": "string", "confidence": float 0-1, "document_count": int}
+ONLY use one of these exact values for document_type: <<DOCUMENT_TYPES>>
+Do not create new categories. If unsure, use 'other_document'.
+If it's not a document, use 'not_a_document'.
+document_count: how many separate documents are visible in this image?
+EOT
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+
+#-------------------
 # IAM Policies
 #-------------------
 resource "aws_iam_policy" "dynamodb_read_write" {
@@ -385,7 +422,7 @@ resource "aws_iam_policy" "dynamodb_read_write" {
   })
 }
 
-resource "aws_iam_policy" "bedrock_invoke" {
+resource "aws_iam_policy" "bedrock_data_automation_invoke" {
   count = local.document_data_extraction_config != null ? 1 : 0
 
   name = "${local.prefix}bedrock-invoke"
@@ -402,5 +439,30 @@ resource "aws_iam_policy" "bedrock_invoke" {
       ]
       Effect = "Allow"
     }]
+  })
+}
+
+
+resource "aws_iam_policy" "bedrock_runtime_invoke" {
+  count = local.document_data_extraction_config != null ? 1 : 0
+
+  name = "${local.prefix}bedrock-runtime-invoke"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action   = "bedrock:InvokeModel"
+        Resource = "arn:aws:bedrock:${data.aws_region.current.name}::foundation-model/*"
+        Effect   = "Allow"
+      },
+      {
+        Action = "ssm:GetParameter"
+        Resource = [
+          aws_ssm_parameter.bedrock_classification_model_id[0].arn,
+          aws_ssm_parameter.bedrock_classification_prompt[0].arn,
+        ]
+        Effect = "Allow"
+      }
+    ]
   })
 }

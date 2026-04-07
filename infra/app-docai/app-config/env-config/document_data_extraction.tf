@@ -52,13 +52,13 @@ locals {
       }
     }
 
-    override_configuration = {
-      document = {
-        splitter = {
-          state = "ENABLED"
-        }
-      }
-    }
+    # override_configuration = {
+    #   document = {
+    #     splitter = {
+    #       state = "ENABLED"
+    #     }
+    #   }
+    # }
 
   } : null
 }

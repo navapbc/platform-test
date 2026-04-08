@@ -2,7 +2,7 @@
   "description": "A consolidated tax reporting statement from a financial institution summarizing 1099 forms such as 1099-DIV, 1099-INT, and 1099-MISC.",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "class": "Tax-Reporting-Statement",
+  "class": "1099-Consolidated-Summary-Statement",
   "definitions": {},
   "properties": {
     "account_holder_name": {

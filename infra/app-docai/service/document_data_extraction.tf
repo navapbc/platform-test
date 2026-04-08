@@ -466,3 +466,17 @@ resource "aws_iam_policy" "bedrock_runtime_invoke" {
     ]
   })
 }
+
+resource "aws_iam_policy" "textract_analyze_id" {
+  count = local.document_data_extraction_config != null ? 1 : 0
+
+  name = "${local.prefix}textract-analyze-id"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action   = "textract:AnalyzeID"
+      Resource = "*"
+      Effect   = "Allow"
+    }]
+  })
+}

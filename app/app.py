@@ -114,7 +114,23 @@ def sms_notifications_page():
         phone_number = request.form.get("phone_number")
         message = "This is a test SMS from Strata Platform."
 
-        # Check opt-out status first
+        # AWS guidelines require that applications verify users have explicitly opted in
+        # before sending SMS messages. Sending to numbers that have not opted in can
+        # result in violations of carrier policies and AWS End User Messaging SMS terms of service.
+        # Here we check the phone number against a recordset of opt-in numbers.
+        # OPT_IN_NUMBERS is used as the recordset in this example, but in production
+        # this information should come from a persistent data source (e.g. a database).
+        # When OPT_IN_NUMBERS is not set, only the simulator numbers ["+14254147755", "+14254147167"]
+        # are permitted as safe test targets.
+        opt_in_env = os.environ.get("OPT_IN_NUMBERS")
+        if opt_in_env is not None:
+            allowed_numbers = [n.strip() for n in opt_in_env.split(",")]
+        else:
+            allowed_numbers = ["+14254147755", "+14254147167"]
+        if phone_number not in allowed_numbers:
+            return f"Cannot send SMS: {phone_number} is not in the opt-in list."
+
+        # Check opt-out status
         opt_out_status = sms_notifications.check_opt_out_status(phone_number)
         if opt_out_status.get("opted_out"):
             return f"Cannot send SMS: {phone_number} has opted out of messages."
@@ -126,7 +142,8 @@ def sms_notifications_page():
         if result["success"]:
             return f"SMS sent successfully to {phone_number}. Message ID: {result['message_id']}"
         else:
-            return f"Failed to send SMS: {result['error']} (Code: {result.get('error_code', 'Unknown')})"
+            return f"Failed to send SMS: {result['error']} (Code: {result.get('error_co:w' \
+            'de', 'Unknown')})"
 
     return render_template("sms_form.html")
 

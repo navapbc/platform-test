@@ -1,0 +1,49 @@
+{
+  "description": "A document related to an Individual Retirement Account (IRA), including account details, contributions, and distributions.",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "class": "IRA-Account-Document",
+  "definitions": {},
+  "properties": {
+    "account_holder_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The full name of the individual who owns the IRA account."
+    },
+    "account_number": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The unique number assigned to the IRA account by the financial institution."
+    },
+    "financial_institution": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The name of the bank, broker, or financial institution that manages the IRA."
+    },
+    "account_type": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The type of IRA, such as Traditional IRA, Roth IRA, SEP IRA, or SIMPLE IRA."
+    },
+    "contribution_dates": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The dates on which contributions were made to the IRA."
+    },
+    "distribution_dates": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The dates on which distributions or withdrawals were made from the IRA, if any."
+    },
+    "account_balance": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The account balance as reported on the document."
+    },
+    "tax_year": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The tax year the document applies to, often printed on statements or Form 5498."
+    }
+  }
+}

@@ -1,0 +1,6 @@
+bucket         = "platform-test-430004246987-us-east-1-tf"
+# TODO: migrate state key from app-flask to app-docai
+# keeping as is to retain previously deployed infra
+key            = "infra/app-flask/service/dev.tfstate"
+region         = "us-east-1"
+use_lockfile   = true

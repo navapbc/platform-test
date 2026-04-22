@@ -1,0 +1,49 @@
+{
+  "description": "A letter issued by an employer verifying an individual's employment history and job details.",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "class": "Employment-Verification-Letter",
+  "definitions": {},
+  "properties": {
+    "employee_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The full name of the employee whose employment is being verified."
+    },
+    "employer_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The name of the company or organization employing the individual."
+    },
+    "job_title": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The job title or position held by the employee."
+    },
+    "employment_start_date": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The date the employee began working for the employer."
+    },
+    "employment_end_date": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The date the employee stopped working for the employer if applicable."
+    },
+    "salary_or_wage": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The employee's salary, hourly wage, or compensation if stated in the letter."
+    },
+    "issuer_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The name of the person issuing or signing the employment verification letter."
+    },
+    "issuer_title": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The job title of the person issuing the letter, such as HR manager or supervisor."
+    }
+  }
+}

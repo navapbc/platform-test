@@ -19,11 +19,6 @@ locals {
   #   }
   # }
   secrets = {
-    API_AUTH_INSECURE_SHARED_KEY = {
-      manage_method     = "generated"
-      secret_store_name = "/${var.app_name}-${var.environment}/api-auth-insecure-shared-key"
-    }
-
     # Example generated secret
     # RANDOM_SECRET = {
     #   manage_method     = "generated"

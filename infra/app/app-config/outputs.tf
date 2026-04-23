@@ -34,6 +34,10 @@ output "enable_notifications" {
   value = local.enable_notifications
 }
 
+output "enable_storage_malware_scanning" {
+  value = local.enable_storage_malware_scanning
+}
+
 output "enable_waf" {
   value = local.enable_waf
 }
@@ -41,3 +45,5 @@ output "enable_waf" {
 output "shared_network_name" {
   value = local.shared_network_name
 }
+
+

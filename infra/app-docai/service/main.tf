@@ -111,7 +111,6 @@ module "service" {
       BUCKET_NAME = local.bucket_name
     },
     local.document_data_extraction_environment_variables,
-    local.metrics_environment_variables,
     local.identity_provider_environment_variables,
     local.notifications_environment_variables,
     local.service_config.extra_environment_variables
@@ -136,13 +135,9 @@ module "service" {
     module.app_config.enable_document_data_extraction ? {
       documentai_input_bucket_access            = module.documentai_input_bucket[0].access_policy_arn
       documentai_output_bucket_access           = module.documentai_output_bucket[0].access_policy_arn,
-      documentai_metrics_bucket_access          = module.documentai_metrics_bucket[0].access_policy_arn,
       documentai_bedrock_access                 = module.documentai[0].access_policy_arn,
       documentai_dynamodb_access                = aws_iam_policy.dynamodb_read_write[0].arn
-      documentai_sqs_send_message               = aws_iam_policy.sqs_send_message[0].arn
       documentai_bedrock_data_automation_invoke = aws_iam_policy.bedrock_data_automation_invoke[0].arn
-      documentai_bedrock_runtime_invoke         = aws_iam_policy.bedrock_runtime_invoke[0].arn
-      documentai_textract_analyze_id            = aws_iam_policy.textract_analyze_id[0].arn
     } : {},
     module.app_config.enable_identity_provider ? {
       identity_provider_access = module.identity_provider_client[0].access_policy_arn,

@@ -4,8 +4,6 @@ locals {
     input_bucket_name            = "${var.app_name}-${var.environment}-bda-input"
     output_bucket_name           = "${var.app_name}-${var.environment}-bda-output"
     document_metadata_table_name = "${var.app_name}-${var.environment}-document-metadata"
-    document_build_table_name    = "${var.app_name}-${var.environment}-document-builds"
-    batch_table_name             = "${var.app_name}-${var.environment}-document-batches"
     custom_blueprints_path       = "./document-data-extraction-blueprints/"
 
 
@@ -51,14 +49,5 @@ locals {
         }
       }
     }
-
-    # override_configuration = {
-    #   document = {
-    #     splitter = {
-    #       state = "ENABLED"
-    #     }
-    #   }
-    # }
-
   } : null
 }

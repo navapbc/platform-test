@@ -5,12 +5,15 @@ module "staging_config" {
   default_region                  = module.project_config.default_region
   environment                     = "staging"
   network_name                    = "staging"
-  domain_name                     = "platform-test-staging.navateam.com"
-  enable_https                    = true
+  domain_name                     = null
+  enable_https                    = false
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
   enable_identity_provider        = local.enable_identity_provider
   enable_notifications            = local.enable_notifications
+  enable_document_data_extraction = local.enable_document_data_extraction
+  enable_sms_notifications        = local.enable_sms_notifications
+  enable_storage_malware_scanning = local.enable_storage_malware_scanning
 
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html

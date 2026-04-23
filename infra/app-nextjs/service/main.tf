@@ -97,8 +97,10 @@ module "service" {
     {
       BUCKET_NAME = local.bucket_name
     },
+    local.document_data_extraction_environment_variables,
     local.identity_provider_environment_variables,
     local.notifications_environment_variables,
+    local.sms_environment_variables,
     local.service_config.extra_environment_variables
   )
 
@@ -118,11 +120,19 @@ module "service" {
     {
       storage_access = module.storage.access_policy_arn
     },
+    module.app_config.enable_document_data_extraction ? {
+      dde_input_bucket_access  = module.dde_input_bucket[0].access_policy_arn
+      dde_output_bucket_access = module.dde_output_bucket[0].access_policy_arn,
+      dde_bedrock_access       = module.dde[0].access_policy_arn
+    } : {},
     module.app_config.enable_identity_provider ? {
       identity_provider_access = module.identity_provider_client[0].access_policy_arn,
     } : {},
     module.app_config.enable_notifications ? {
       notifications_access = module.notifications[0].access_policy_arn,
+    } : {},
+    local.sms_config != null ? {
+      sms_notifications_access = module.notifications_sms[0].access_policy_arn,
     } : {},
   )
 

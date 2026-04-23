@@ -1,0 +1,128 @@
+> Module Paidleave
+
+# Paid Leave — Leave Balance Determination
+
+This module formalizes the leave balance sufficiency rules for a paid
+leave application. The determination combines the current application
+data (leave type and requested periods) with historical context (leave
+already taken of that type in the current benefit year).
+
+## Legal Authority
+
+- 29 U.S.C. § 2612 — Family and Medical Leave Act (FMLA) Leave Requirement
+- 29 CFR Part 825 — The Family and Medical Leave Act of 1993
+
+## Data Types
+
+### Leave Type
+
+Leave may be requested under one of several qualifying categories, each
+with its own maximum entitlement.
+
+```catala-metadata
+declaration enumeration LeaveType:
+  -- MedicalLeave
+  -- BondingLeave
+  -- CareForFamily
+  -- CareForFamilyServiceMember
+```
+
+### Leave Period
+
+Each application contains one or more leave periods. Each period
+specifies a length in weeks.
+
+```catala-metadata
+declaration structure LeavePeriod:
+  data length_in_weeks content integer
+```
+
+## Leave Balance Scope
+
+The scope takes inputs from two distinct contexts:
+
+1. **Application context** — the leave type being requested and the
+   individual leave periods in the application.
+2. **Historical context** — the total leave already taken of the
+   requested type during the current benefit year, as well as the total
+   leave taken across all types (both sourced from prior claim records).
+
+```catala-metadata
+declaration scope LeaveBalance:
+  # Application context
+  input application_leave_type content LeaveType
+  input leave_periods content list of LeavePeriod
+
+  # Historical context (from prior claim records)
+  input leave_taken_in_benefit_year content integer
+  input total_leave_taken_all_types content integer
+
+  output max_entitlement content integer
+  output leave_balance content integer
+  output total_requested content integer
+  output has_sufficient_leave_balance content boolean
+```
+
+## Leave Balance Computation
+
+### Maximum Entitlement by Leave Type
+
+The maximum number of weeks of leave a person is entitled to depends on
+the type of leave requested:
+
+| Leave Type                     | Max Entitlement (weeks) |
+|:------------------------------:|:-----------------------:|
+| Medical leave                  | 20                      |
+| Bonding leave                  | 12                      |
+| Care for family                | 12                      |
+| Care for family service member | 26                      |
+
+```catala
+scope LeaveBalance:
+  definition max_entitlement equals
+    match application_leave_type with pattern
+    -- MedicalLeave : 20
+    -- BondingLeave : 12
+    -- CareForFamily : 12
+    -- CareForFamilyServiceMember : 26
+```
+
+### Leave Balance for Application Leave Type
+
+A person's leave balance is the maximum entitlement for the requested
+leave type minus the total leave already taken of that type in the
+current benefit year.
+
+```catala
+scope LeaveBalance:
+  definition leave_balance equals
+    max_entitlement - leave_taken_in_benefit_year
+```
+
+### Total Requested Leave
+
+The total requested leave is the sum of all leave period lengths in the
+application.
+
+```catala
+scope LeaveBalance:
+  definition total_requested equals
+    sum integer of map each period among leave_periods to
+        period.length_in_weeks
+```
+
+### Sufficient Leave Balance
+
+A person has sufficient leave balance if:
+
+1. The total requested leave does not exceed their remaining balance for
+   the application leave type, AND
+2. The total leave taken across all types, plus the requested leave,
+   does not exceed the overall 26-week maximum.
+
+```catala
+scope LeaveBalance:
+  definition has_sufficient_leave_balance equals
+    total_requested <= leave_balance
+    and total_leave_taken_all_types + total_requested <= 26
+```

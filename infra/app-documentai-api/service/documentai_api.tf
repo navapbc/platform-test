@@ -1,6 +1,5 @@
 # documentai_api.tf - App-specific resources for DocumentAI API
 
-data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
 locals {

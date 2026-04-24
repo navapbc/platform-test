@@ -4,6 +4,7 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
 locals {
+  documentai_api_config         = local.environment_config.documentai_api_config
   job_id_index_name             = "jobId-index"
   max_bda_invoke_retry_attempts = 3
 
@@ -11,7 +12,7 @@ locals {
     DOCUMENTAI_INPUT_LOCATION                      = "s3://${local.prefix}${local.document_data_extraction_config.input_bucket_name}/input"
     DOCUMENTAI_PREPROCESSING_LOCATION              = "s3://${local.prefix}${local.document_data_extraction_config.input_bucket_name}/preprocessing"
     DOCUMENTAI_OUTPUT_LOCATION                     = "s3://${local.prefix}${local.document_data_extraction_config.output_bucket_name}/processed"
-    DOCUMENTAI_DOCUMENT_METADATA_TABLE_NAME        = "${local.prefix}${local.document_data_extraction_config.document_metadata_table_name}"
+    DOCUMENTAI_DOCUMENT_METADATA_TABLE_NAME        = "${local.prefix}${local.documentai_api_config.document_metadata_table_name}"
     DOCUMENTAI_DOCUMENT_METADATA_JOB_ID_INDEX_NAME = local.job_id_index_name
     BDA_PROJECT_ARN                                = module.dde[0].bda_project_arn
     BDA_REGION                                     = local.document_data_extraction_config.bda_region
@@ -51,7 +52,7 @@ resource "aws_kms_key" "dynamodb" {
 resource "aws_dynamodb_table" "document_metadata" {
   count = local.document_data_extraction_config != null ? 1 : 0
 
-  name         = "${local.prefix}${local.document_data_extraction_config.document_metadata_table_name}"
+  name         = "${local.prefix}${local.documentai_api_config.document_metadata_table_name}"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "fileName"
 

@@ -1,0 +1,16 @@
+services:
+  app-documentai:
+    build:
+      context: .
+      target: dev
+    ports:
+      - 3500:8000
+    volumes:
+      - .:/app
+      # Use named volumes for directories that the container should use the guest
+      # machine's dir instead of the host machine's dir, which may be divergent.
+      # This is especially true for any dependency or temp directories.
+      - app-documentai_venv:/app/.venv
+
+volumes:
+  app-documentai_venv:

@@ -9,6 +9,12 @@ variable "name" {
   description = "Name of the AWS S3 bucket. Needs to be globally unique across all regions."
 }
 
+variable "enable_malware_scanning" {
+  description = "Whether to enable malware scanning on the storage bucket."
+  type        = bool
+  default     = false
+}
+
 variable "service_principals_with_access" {
   description = <<-EOT
   Storage access should generally be controlled via attaching the `access_policy_arn`

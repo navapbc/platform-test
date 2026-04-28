@@ -14,5 +14,12 @@ locals {
   # otherwise us-east-1 is a good default
   default_region = "us-east-1"
 
+  # List of AWS regions that may be used for this project.
+  # Used for multi-region deployments or to scope down other resources that need to interact with multiple regions.
+  # TODO: When upgrading to AWS provider >= 5.7.0, update to include all regions that GuardDuty should be enabled in for multi-region support:
+  # Ticket: https://github.com/navapbc/template-infra/issues/1004#issue-4083076747
+  #regions = [local.default_region]
+
   github_actions_role_name = "${local.project_name}-github-actions"
+
 }

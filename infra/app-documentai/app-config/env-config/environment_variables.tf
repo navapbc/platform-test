@@ -30,5 +30,10 @@ locals {
     #   manage_method     = "manual"
     #   secret_store_name = "/${var.app_name}-${var.environment}/secret-sauce"
     # }
+
+    API_AUTH_INSECURE_SHARED_KEY = {
+      manage_method     = "generated"
+      secret_store_name = "/${var.app_name}-${var.environment}/api-auth-insecure-shared-key"
+    }
   }
 }

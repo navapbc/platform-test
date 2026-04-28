@@ -8,7 +8,26 @@ locals {
     # File paths are relative to the service directory
     # ARNs reference AWS-managed or existing custom blueprints
     blueprints = [
-      "./document-data-extraction-blueprints/*"
+      # TODO(pre-merge): Add trailing comma to this line in template
+      "./document-data-extraction-blueprints/*",
+
+      ## AWS Managed Blueprints
+      # Financial Documents
+      "arn:aws:bedrock:us-east-1:aws:blueprint/bedrock-data-automation-public-bank-statement",
+      "arn:aws:bedrock:us-east-1:aws:blueprint/bedrock-data-automation-public-invoice",
+      "arn:aws:bedrock:us-east-1:aws:blueprint/bedrock-data-automation-public-receipt",
+
+      # Identity Documents
+      "arn:aws:bedrock:us-east-1:aws:blueprint/bedrock-data-automation-public-us-driver-license",
+      "arn:aws:bedrock:us-east-1:aws:blueprint/bedrock-data-automation-public-us-passport",
+      "arn:aws:bedrock:us-east-1:aws:blueprint/bedrock-data-automation-public-birth-certificate",
+
+      # Tax/Employment Documents
+      "arn:aws:bedrock:us-east-1:aws:blueprint/bedrock-data-automation-public-form-1040",
+      "arn:aws:bedrock:us-east-1:aws:blueprint/bedrock-data-automation-public-form-1099-int",
+      "arn:aws:bedrock:us-east-1:aws:blueprint/bedrock-data-automation-public-form-1099-misc",
+      "arn:aws:bedrock:us-east-1:aws:blueprint/bedrock-data-automation-public-payslip",
+      "arn:aws:bedrock:us-east-1:aws:blueprint/bedrock-data-automation-public-w2-form",
     ]
 
     # BDA can only be deployed to us-east-1, us-west-2, and us-gov-west-1
@@ -16,6 +35,7 @@ locals {
     bda_region = "us-east-1"
 
     standard_output_configuration = {
+      # TODO(pre-merge): this is standard
       image = {
         extraction = {
           bounding_box = {
@@ -29,6 +49,26 @@ locals {
         generative_field = {
           state = "ENABLED"
           types = ["IMAGE_SUMMARY"]
+        }
+      }
+
+      # TODO(pre-merge): this is new, what should we be using?
+      document = {
+        extraction = {
+          granularity = {
+            types = ["PAGE"]
+          }
+          bounding_box = {
+            state = "ENABLED"
+          }
+        }
+        output_format = {
+          additional_file_format = {
+            state = "DISABLED"
+          }
+          text_format = {
+            types = ["PLAIN_TEXT"]
+          }
         }
       }
     }

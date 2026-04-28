@@ -9,6 +9,9 @@ locals {
     // Application Auto Scaling – Enables automatic scaling of AWS services beyond EC2.
     "application-autoscaling",
 
+    // Amazon Athena – An interactive query service for analyzing data in S3 using SQL. Used for metrics analysis.
+    "athena",
+
     // AWS Auto Scaling – Automatically adjusts EC2 instance capacity based on demand.
     "autoscaling",
 
@@ -92,6 +95,9 @@ locals {
 
     // Amazon Simple Notification Service (SNS) – A pub/sub messaging service.
     "sns",
+
+    // AWS Simple Queue Service (SQS) – A managed message queuing service for decoupling applications.
+    "sqs",
 
     // AWS Systems Manager – Contains Parameter Store service which securely stores and manages configuration data and secrets.
     "ssm",

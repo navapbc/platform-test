@@ -1,0 +1,59 @@
+{
+  "description": "A consolidated tax reporting statement from a financial institution summarizing 1099 forms such as 1099-DIV, 1099-INT, and 1099-MISC.",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "class": "1099-Consolidated-Summary-Statement",
+  "definitions": {},
+  "properties": {
+    "account_holder_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The full name of the account holder as printed on the statement."
+    },
+    "account_number": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The account number associated with the brokerage or investment account."
+    },
+    "financial_institution": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The name of the financial institution issuing the tax reporting statement, e.g., Fidelity Investments."
+    },
+    "tax_year": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The tax year the statement applies to."
+    },
+    "dividend_income": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Total dividends reported for the tax year, typically from 1099-DIV forms."
+    },
+    "interest_income": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Total interest income reported for the tax year, typically from 1099-INT forms."
+    },
+    "misc_income": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Total miscellaneous income reported for the tax year, typically from 1099-MISC forms."
+    },
+    "federal_tax_withheld": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Total federal tax withheld as reported on any of the included 1099 forms."
+    },
+    "state_tax_withheld": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Total state tax withheld as reported on any of the included 1099 forms."
+    },
+    "form_types": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "List of IRS forms included in the statement, such as 1099-DIV, 1099-INT, 1099-MISC, or 1099-B."
+    }
+  }
+}

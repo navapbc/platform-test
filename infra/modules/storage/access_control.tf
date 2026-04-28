@@ -59,7 +59,7 @@ data "aws_iam_policy_document" "storage_access" {
   }
 
   statement {
-    actions   = ["kms:GenerateDataKey", "kms:Decrypt"]
+    actions   = ["kms:GenerateDataKey", "kms:Decrypt", "kms:Encrypt"]
     effect    = "Allow"
     resources = [aws_kms_key.storage.arn]
   }

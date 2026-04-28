@@ -1,0 +1,87 @@
+{
+  "description": "Structured extraction schema for a mortgage statement document.",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "class": "Mortgage-Statement",
+  "definitions": {
+    "monthly_payment": {
+      "properties": {
+        "principal": {
+          "type": "string",
+          "inferenceType": "explicit",
+          "instruction": "Monthly principal portion as a numeric amount only (e.g., 1234). Do not include currency symbols or commas."
+        },
+        "interest": {
+          "type": "string",
+          "inferenceType": "explicit",
+          "instruction": "Monthly interest portion as a numeric amount only (e.g., 567). Do not include currency symbols or commas."
+        },
+        "escrow": {
+          "type": "string",
+          "inferenceType": "explicit",
+          "instruction": "Monthly escrow portion as a numeric amount only (e.g., 890). Do not include currency symbols or commas."
+        },
+        "total": {
+          "type": "string",
+          "inferenceType": "explicit",
+          "instruction": "Total monthly payment amount as a numeric amount only (e.g., 2691). Do not include currency symbols or commas."
+        }
+      }
+    }
+  },
+  "properties": {
+    "borrower_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Extract the full legal name of the borrower or mortgagor exactly as shown."
+    },
+    "property_address": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Extract the full street address of the mortgaged property, including city, state, and ZIP code if present."
+    },
+    "lender_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Extract the name of the mortgage lender or loan servicer."
+    },
+    "loan_number": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Extract the unique loan or account number exactly as shown, preserving leading zeros."
+    },
+    "principal_balance": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Extract the overall remaining principal loan balance as a numeric amount only (e.g., 123456). This is not the monthly payment amount. Do not include currency symbols or commas."
+    },
+    "interest_rate": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Extract the annual interest rate as a percentage (e.g., 6.5 for 6.5%)."
+    },
+    "monthly_payment": {
+      "$ref": "#/definitions/monthly_payment"
+    },
+    "escrow_balance": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Extract the current escrow account balance as a numeric amount only (e.g., 123456). Do not include currency symbols or commas."
+    },
+    "payment_due_date": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Extract the next payment due date in YYYY-MM-DD format."
+    },
+    "statement_date": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Extract the statement issue date in YYYY-MM-DD format."
+    },
+    "maturity_date": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Extract the loan maturity date in YYYY-MM-DD format if present."
+    }
+  }
+}

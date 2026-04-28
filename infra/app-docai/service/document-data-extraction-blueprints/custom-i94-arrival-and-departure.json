@@ -1,0 +1,54 @@
+{
+  "description": "Form I-94 Arrival and Departure Record issued to foreign travelers entering the United States.",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "class": "I-94-Arrival-Departure-Record",
+  "definitions": {},
+  "properties": {
+    "i94_admission_number": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The unique admission number assigned to the traveler on the I-94 record. It may be labeled as Admission Number or I-94 Number."
+    },
+    "traveler_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The full legal name of the traveler as shown on the I-94 record."
+    },
+    "passport_number": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The passport number associated with the traveler's entry to the United States."
+    },
+    "country_of_citizenship": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The country of citizenship listed for the traveler."
+    },
+    "date_of_birth": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The date of birth of the traveler."
+    },
+    "date_of_entry": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The date the traveler entered the United States, sometimes labeled as Date of Entry or Admit Date."
+    },
+    "class_of_admission": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The immigration class of admission granted to the traveler, such as F-1, H-1B, B-1, B-2, J-1, or other visa category."
+    },
+    "admit_until_date": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The date until which the traveler is authorized to remain in the United States."
+    },
+    "port_of_entry": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "The U.S. port of entry where the traveler was admitted into the country."
+    }
+  }
+}

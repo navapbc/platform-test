@@ -43,6 +43,10 @@ locals {
   )
 }
 
+# TODO(pre-merge): create ticket in template-infra to track
+#
+# Note if specifying blueprints, this will always show a diff due to upstream
+# issues: https://github.com/hashicorp/terraform-provider-awscc/issues/3058
 resource "awscc_bedrock_data_automation_project" "bda_project" {
   project_name                  = "${var.name}-project"
   project_description           = "Project for ${var.name}"

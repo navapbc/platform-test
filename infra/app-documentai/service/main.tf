@@ -22,6 +22,13 @@ locals {
   service_config          = local.environment_config.service_config
 
   service_name = "${local.prefix}${local.service_config.service_name}"
+
+  # TODO(pre-merge): at least add better docs, potentially upstream
+  # (and add an opt-out like handle_temp_prefix=true enabled?)
+  prefixed_file_upload_jobs = {
+    for job_name, job_config in local.service_config.file_upload_jobs :
+    job_name => merge(job_config, { source_bucket = "${local.prefix}${job_config.source_bucket}" })
+  }
 }
 
 terraform {
@@ -77,7 +84,7 @@ module "service" {
   desired_instance_count   = local.service_config.desired_instance_count
   enable_command_execution = local.service_config.enable_command_execution
 
-  file_upload_jobs = local.service_config.file_upload_jobs
+  file_upload_jobs = local.prefixed_file_upload_jobs
   scheduled_jobs   = local.environment_config.scheduled_jobs
 
   db_vars = module.app_config.has_database ? {

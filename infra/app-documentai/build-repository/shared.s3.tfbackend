@@ -1,0 +1,4 @@
+bucket         = "platform-test-430004246987-us-east-1-tf"
+key            = "infra/app-documentai/build-repository/shared.tfstate"
+region         = "us-east-1"
+use_lockfile   = true

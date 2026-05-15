@@ -13,7 +13,7 @@ locals {
   # 2. Each environment's config will have a database_config property that is used to
   #    pass db_vars into the infra/modules/service module, which provides the necessary
   #    configuration for the service to access the database
-  has_database = true
+  has_database = false
 
   # Whether or not the application depends on external non-AWS services.
   # If enabled, the networks associated with this application's environments
@@ -58,7 +58,7 @@ locals {
   # Whether or not the application should include documentation data extraction
   # If enabled:
   # 1. Configures an AWS Bedrock Data Automation project with associated custom blueprints
-  enable_document_data_extraction = false
+  enable_document_data_extraction = true
 
   environment_configs = {
     dev     = module.dev_config

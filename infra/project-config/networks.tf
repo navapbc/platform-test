@@ -12,6 +12,10 @@ locals {
             source = "issued"
           }
 
+          "app-docuai.platform-test-dev.navateam.com" = {
+            source = "issued"
+          }
+
           "app-flask.platform-test-dev.navateam.com" = {
             source = "issued"
           }

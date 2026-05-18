@@ -91,6 +91,8 @@ resource "aws_dynamodb_table" "documentai_api_document_metadata" {
   point_in_time_recovery {
     enabled = true
   }
+
+  deletion_protection_enabled = !local.is_temporary
 }
 
 resource "aws_iam_policy" "documentai_api_dynamodb_read_write" {

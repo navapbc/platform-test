@@ -3,8 +3,8 @@
 data "aws_caller_identity" "current" {}
 
 locals {
-  documentai_api_config = local.environment_config.documentai_api_config
-  job_id_index_name     = "jobId-index"
+  document_metadata_table_name = "${local.service_name}-document-metadata"
+  job_id_index_name            = "jobId-index"
 
   documentai_api_environment_variables = local.document_data_extraction_config != null ? {
     # Alias standard DDE env vars
@@ -58,7 +58,7 @@ resource "aws_kms_key" "dynamodb" {
 resource "aws_dynamodb_table" "document_metadata" {
   count = local.document_data_extraction_config != null ? 1 : 0
 
-  name         = "${local.prefix}${local.documentai_api_config.document_metadata_table_name}"
+  name         = local.document_metadata_table_name
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "fileName"
 

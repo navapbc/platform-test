@@ -48,7 +48,3 @@ output "storage_config" {
 output "document_data_extraction_config" {
   value = local.document_data_extraction_config
 }
-
-output "documentai_api_config" {
-  value = local.documentai_api_config
-}

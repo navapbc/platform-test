@@ -3,9 +3,8 @@
 data "aws_caller_identity" "current" {}
 
 locals {
-  documentai_api_config         = local.environment_config.documentai_api_config
-  job_id_index_name             = "jobId-index"
-  max_bda_invoke_retry_attempts = 3
+  documentai_api_config = local.environment_config.documentai_api_config
+  job_id_index_name     = "jobId-index"
 
   documentai_api_environment_variables = local.document_data_extraction_config != null ? {
     # Alias standard DDE env vars
@@ -24,7 +23,6 @@ locals {
 
     DOCUMENTAI_DOCUMENT_METADATA_TABLE_NAME        = aws_dynamodb_table.document_metadata[0].name
     DOCUMENTAI_DOCUMENT_METADATA_JOB_ID_INDEX_NAME = local.job_id_index_name
-    MAX_BDA_INVOKE_RETRY_ATTEMPTS                  = local.max_bda_invoke_retry_attempts
 
     ENVIRONMENT = var.environment_name
   } : {}

@@ -28,6 +28,8 @@ locals {
       # separate configuration
       BDA_REGION = local.document_data_extraction_config.bda_region
   } : {})
+
+  documentai_api_document_metadata_table_arn = aws_dynamodb_table.documentai_api_document_metadata.arn
 }
 
 # KMS Key for DynamoDB Encryption
@@ -110,8 +112,8 @@ data "aws_iam_policy_document" "documentai_api_dynamodb_read_write" {
       "dynamodb:DescribeTable"
     ]
     resources = [
-      aws_dynamodb_table.documentai_api_document_metadata.arn,
-      "${aws_dynamodb_table.documentai_api_document_metadata.arn}/index/*"
+      local.documentai_api_document_metadata_table_arn,
+      "${local.documentai_api_document_metadata_table_arn}/index/*"
     ]
     effect = "Allow"
 

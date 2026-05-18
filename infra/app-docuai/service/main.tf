@@ -152,9 +152,9 @@ module "service" {
     local.sms_config != null ? {
       sms_notifications_access = module.notifications_sms[0].access_policy_arn,
     } : {},
-    local.document_data_extraction_config != null ? {
-      documentai_api_dynamodb_access = aws_iam_policy.dynamodb_read_write[0].arn,
-    } : {},
+    {
+      documentai_api_dynamodb_access = aws_iam_policy.dynamodb_read_write.arn,
+    },
   )
 
   ephemeral_write_volumes = local.service_config.ephemeral_write_volumes

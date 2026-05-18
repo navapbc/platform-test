@@ -3,13 +3,13 @@
 data "aws_caller_identity" "current" {}
 
 locals {
-  document_metadata_table_name = "${local.service_name}-document-metadata"
-  job_id_index_name            = "jobId-index"
+  documentai_api_document_metadata_table_name = "${local.service_name}-document-metadata"
+  documentai_api_db_job_id_index_name         = "jobId-index"
 
   documentai_api_environment_variables = merge(
     {
-      DOCUMENTAI_DOCUMENT_METADATA_TABLE_NAME        = aws_dynamodb_table.document_metadata.name
-      DOCUMENTAI_DOCUMENT_METADATA_JOB_ID_INDEX_NAME = local.job_id_index_name
+      DOCUMENTAI_DOCUMENT_METADATA_TABLE_NAME        = aws_dynamodb_table.documentai_api_document_metadata.name
+      DOCUMENTAI_DOCUMENT_METADATA_JOB_ID_INDEX_NAME = local.documentai_api_db_job_id_index_name
 
       ENVIRONMENT = var.environment_name
     },
@@ -31,7 +31,7 @@ locals {
 }
 
 # KMS Key for DynamoDB Encryption
-data "aws_iam_policy_document" "dynamodb_kms_key_policy" {
+data "aws_iam_policy_document" "documentai_api_dynamodb_kms_key_policy" {
   #checkov:skip=CKV_AWS_109
   #checkov:skip=CKV_AWS_111
   #checkov:skip=CKV_AWS_356
@@ -48,15 +48,15 @@ data "aws_iam_policy_document" "dynamodb_kms_key_policy" {
   }
 }
 
-resource "aws_kms_key" "dynamodb" {
+resource "aws_kms_key" "documentai_api_dynamodb" {
   description             = "KMS key for DocumentAI DynamoDB tables"
   deletion_window_in_days = 10
   enable_key_rotation     = true
-  policy                  = data.aws_iam_policy_document.dynamodb_kms_key_policy.json
+  policy                  = data.aws_iam_policy_document.documentai_api_dynamodb_kms_key_policy.json
 }
 
-resource "aws_dynamodb_table" "document_metadata" {
-  name         = local.document_metadata_table_name
+resource "aws_dynamodb_table" "documentai_api_document_metadata" {
+  name         = local.documentai_api_document_metadata_table_name
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "fileName"
 
@@ -76,14 +76,14 @@ resource "aws_dynamodb_table" "document_metadata" {
   }
 
   global_secondary_index {
-    name            = local.job_id_index_name
+    name            = local.documentai_api_db_job_id_index_name
     hash_key        = "jobId"
     projection_type = "ALL"
   }
 
   server_side_encryption {
     enabled     = true
-    kms_key_arn = aws_kms_key.dynamodb.arn
+    kms_key_arn = aws_kms_key.documentai_api_dynamodb.arn
   }
 
   point_in_time_recovery {
@@ -91,12 +91,12 @@ resource "aws_dynamodb_table" "document_metadata" {
   }
 }
 
-resource "aws_iam_policy" "dynamodb_read_write" {
-  name   = "${local.service_name}-document-metadata-table-access"
-  policy = data.aws_iam_policy_document.dynamodb_read_write.json
+resource "aws_iam_policy" "documentai_api_dynamodb_read_write" {
+  name   = "${local.service_name}-dynamodb-access"
+  policy = data.aws_iam_policy_document.documentai_api_dynamodb_read_write.json
 }
 
-data "aws_iam_policy_document" "dynamodb_read_write" {
+data "aws_iam_policy_document" "documentai_api_dynamodb_read_write" {
   statement {
     actions = [
       "dynamodb:BatchWriteItem",
@@ -110,8 +110,8 @@ data "aws_iam_policy_document" "dynamodb_read_write" {
       "dynamodb:DescribeTable"
     ]
     resources = [
-      aws_dynamodb_table.document_metadata.arn,
-      "${aws_dynamodb_table.document_metadata.arn}/index/*"
+      aws_dynamodb_table.documentai_api_document_metadata.arn,
+      "${aws_dynamodb_table.documentai_api_document_metadata.arn}/index/*"
     ]
     effect = "Allow"
 
@@ -122,7 +122,7 @@ data "aws_iam_policy_document" "dynamodb_read_write" {
       "kms:DescribeKey",
       "kms:GenerateDataKey",
     ]
-    resources = [aws_kms_key.dynamodb.arn]
+    resources = [aws_kms_key.documentai_api_dynamodb.arn]
     effect    = "Allow"
   }
 }

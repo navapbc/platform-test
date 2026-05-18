@@ -153,7 +153,7 @@ module "service" {
       sms_notifications_access = module.notifications_sms[0].access_policy_arn,
     } : {},
     {
-      documentai_api_dynamodb_access = aws_iam_policy.dynamodb_read_write.arn,
+      documentai_api_dynamodb_access = aws_iam_policy.documentai_api_dynamodb_read_write.arn,
     },
   )
 

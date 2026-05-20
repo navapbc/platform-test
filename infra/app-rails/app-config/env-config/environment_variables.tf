@@ -7,6 +7,7 @@ locals {
     # WORKER_THREADS_COUNT    = 4
     # LOG_LEVEL               = "info"
     # DB_CONNECTION_POOL_SIZE = 5
+    DB_AUTH_METHOD = "aws_iam"
   }
 
   # Configuration for secrets

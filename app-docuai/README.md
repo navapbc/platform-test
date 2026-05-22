@@ -4,7 +4,8 @@ This is the application code for DocumentAI.
 
 ## Overview
 
-A document processing system built on AWS that uses Amazon Bedrock Data Automation (BDA) to classify and extract data from uploaded documents.
+A document processing system built on AWS that uses Amazon Bedrock Data
+Automation (BDA) to classify and extract data from uploaded documents.
 
 ## Architecture
 
@@ -16,6 +17,7 @@ The system follows an event-driven architecture with two main layers:
 ![Architecture Diagram](../docs/app-docuai/media/architecture.png)
 
 **Processing Flow:**
+
 1. A document is uploaded via DocumentAI API endpoint
 2. DocumentAI API validates and stores document in S3 bucket
 3. S3 event triggers `document_processor` job
@@ -39,26 +41,29 @@ For detailed component descriptions, see [Project Structure](#project-structure)
 ## File Requirements & Limitations
 
 **Supported file formats:**
+
 - PDF
 - JPEG
-- PNG  
+- PNG
 - TIFF
 
 **File size limits:**
+
 - **Images** (JPEG, PNG, TIFF): Maximum 5 MB per file
 - **PDF documents**: Maximum 500 MB per file
 
 **PDF page handling:**
+
 - PDFs with more than 5 pages (configurable) are automatically trimmed to the first 5 pages
 - Quality checks are performed on the first 5 (configurable) pages only
 
 > **Note:** The 5-page default was chosen for performance optimization. Documents are trimmed rather than rejected to ensure processing can proceed.
 
 **Document requirements:**
+
 - Documents must not be password-protected
 - Minimum text content of 50 characters for document detection
 - Images must meet minimum quality standards (blur detection threshold applied)
-
 
 ## Prerequisites
 
@@ -97,14 +102,15 @@ For detailed component descriptions, see [Project Structure](#project-structure)
 
 ### Application Constants
 
-Core application settings are defined in `src/documentai_api/config/constants.json`. These constants are loaded at startup and do not require environment variables.
+Core application settings are defined in
+`src/documentai_api/config/constants.py`. These constants are loaded at startup
+and do not require environment variables.
 
 - **Document categories** - Supported document types (`income`, `expenses`, `legal_documents`, `employment_training`)
 - **File validation** - Supported content types (PDF, JPEG, PNG, TIFF)
 - **Processing statuses** - Document processing states and completion criteria
 - **BDA configuration** - Job statuses, response field mappings, output prefixes
 - **Timeouts and thresholds** - Confidence thresholds, polling intervals, file size limits
-
 
 ## Usage
 
@@ -117,6 +123,7 @@ This project supports two development approaches:
 Uses Docker Compose to run the application in a containerized environment.
 
 **Setup:**
+
 ```bash
 make init          # Build Docker containers
 make start         # Start services in detached mode
@@ -124,6 +131,7 @@ make run-logs      # Start and follow logs
 ```
 
 **Advantages**:
+
 - Consistent environment across team members
 - No local Python environment needed
 - Closely matches production environment
@@ -134,6 +142,7 @@ make run-logs      # Start and follow logs
 Run the application directly on your machine without Docker.
 
 **Setup**:
+
 ```bash
 make init-local                    # Install dependencies with uv
 export RUN_CMD_APPROACH=local      # Enable native mode
@@ -141,6 +150,7 @@ make start-local                   # Run API server natively
 ```
 
 **Advantages**:
+
 - Faster iteration (no container overhead)
 - Direct debugging in IDE
 - Lower resource usage
@@ -148,7 +158,9 @@ make start-local                   # Run API server natively
 *Note*: To persist native mode, add `export RUN_CMD_APPROACH=local` to your `~/.zshrc` or `~/.bashrc`.
 
 ### Switching Between Docker and Native
+
 The Makefile automatically detects the `RUN_CMD_APPROACH` environment variable:
+
 - **Not set or `docker`**: Commands run in Docker containers
 - **Set to `local`**: Commands run natively on your machine
 
@@ -159,8 +171,8 @@ The application will be available at http://localhost:3500.
 API endpoints require an `API-Key` header. See [API Authentication](../docs/app-docuai/api-authentication.md) for details. 
 A default key is preconfigured in `local.env.example` and is copied to `.env` during `make init`/`init-local`.
 
-
 **Upload a document (async)** - returns immediately with `jobId` for polling:
+
 ```
 curl -X POST http://localhost:3500/v1/documents \
   -H "API-Key: your-key" \
@@ -180,6 +192,7 @@ curl -X POST "http://localhost:3500/v1/documents?wait=true&timeout=120" \
 For more details on API endpoints, see [openapi.json](../app-docuai/docs/openapi.json).
 
 ### Development Commands
+
 ```bash
 make check         # Run all checks (format, lint, test)
 make test          # Run test suite
@@ -192,32 +205,36 @@ make format        # Format code with ruff
 Tests use pytest with FastAPI's TestClient and run without requiring actual AWS infrastructure.
 
 **Run all tests:**
+
 ```bash
 make test
 ```
 
 **Run tests with coverage report:**
+
 ```bash
 make test-coverage
 ```
 
 **Run tests in parallel:**
+
 ```bash
 make test-parallel
 ```
 
 **Run specific test file:**
+
 ```bash
 make test args=tests/test_document_detector.py
 ```
 
 **Run specific test:**
+
 ```bash
 make test args=tests/test_document_detector.py::test_detect_multipage_document
 ```
 
 For more details on writing tests, see [Writing Tests](../docs/app-docuai/writing-tests.md).
-
 
 ## 🏗️ Project Structure
 
@@ -229,7 +246,6 @@ For more details on writing tests, see [Writing Tests](../docs/app-docuai/writin
 │       ├── cli/                          # Miscellaneous cli scripts
 │       │   ├── export_openapi.py
 │       ├── config/                       # Configuration and constants
-│       │   ├── constants.json
 │       │   └── constants.py
 │       ├── jobs/                         # Background jobs and event handlers
 │       │   ├── bda_result_processor/     # Processes BDA output results
@@ -254,6 +270,7 @@ For more details on writing tests, see [Writing Tests](../docs/app-docuai/writin
 ```
 
 ### Key Components
+
 - **Jobs** - Event-driven document processing pipeline
 - **Services** - AWS client wrappers for S3, DynamoDB, and Bedrock Data Automation
 - **Utils** - Document detection, quality analysis, response formatting

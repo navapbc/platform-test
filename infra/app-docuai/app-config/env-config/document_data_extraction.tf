@@ -69,6 +69,5 @@ locals {
         }
       }
     }
-
   } : null
 }

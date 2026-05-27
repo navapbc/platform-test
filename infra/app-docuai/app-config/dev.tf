@@ -20,6 +20,9 @@ module "dev_config" {
   extra_identity_provider_callback_urls = ["http://localhost"]
   extra_identity_provider_logout_urls   = ["http://localhost"]
 
+  service_cpu    = 512
+  service_memory = 2048
+
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
   # Defaults to `false`. Uncomment the next line to enable.

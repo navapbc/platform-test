@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier
-_commit: v0.18.0-16-g2f445f6
+_commit: v0.18.0-17-gaa27c26
 _src_path: https://github.com/navapbc/template-infra
 app_has_dev_env_setup: true
 app_local_port: 3500

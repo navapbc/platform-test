@@ -23,7 +23,7 @@ data "aws_iam_policy_document" "workflow_orchestrator_assume_role" {
     condition {
       test     = "ArnLike"
       variable = "aws:SourceArn"
-      values   = ["arn:aws:states:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:stateMachine:*"]
+      values   = ["arn:aws:states:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:stateMachine:*"]
     }
 
     condition {
@@ -70,7 +70,7 @@ data "aws_iam_policy_document" "workflow_orchestrator" {
       "events:DescribeRule",
     ]
     resources = [
-      "arn:aws:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/StepFunctionsGetEventsForECSTaskRule",
+      "arn:aws:events:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:rule/StepFunctionsGetEventsForECSTaskRule",
     ]
   }
 
@@ -91,7 +91,7 @@ data "aws_iam_policy_document" "workflow_orchestrator" {
       "ecs:StopTask",
       "ecs:DescribeTasks",
     ]
-    resources = ["arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:task/${var.service_name}/*"]
+    resources = ["arn:aws:ecs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:task/${var.service_name}/*"]
     condition {
       test     = "ArnLike"
       variable = "ecs:cluster"

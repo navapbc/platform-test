@@ -5,13 +5,14 @@ module "dev_config" {
   default_region                  = module.project_config.default_region
   environment                     = "dev"
   network_name                    = "dev"
-  domain_name                     = "platform-test-dev.navateam.com"
-  enable_https                    = true
+  domain_name                     = null
+  enable_https                    = false
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
   enable_notifications            = local.enable_notifications
   enable_document_data_extraction = local.enable_document_data_extraction
   enable_sms_notifications        = local.enable_sms_notifications
+  enable_storage_malware_scanning = local.enable_storage_malware_scanning
 
   # Enable and configure identity provider.
   enable_identity_provider = local.enable_identity_provider
@@ -26,7 +27,7 @@ module "dev_config" {
   # enable_command_execution = true
 
   # Uncomment to override default feature flag values
-  feature_flag_overrides = {
-    BAR = true
-  }
+  # feature_flag_overrides = {
+  #   BAR = true
+  # }
 }

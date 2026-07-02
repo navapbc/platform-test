@@ -1,23 +1,18 @@
-locals {
-  network_name   = "dev"
-  network_config = module.project_config.network_configs[local.network_name]
-  domain_name    = "${local.app_name}.${local.network_config.domain_config.hosted_zone}"
-}
-
 module "dev_config" {
   source                          = "./env-config"
   project_name                    = local.project_name
   app_name                        = local.app_name
   default_region                  = module.project_config.default_region
   environment                     = "dev"
-  network_name                    = local.network_name
-  domain_name                     = local.domain_name
-  enable_https                    = true
+  network_name                    = "dev"
+  domain_name                     = null
+  enable_https                    = false
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
   enable_notifications            = local.enable_notifications
   enable_document_data_extraction = local.enable_document_data_extraction
   enable_sms_notifications        = local.enable_sms_notifications
+  enable_storage_malware_scanning = local.enable_storage_malware_scanning
 
   # Enable and configure identity provider.
   enable_identity_provider = local.enable_identity_provider

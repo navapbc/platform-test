@@ -28,7 +28,13 @@ locals {
   # 1. Creates a Cognito user pool
   # 2. Creates a Cognito user pool app client
   # 3. Adds environment variables for the app client to the service
-  enable_identity_provider = true
+  enable_identity_provider = false
+
+  # Whether or not the application storage should have malware scanning enabled.
+  # If enabled:
+  # 1. Automatically scans uploaded files for malware
+  # 2. Tags the affected files with "THREATS_FOUND" and prevents them from being retrieved
+  enable_storage_malware_scanning = false
 
   # Whether or not the application should deploy a notification service.
   #
@@ -41,19 +47,19 @@ locals {
   # If enabled:
   # 1. Configures AWS SES for sending email notifications
   # 2. Sets up IAM permissions for the application to send emails
-  enable_notifications = true
+  enable_notifications = false
 
   # Whether or not the application should enable SMS notifications via AWS End User Messaging.
   # If enabled:
   # 1. Creates AWS End User Messaging SMS configuration set
   # 2. Sets up IAM permissions for SMS sending
   # 3. Configures SMS delivery tracking and opt-out management
-  enable_sms_notifications = true
+  enable_sms_notifications = false
 
   # Whether or not the application should enable WAF for the load balancer.
   # If enabled:
   # 1. Creates an AWS WAF web ACL with AWSManagedRulesCommonRuleSet
-  enable_waf = true
+  enable_waf = false
 
   # Whether or not the application should include documentation data extraction
   # If enabled:
